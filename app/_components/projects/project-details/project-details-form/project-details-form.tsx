@@ -24,24 +24,23 @@ interface ProjectDetailsFormParams {
 
 const deliveryStreams = [
   { id: 1, name: "" },
-  { id: 2, name: "Alaska" },
-  { id: 3, name: "Arizona" },
-  { id: 4, name: "Oregon" },
-  { id: 5, name: "Nevada" },
+  { id: 2, name: "Delivery Stream 1" },
+  { id: 3, name: "Delivery Stream 2" },
+  { id: 4, name: "Delivery Stream 3" },
+  { id: 5, name: "Delivery Stream 4" },
 ];
 
 const proposalTypes = [
   { id: 1, name: "" },
-  { id: 2, name: "TM" },
-  { id: 3, name: "FP" },
+  { id: 2, name: "Timed" },
+  { id: 3, name: "Fixed" },
 ];
 
 const lineOfBusinesses = [
   { id: 1, name: "" },
   { id: 2, name: "Project" },
-  { id: 3, name: "Run" },
+  { id: 3, name: "Service" },
   { id: 4, name: "Opportunity" },
-  { id: 5, name: "Innovation" },
 ];
 
 export default function ProjectDetailsForm({
@@ -114,8 +113,6 @@ export default function ProjectDetailsForm({
   }, [formState]);
 
   let disableMessage: string = "";
-
-  console.log("RENDERING FORM");
 
   if (!resources) disableMessage = "Fetching Resource Names...";
 

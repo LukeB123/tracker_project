@@ -46,8 +46,6 @@ export default function ProjectDetailsFormRow({
 
   let inputElement: JSX.Element;
 
-  // console.log("RENDERING ROW");
-
   if (
     typeof value === "number" ||
     typeof value === "string" ||

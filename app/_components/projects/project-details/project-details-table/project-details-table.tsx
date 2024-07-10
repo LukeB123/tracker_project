@@ -35,23 +35,16 @@ export default function ProjectDetailsTable({
               <ProjectDetailsRow
                 label="Project Manager"
                 value={project.project_manager}
-                capitalise
               />
               <ProjectDetailsRow
                 label="Delivery Manager"
                 value={project.delivery_manager}
-                capitalise
               />
               <ProjectDetailsRow
                 label="Scrum Master"
                 value={project.scrum_master}
-                capitalise
               />
-              <ProjectDetailsRow
-                label="Task ID"
-                value={project.task}
-                uppercase
-              />
+              <ProjectDetailsRow label="Task ID" value={project.task} />
               <ProjectDetailsRow
                 label="Delivery Stream"
                 value={project.delivery_stream}
@@ -59,7 +52,6 @@ export default function ProjectDetailsTable({
               <ProjectDetailsRow
                 label="Value Stream"
                 value={project.value_stream}
-                capitalise
               />
               <ProjectDetailsRow
                 label="Project Type"
