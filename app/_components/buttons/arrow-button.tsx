@@ -7,7 +7,7 @@ export default function ArrowButton({
 }: Readonly<{
   label: string;
   isDisabled: boolean;
-  onClick: any;
+  onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }>) {
   let iconName: "leftArrow" | "rightArrow" = "leftArrow";
 

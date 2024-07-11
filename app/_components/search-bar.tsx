@@ -1,9 +1,10 @@
 import Icon from "@/app/_components/icons/icons";
+import React from "react";
 
 interface SearchBarParams {
   label?: string;
   value: string;
-  onChange: any;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   disabled?: boolean;
   style?: string;
   autoFocus?: boolean;

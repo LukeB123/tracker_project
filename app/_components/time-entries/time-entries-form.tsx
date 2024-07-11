@@ -25,8 +25,8 @@ interface ProjectTimeEntriesProps {
   weeks: TWeekProps[];
   isEditing: boolean;
   isLoading: boolean;
-  handleReset: any;
-  handleCancelEdit: any;
+  handleReset: () => void;
+  handleCancelEdit: () => void;
   changesMade: boolean;
   setChangesMade: React.Dispatch<React.SetStateAction<boolean>>;
   setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;

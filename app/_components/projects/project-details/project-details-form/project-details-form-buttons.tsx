@@ -7,8 +7,8 @@ import Icon from "@/app/_components/icons/icons";
 interface ProjectDetailsFormButtonsParmas {
   newProject: boolean;
   changesMade: boolean;
-  setChangesMade: any;
-  setIsEditing?: any;
+  setChangesMade: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsEditing?: React.Dispatch<React.SetStateAction<boolean>>;
   disabled?: boolean;
 }
 export default function ProjectDetailsFormButtons({

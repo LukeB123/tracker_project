@@ -2,14 +2,14 @@ import SearchBar from "@/app/_components/search-bar";
 
 interface ProjectsTableHeaderParams {
   search?: string;
-  handleSearchChange?: any;
+  handleSearchChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   disableSearchBar?: boolean;
   children: React.ReactNode;
 }
 
 export default function ProjectsTableHeader({
   search = "",
-  handleSearchChange = null,
+  handleSearchChange = () => {},
   disableSearchBar = false,
   children,
 }: ProjectsTableHeaderParams) {

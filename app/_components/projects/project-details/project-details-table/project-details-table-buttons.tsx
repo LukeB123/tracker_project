@@ -3,8 +3,8 @@
 import Button from "@/app/_components/buttons/button";
 
 interface ProjectDetailsTableButtonsParmas {
-  setIsEditing: any;
-  setShowDeleteModal: any;
+  setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowDeleteModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export default function ProjectDetailsFormButtons({
   setIsEditing,

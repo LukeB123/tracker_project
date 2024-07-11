@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormState } from "react-dom";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { redirect } from "next/navigation";
 
@@ -18,7 +18,7 @@ import { projectsActions } from "@/lib/projects";
 import { TProjectDetailsProps } from "@/util/projects";
 
 interface ProjectDetailsFormParams {
-  setIsEditing?: any;
+  setIsEditing?: React.Dispatch<React.SetStateAction<boolean>>;
   newProject?: boolean;
 }
 

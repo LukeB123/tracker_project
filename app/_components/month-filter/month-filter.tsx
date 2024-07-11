@@ -17,7 +17,7 @@ interface MonthFilterProps {
     year: number;
     monthIndex: number;
   };
-  handleMonthChange: any;
+  handleMonthChange: (type: "decrease" | "increase") => void;
   isDisabled: boolean;
 }
 

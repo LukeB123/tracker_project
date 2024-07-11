@@ -4,7 +4,7 @@ interface PrimaryButtonParams {
   buttonStyle?: "primary" | "secondary";
   disabled?: boolean;
   type?: "button" | "submit" | "reset";
-  onClick?: any;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   href?: string;
   height?:
     | "h-10"
@@ -39,10 +39,10 @@ export default function Button({
   buttonStyle = "primary",
   disabled = false,
   type = "button",
-  onClick = undefined,
-  href = undefined,
-  height = undefined,
-  width = undefined,
+  onClick,
+  href,
+  height,
+  width,
   children,
 }: PrimaryButtonParams) {
   let className = "text-center py-1 px-2 rounded-md ";
@@ -71,16 +71,14 @@ export default function Button({
     );
   }
 
-  if (onClick) {
-    return (
-      <button
-        type={type}
-        className={className}
-        onClick={onClick}
-        disabled={disabled}
-      >
-        {children}
-      </button>
-    );
-  }
+  return (
+    <button
+      type={type}
+      className={className}
+      onClick={(event) => {}}
+      disabled={disabled}
+    >
+      {children}
+    </button>
+  );
 }

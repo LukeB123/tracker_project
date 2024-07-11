@@ -10,7 +10,7 @@ import ProjectDetailsButtons from "@/app/_components/projects/project-details/pr
 import { useAppSelector } from "@/lib/hooks";
 
 interface ProjectDetailsTableParams {
-  setIsEditing: any;
+  setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function ProjectDetailsTable({
