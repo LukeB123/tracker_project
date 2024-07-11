@@ -1,5 +1,5 @@
 import Icon from "@/app/_components/icons/icons";
-import TimeEntriesDeleteProjectResourceButtons from "@/app/_components/time-entries/time-entries-delete-project-resource-buttons";
+import DeleteIconButton from "@/app/_components/delete-icon-button";
 import Dropdown from "@/app/_components/dropdown";
 
 import { TPeopleProps } from "@/util/people";
@@ -256,13 +256,21 @@ export default function TimeEntriesProjectResourceInput({
       {isEditing && (
         <>
           <div className="absolute -left-5 flex items-center">
-            <TimeEntriesDeleteProjectResourceButtons
+            <DeleteIconButton
               label={projectResourceLabel}
-              uniqueId={projectResource.unique_identifier}
               isDelete={isDelete}
               setIsDelete={setIsDelete}
               setChangesMade={setChangesMade}
               isDisabled={formStatusIsPending}
+              showModal={false}
+            />
+            <input
+              name={projectResource.unique_identifier + "_delete"}
+              value={isDelete ? 1 : 0}
+              onChange={() => {}}
+              className="hidden"
+              readOnly
+              form="time_entries_form"
             />
           </div>
           <div className={"border-r-2 basis-3/4 flex items-center relative"}>

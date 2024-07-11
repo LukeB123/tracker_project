@@ -31,7 +31,7 @@ export default function ProjectDetailsFormRow({
   const { pending } = useFormStatus();
 
   let valueClass =
-    "basis-1/2 rounded-md px-2 bg-grey-50 text-purple-600 border-2 border-grey-600 disabled:text-purple-500 px-2 py-1 ";
+    "basis-1/2 rounded-md bg-grey-50 text-purple-600 border-2 border-grey-600 disabled:text-purple-500 px-2 py-1 ";
 
   if (disabledmessage != "") valueClass += " italic";
 

@@ -13,9 +13,11 @@ interface ProjectDetailsFormButtonsParmas {
   context: "project" | "resource";
   isLoading: boolean;
   isEditing: boolean;
-  setIsEditing: any;
+  setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
   changesMade: boolean;
-  handleCancelEdit: any;
+  handleCancelEdit: (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => void;
 }
 
 export default function TimeEntriesButtons({
@@ -35,6 +37,10 @@ export default function TimeEntriesButtons({
   useEffect(() => {
     dispatch(formSatusActions.setFormSatusIsPending(pending));
   }, [pending]);
+
+  useEffect(() => {
+    dispatch(formSatusActions.setFormSatusIsPending(false));
+  }, []);
 
   return (
     <>

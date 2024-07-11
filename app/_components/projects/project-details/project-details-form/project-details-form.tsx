@@ -112,23 +112,13 @@ export default function ProjectDetailsForm({
     }
   }, [formState]);
 
-  let disableMessage: string = "";
-
-  if (!resources) disableMessage = "Fetching Resource Names...";
-
-  if (error) disableMessage = "Error Fetching Resource Names";
-
   return (
     <form
       action={formAction}
       onChange={() => setChangesMade(true)}
       onReset={() => setChangesMade(false)}
     >
-      <ProjectDetailsFormHeader
-        title={project?.title}
-        disableMessage={disableMessage}
-        error={error}
-      />
+      <ProjectDetailsFormHeader title={project?.title} />
       <div className="flex justify-center">
         <div className="flex flex-col w-1/3 min-w-128 gap-2">
           <ProjectDetailsFormRow
