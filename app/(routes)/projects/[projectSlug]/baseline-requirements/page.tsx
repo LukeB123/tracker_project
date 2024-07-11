@@ -1,5 +1,5 @@
 import Icon from "@/app/_components/icons/icons";
-import BaselineInput from "@/app/_components/time-entries/baseline/baseline";
+import BaselineInput from "@/app/_components/baseline/baseline";
 import { getWeeks } from "@/util/date";
 import { getResources } from "@/util/people";
 import { Suspense } from "react";
