@@ -1,39 +1,41 @@
 import Icon from "@/app/_components/icons/icons";
-import TimeEntriesDeleteProjectResourceModal from "@/app/_components/time-entries/time-entries-delete-project-resource-modal";
+import DeleteModal from "@/app/_components/delete-modal";
 import { useState } from "react";
 
-interface TimeEntriesDeleteProjectResourceButtonsProps {
-  label: string;
-  uniqueId: string;
+interface DeleteIconButtonProps {
+  label?: string;
   isDelete: boolean;
   setIsDelete: React.Dispatch<React.SetStateAction<boolean>>;
-  setChangesMade: React.Dispatch<React.SetStateAction<boolean>>;
-  isDisabled: boolean;
+  setChangesMade?: React.Dispatch<React.SetStateAction<boolean>>;
+  isDisabled?: boolean;
+  showModal?: boolean;
 }
 
-export default function TimeEntriesDeleteProjectResourceButtons({
+export default function DeleteIconButton({
   label,
-  uniqueId,
   isDelete,
   setIsDelete,
   setChangesMade,
-  isDisabled,
-}: TimeEntriesDeleteProjectResourceButtonsProps) {
+  isDisabled = false,
+  showModal = true,
+}: DeleteIconButtonProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   function handleDeleteClick() {
     if (isDelete) {
       setIsDelete(false);
-    } else if (label.trim() === "") {
-      setIsDelete(true);
-    } else {
+      setChangesMade && setChangesMade(true);
+    } else if (showModal) {
       setShowDeleteModal(true);
+    } else {
+      setIsDelete(true);
+      setChangesMade && setChangesMade(true);
     }
   }
 
   return (
     <>
-      <TimeEntriesDeleteProjectResourceModal
+      <DeleteModal
         label={label}
         showDeleteModal={showDeleteModal}
         setShowDeleteModal={setShowDeleteModal}
@@ -62,14 +64,6 @@ export default function TimeEntriesDeleteProjectResourceButtons({
             width="20px"
           />
         )}
-        <input
-          name={uniqueId + "_delete"}
-          value={isDelete ? 1 : 0}
-          onChange={() => {}}
-          className="hidden"
-          readOnly
-          form="time_entries_form"
-        />
       </button>
     </>
   );

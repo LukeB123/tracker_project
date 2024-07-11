@@ -3,25 +3,25 @@
 import Modal from "@/app/_components/modal";
 import Button from "@/app/_components/buttons/button";
 
-interface TimeEntriesDeleteProjectResourceModalProps {
-  label: string;
+interface DeleteModalProps {
+  label?: string;
   showDeleteModal: boolean;
   setShowDeleteModal: React.Dispatch<React.SetStateAction<boolean>>;
   setIsDelete: React.Dispatch<React.SetStateAction<boolean>>;
-  setChangesMade: React.Dispatch<React.SetStateAction<boolean>>;
+  setChangesMade?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function TimeEntriesDeleteProjectResourceModal({
+export default function DeleteModal({
   label,
   showDeleteModal,
   setShowDeleteModal,
   setIsDelete,
   setChangesMade,
-}: TimeEntriesDeleteProjectResourceModalProps) {
+}: DeleteModalProps) {
   async function handleDelete() {
     setShowDeleteModal(false);
     setIsDelete(true);
-    setChangesMade(true);
+    setChangesMade && setChangesMade(true);
   }
 
   return (
@@ -32,9 +32,11 @@ export default function TimeEntriesDeleteProjectResourceModal({
       }}
     >
       <div className="w-full text-center p-10">
-        Are you sure you want to mark{" "}
-        <span className="text-purple-700 font-semibold">{label}</span> for
-        deletion?
+        Are you sure you want to delete{" "}
+        {label !== undefined && (
+          <span className="text-purple-700 font-semibold">{label}</span>
+        )}
+        {label === undefined && <span>this entry</span>}?
         <div className="flex justify-center items-center gap-4 pt-10">
           <Button
             buttonStyle="secondary"

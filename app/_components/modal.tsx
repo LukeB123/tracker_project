@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 
 interface ModalProps {
   open: boolean;
-  onClose: any;
+  onClose: () => void;
   children: React.ReactNode;
 }
 
