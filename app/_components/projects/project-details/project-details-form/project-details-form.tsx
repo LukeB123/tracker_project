@@ -187,18 +187,21 @@ export default function ProjectDetailsForm({
             name="task"
             type="text"
             value={project?.task}
-            uppercase
           />
           <ProjectDetailsFormRow
             label="Delivery Stream"
             name="delivery_stream"
             type="dropdown"
-            value={project?.delivery_stream}
-            selectedId={
-              deliveryStreams.find(
-                (deliveryStream) =>
-                  deliveryStream.name === project?.delivery_stream
-              )?.id
+            value={
+              project
+                ? {
+                    id: deliveryStreams.find(
+                      (deliveryStream) =>
+                        deliveryStream.name === project.delivery_stream
+                    )!.id,
+                    name: project.delivery_stream,
+                  }
+                : undefined
             }
             selection={deliveryStreams}
             changesMade={changesMade}
@@ -209,17 +212,21 @@ export default function ProjectDetailsForm({
             name="value_stream"
             type="text"
             value={project?.value_stream}
-            capitalise
           />
           <ProjectDetailsFormRow
             label="Project Type"
             name="project_type"
             type="dropdown"
-            value={project?.project_type}
-            selectedId={
-              proposalTypes.find(
-                (proposalType) => proposalType.name === project?.project_type
-              )?.id
+            value={
+              project
+                ? {
+                    id: proposalTypes.find(
+                      (proposalType) =>
+                        proposalType.name === project.project_type
+                    )!.id,
+                    name: project.project_type,
+                  }
+                : undefined
             }
             selection={proposalTypes}
             changesMade={changesMade}
@@ -229,12 +236,16 @@ export default function ProjectDetailsForm({
             label="Line of Business"
             name="line_of_business"
             type="dropdown"
-            value={project?.line_of_business}
-            selectedId={
-              lineOfBusinesses.find(
-                (lineOfBusiness) =>
-                  lineOfBusiness.name === project?.line_of_business
-              )?.id
+            value={
+              project
+                ? {
+                    id: lineOfBusinesses.find(
+                      (lineOfBusiness) =>
+                        lineOfBusiness.name === project.line_of_business
+                    )!.id,
+                    name: project.line_of_business,
+                  }
+                : undefined
             }
             selection={lineOfBusinesses}
             changesMade={changesMade}

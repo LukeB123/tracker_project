@@ -6,10 +6,7 @@ interface ProjectDetailsFormRowParams {
   name: string;
   type: "text" | "number" | "dropdown";
   value: DropdownItem | number | string | undefined;
-  uppercase?: boolean;
-  capitalise?: boolean;
   selection?: DropdownItem[];
-  selectedId?: number;
   disabledmessage?: string;
   search?: boolean;
   form?: string;
@@ -23,8 +20,6 @@ export default function ProjectDetailsFormRow({
   name,
   type,
   value,
-  uppercase = false,
-  capitalise = false,
   selection = [],
   disabledmessage = "",
   search = false,
@@ -37,10 +32,6 @@ export default function ProjectDetailsFormRow({
 
   let valueClass =
     "basis-1/2 rounded-md px-2 bg-grey-50 text-purple-600 border-2 border-grey-600 disabled:text-purple-500 px-2 py-1 ";
-
-  if (uppercase) valueClass += " uppercase";
-
-  if (capitalise) valueClass += " capitalize";
 
   if (disabledmessage != "") valueClass += " italic";
 
