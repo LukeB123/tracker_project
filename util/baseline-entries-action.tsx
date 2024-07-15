@@ -6,25 +6,24 @@ import { TNotificationState } from "@/lib/ui";
 import {
   TNewProjectResourcesProps,
   TNewTimeEntriesProps,
-  TProjectResourcesProps,
   TTimeEntriesProps,
   addProjectResources,
   addTimeEntries,
-  deleteZeroedTimeEntries,
   updateTimeEntries,
-  updateProjectResources,
-  deleteProjectResources,
   deleteTimeEnties,
-  getProjectResourceByProjectResource,
-  getResourcesTimeEntries,
+  getProjectResourcesByProjectId,
+  getProjectTimeEntries,
 } from "@/util/time-entries";
 import {
   TProjectDetailsProps,
   updateProjectsLastUpdated,
 } from "@/util/projects";
+import { TWeekProps } from "./date";
 
 interface TFormState {
-  numberOfEntries: number;
+  project: TProjectDetailsProps;
+  weeks: TWeekProps[];
+  numberOfEntries: number[];
   notification: TNotificationState | null;
 }
 
@@ -32,270 +31,208 @@ export async function baselineEntriesAction(
   prevState: TFormState,
   formData: any
 ): Promise<TFormState> {
-  const newProjectResources: TNewProjectResourcesProps[] = [];
-  const newTimeEntries: TNewTimeEntriesProps[] = [];
+  const entryIds = [...prevState.numberOfEntries];
 
-  const updatedProjectResources: TProjectResourcesProps[] = [];
+  const modelledDataProjectResources: TNewProjectResourcesProps[] = [];
+  const modelledDataTimeEntries: TNewTimeEntriesProps[] = [];
+  const modelledTimeEntryUniqueIds: string[] = [];
+
+  const newProjectResources: TNewProjectResourcesProps[] = [];
+
+  const newTimeEntries: TNewTimeEntriesProps[] = [];
   const updatedTimeEntries: TTimeEntriesProps[] = [];
 
-  const deletedProjectResourceIds: number[] = [];
   const deletedTimeEntryIds: number[] = [];
 
-  const updatedProjectIds: number[] = [];
-
-  const newProjectResourcesState: (
-    | TProjectResourcesProps
-    | TNewProjectResourcesProps
-  )[] = [];
-
-  // console.log(prevState.projectResources);
-
-  prevState.projectResources.forEach((projectResource) => {
-    if (
-      projectResource.project_id &&
-      !updatedProjectIds.includes(projectResource.project_id)
-    )
-      updatedProjectIds.push(projectResource.project_id);
-
-    let initialProjectResource: TProjectResourcesProps | undefined;
-
-    const isDeleted =
-      +formData.get(projectResource.unique_identifier + "_delete") === 1;
-
-    let isUpdatedProjectResource = false;
-
-    const isNewProjectResource = !("id" in projectResource);
-
-    if (!isNewProjectResource)
-      initialProjectResource = prevState.initialProjectResources.find(
-        (initialProjectResource) =>
-          initialProjectResource.id === projectResource.id
-      );
-
-    const newUniqueId =
-      projectResource.project_id +
-      "_" +
-      projectResource.resource_id +
-      "_" +
-      projectResource.rate_grade;
-
-    if (!isNewProjectResource) {
-      if (isDeleted) {
-        deletedProjectResourceIds.push(projectResource.id);
-      } else {
-        isUpdatedProjectResource =
-          initialProjectResource !== undefined &&
-          initialProjectResource.unique_identifier !== newUniqueId;
-
-        const isUpdatedRateGrade =
-          initialProjectResource !== undefined &&
-          initialProjectResource.rate_grade !== projectResource.rate_grade;
-
-        if (isUpdatedProjectResource || isUpdatedRateGrade) {
-          const updatedProjectResourceEntry: TProjectResourcesProps = {
-            id: projectResource.id,
-            project_id: projectResource.project_id,
-            project_slug: projectResource.project_slug,
-            project_title: projectResource.project_title,
-            resource_id: projectResource.resource_id,
-            resource_name: projectResource.resource_name,
-            rate_grade: projectResource.rate_grade,
-            unique_identifier: newUniqueId,
-          };
-          updatedProjectResources.push(updatedProjectResourceEntry);
-
-          newProjectResourcesState.push(updatedProjectResourceEntry);
-        } else if (initialProjectResource) {
-          newProjectResourcesState.push(initialProjectResource);
-        }
-      }
-    } else if (
-      !isDeleted &&
-      projectResource.project_id !== undefined &&
-      projectResource.resource_id !== undefined
-    ) {
-      const newProjectResourceEntry: TNewProjectResourcesProps = {
-        project_id: projectResource.project_id,
-        project_slug: projectResource.project_slug,
-        project_title: projectResource.project_title,
-        resource_id: projectResource.resource_id,
-        resource_name: projectResource.resource_name,
-        rate_grade: projectResource.rate_grade,
-        unique_identifier: newUniqueId,
-      };
-
-      newProjectResources.push(newProjectResourceEntry);
-
-      newProjectResourcesState.push(newProjectResourceEntry);
-    } else {
-      return;
-    }
-
-    // Iterate over the weeks to handle each time entry
-    prevState.weeks.map((week) => {
-      let initialTimeEntry = prevState.timeEntries.find(
-        (timeEntry) =>
-          timeEntry.unique_identifier ===
-          projectResource.unique_identifier + "_" + week.week_commencing
-      );
-
-      const newTimeEntryValue: number = +formData.get(
-        projectResource.unique_identifier + "_" + week.week_commencing
-      );
+  // Model the data for each row in the form
+  try {
+    entryIds.forEach((entryId) => {
+      const resourceId = +formData.get("resource_" + entryId + "_id");
+      const resourceName: string = formData.get("resource_" + entryId);
+      const rateGrade: string = formData.get("rate_grade_" + entryId);
+      const initialWeek: string = formData.get("week_commencing_" + entryId);
+      const daysPerWeek: string = formData.get("work_days_" + entryId);
+      const numberOfWeeks: string = formData.get("number_of_weeks_" + entryId);
+      const uniqueId =
+        prevState.project.id + "_" + resourceId.toString() + "_" + rateGrade;
 
       if (
-        !isNewProjectResource &&
-        initialTimeEntry &&
-        (isDeleted || newTimeEntryValue === 0)
+        resourceId > 0 &&
+        rateGrade !== "" &&
+        initialWeek !== "" &&
+        daysPerWeek !== "" &&
+        numberOfWeeks !== ""
       ) {
-        // Existing Time Entry to be deleted
+        // if (!resourceIds.includes(resourceId)) resourceIds.push(resourceId);
 
-        deletedTimeEntryIds.push(initialTimeEntry.id);
-      } else if (
-        !isNewProjectResource &&
-        initialTimeEntry &&
-        newTimeEntryValue > 0
-      ) {
-        const timeEntryChanged =
-          initialTimeEntry.work_days !== newTimeEntryValue;
+        modelledDataProjectResources.push({
+          project_id: prevState.project.id,
+          project_slug: prevState.project.slug,
+          project_title: prevState.project.title,
+          resource_id: resourceId,
+          resource_name: resourceName,
+          rate_grade: rateGrade,
+          unique_identifier: uniqueId,
+        });
 
-        if (timeEntryChanged || isUpdatedProjectResource) {
-          // Existing Time Entry to be updated
+        const iniialWeekIndex = prevState.weeks.findIndex(
+          (week) => week.week_commencing === initialWeek
+        );
 
-          const updateTimeEntry: TTimeEntriesProps = {
-            id: initialTimeEntry.id,
-            project_id: projectResource.project_id,
-            project_slug: projectResource.project_slug,
-            project_title: projectResource.project_title,
-            resource_id: projectResource.resource_id,
-            week_commencing: week.week_commencing,
-            work_days: newTimeEntryValue,
-            unique_identifier: newUniqueId + "_" + week.week_commencing,
+        const entryWeeks = prevState.weeks.slice(
+          iniialWeekIndex,
+          iniialWeekIndex + +numberOfWeeks
+        );
+
+        entryWeeks.forEach((entryWeek) => {
+          const timeEntryUniqueId = uniqueId + "_" + entryWeek.week_commencing;
+
+          const weekTimeEntry: TNewTimeEntriesProps = {
+            project_id: prevState.project.id,
+            project_slug: prevState.project.slug,
+            project_title: prevState.project.title,
+            resource_id: resourceId,
+            rate_grade: rateGrade,
+            week_commencing: entryWeek.week_commencing,
+            work_days: +daysPerWeek,
+            unique_identifier: timeEntryUniqueId,
           };
 
-          updatedTimeEntries.push(updateTimeEntry);
-        }
-      } else if (
-        (isNewProjectResource || !initialTimeEntry) &&
-        newTimeEntryValue > 0 &&
-        projectResource.project_id !== undefined &&
-        projectResource.resource_id !== undefined
-      ) {
-        // New Time Entry
-        // Only add time entries with value greater than zero
-        const newTimeEntry: TNewTimeEntriesProps = {
-          project_id: projectResource.project_id,
-          project_slug: projectResource.project_slug,
-          project_title: projectResource.project_title,
-          resource_id: projectResource.resource_id,
-          week_commencing: week.week_commencing,
-          work_days: newTimeEntryValue,
-          unique_identifier: newUniqueId + "_" + week.week_commencing,
-        };
+          if (!modelledTimeEntryUniqueIds.includes(timeEntryUniqueId)) {
+            modelledTimeEntryUniqueIds.push(timeEntryUniqueId);
 
-        newTimeEntries.push(newTimeEntry);
+            modelledDataTimeEntries.push(weekTimeEntry);
+          } else {
+            const timeEntryIndex = modelledDataTimeEntries.findIndex(
+              (timeEntry) => timeEntry.unique_identifier === timeEntryUniqueId
+            );
+
+            modelledDataTimeEntries[timeEntryIndex] = weekTimeEntry;
+          }
+        });
+      } else {
+        // Throw an error if the form contains empty inputs
+        throw new Error();
       }
     });
-  });
+  } catch (error) {
+    return {
+      ...prevState,
+      notification: {
+        status: "netural",
+        title: "Project Baseline Entry",
+        message: "Please Fill Out Entire Form",
+      },
+    };
+  }
 
-  // console.log("newProjectResources", newProjectResources);
-  // console.log("updatedProjectResources", updatedProjectResources);
-  // console.log("newTimeEntries", newTimeEntries);
-  // console.log("updatedTimeEntries", updatedTimeEntries);
-  // console.log("deletedProjectResourceIds", deletedProjectResourceIds);
-  // console.log("deletedTimeEntryIds", deletedTimeEntryIds);
-  // console.log("updatedProjectIds", updatedProjectIds);
+  // Add new project resources to array
+  // Split time entries into new, updated and deleted
+  try {
+    const existingProjectResources = await getProjectResourcesByProjectId(
+      prevState.project.id
+    );
+
+    console.log("existingProjectResources", existingProjectResources);
+
+    modelledDataProjectResources.forEach((entry) => {
+      const isNewProjectResource =
+        !existingProjectResources
+          .map((projectResource) => projectResource.unique_identifier)
+          .includes(entry.unique_identifier) &&
+        !newProjectResources
+          .map((newProjectResource) => newProjectResource.unique_identifier)
+          .includes(entry.unique_identifier);
+
+      if (isNewProjectResource) newProjectResources.push(entry);
+    });
+
+    const existingTimeEntries = await getProjectTimeEntries(
+      prevState.project.id,
+      prevState.weeks.map((week) => week.week_commencing)
+    );
+
+    console.log("existingTimeEntries", existingTimeEntries);
+
+    modelledDataTimeEntries.forEach((timeEntry) => {
+      const isNewTimeEntry = !existingTimeEntries
+        .map((entry) => entry.unique_identifier)
+        .includes(timeEntry.unique_identifier);
+
+      if (isNewTimeEntry && timeEntry.work_days > 0) {
+        newTimeEntries.push(timeEntry);
+      } else if (!isNewTimeEntry) {
+        const existingId = existingTimeEntries.find(
+          (entry) => entry.unique_identifier === timeEntry.unique_identifier
+        )!.id;
+
+        if (timeEntry.work_days > 0) {
+          updatedTimeEntries.push({ id: existingId, ...timeEntry });
+        } else {
+          deletedTimeEntryIds.push(existingId);
+        }
+      }
+    });
+  } catch (error) {
+    return {
+      ...prevState,
+      notification: {
+        status: "error",
+        title: "Project Baseline Entry",
+        message: "Error Fetching Data From Database",
+      },
+    };
+  }
+
+  console.log("newProjectResources", newProjectResources);
+  console.log("newTimeEntries", newTimeEntries);
+  console.log("updatedTimeEntries", updatedTimeEntries);
+  console.log("deletedTimeEntryIds", deletedTimeEntryIds);
 
   try {
     if (newProjectResources.length > 0)
       await addProjectResources(newProjectResources);
 
-    if (updatedProjectResources.length > 0)
-      await updateProjectResources(updatedProjectResources);
-
     if (newTimeEntries.length > 0) await addTimeEntries(newTimeEntries);
 
-    if (updatedTimeEntries.length > 0) {
+    if (updatedTimeEntries.length > 0)
       await updateTimeEntries(updatedTimeEntries);
-      // await deleteZeroedTimeEntries();
-    }
-
-    if (deletedProjectResourceIds.length > 0)
-      await deleteProjectResources(deletedProjectResourceIds);
 
     if (deletedTimeEntryIds.length > 0)
       await deleteTimeEnties(deletedTimeEntryIds);
 
     if (
       newProjectResources.length +
-        updatedProjectResources.length +
         newTimeEntries.length +
         updatedTimeEntries.length +
-        deletedProjectResourceIds.length +
         deletedTimeEntryIds.length >
       0
     ) {
       // UPDATE PROJECT UPDATED TIMES
-      await updateProjectsLastUpdated(updatedProjectIds);
-
-      const updatedNewProjectResourcesState = await Promise.all(
-        newProjectResourcesState.map((projectResource) => {
-          if ("id" in projectResource) return projectResource;
-
-          return getProjectResourceByProjectResource(
-            projectResource.unique_identifier
-          );
-        })
-      );
-
-      const resourceIds = updatedNewProjectResourcesState.map(
-        (entry) => entry.resource_id
-      );
-
-      let updatedTimeEntriesState: TTimeEntriesProps[] = [];
-
-      if (resourceIds.length > 0) {
-        updatedTimeEntriesState = await getResourcesTimeEntries(
-          resourceIds,
-          prevState.weeks.map((week) => week.week_commencing)
-        );
-      }
+      await updateProjectsLastUpdated([prevState.project.id]);
 
       // if (prevState.currentProject && prevState.context === "project") {
       //   revalidatePath(
       //     "/projects/" + prevState.currentProject.slug + "/time-entry"
       //   );
       // }
-
-      return {
-        ...prevState,
-        projectResources: updatedNewProjectResourcesState,
-        initialProjectResources: updatedNewProjectResourcesState,
-        timeEntries: updatedTimeEntriesState,
-        notification: {
-          status: "success",
-          title: "Project Time Entry",
-          message: "Time Entries Updated Successfully",
-        },
-      };
-    } else {
-      return {
-        ...prevState,
-        projectResources: newProjectResourcesState,
-        notification: {
-          status: "neutral",
-          title: "Project Time Entry",
-          message: "No Changes Detected",
-        },
-      };
     }
+
+    return {
+      ...prevState,
+      notification: {
+        status: "success",
+        title: "Project Baseline Entry",
+        message: "Time Entries Updated Successfully",
+      },
+    };
   } catch (error) {
     return {
       ...prevState,
       notification: {
         status: "error",
-        title: "Project Time Entry",
-        message: "Error Updating The Database",
+        title: "Project Baseline Entry",
+        message: "Error Updating Data From Database",
       },
     };
   }

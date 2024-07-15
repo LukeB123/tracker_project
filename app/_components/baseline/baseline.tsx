@@ -40,20 +40,19 @@ export default function BaselineInput({
   weeks,
 }: BaselineInputProps) {
   const [numberOfEntries, setNumberOfEntries] = useState([0]);
-  console.log("RENDERING");
 
   //   const selectableWeeks = weeks.filter(week => {
   //     if(week.year === initialYearMonthIndex.year)
   //   })
 
-  const options = resources.map((resource) => {
+  const resourceOptions = resources.map((resource) => {
     return {
       id: resource.id,
       name: resource.name,
     };
   });
 
-  const weekData = weeks.map((week) => {
+  const weekOptions = weeks.map((week) => {
     let monthIndexString = week.monthIndex.toString();
     if (week.monthIndex < 10) monthIndexString = "0" + monthIndexString;
     return {
@@ -66,7 +65,7 @@ export default function BaselineInput({
     };
   });
 
-  function handleReset() {}
+  function handleSuccess() {}
   return (
     <>
       <h1 className="text-center mt-10 text-xl font-semibold">
@@ -94,14 +93,14 @@ export default function BaselineInput({
             </tr>
           </thead>
           <tbody>
-            {numberOfEntries.map((entry, index) => (
+            {numberOfEntries.map((entry) => (
               <BaselineEntry
                 key={entry}
-                resources={options}
-                weeks={[{ id: 0, name: "" }, ...weekData]}
+                resources={resourceOptions}
+                weeks={[{ id: 0, name: "" }, ...weekOptions]}
                 grades={grades}
                 setNumberOfEntries={setNumberOfEntries}
-                entryIndex={index}
+                entryIndex={entry}
               />
             ))}
           </tbody>
@@ -130,8 +129,9 @@ export default function BaselineInput({
       </div>
       <BaselineForm
         key={numberOfEntries.length}
-        numberOfEntries={numberOfEntries.length}
-        handleReset={handleReset}
+        numberOfEntries={numberOfEntries}
+        handleSuccess={handleSuccess}
+        weeks={weeks}
       />
     </>
   );

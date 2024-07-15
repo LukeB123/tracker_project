@@ -4,23 +4,30 @@ import { useEffect } from "react";
 import { useFormState } from "react-dom";
 
 import { uiActions } from "@/lib/ui";
-import { useAppDispatch } from "@/lib/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import BaselineFormButtons from "@/app/_components/baseline/baseline-form-buttons";
 import { baselineEntriesAction } from "@/util/baseline-entries-action";
+import { TWeekProps } from "@/util/date";
 
 interface BaselineFormProps {
-  numberOfEntries: number;
-  handleReset: () => void;
+  numberOfEntries: number[];
+  handleSuccess: () => void;
+  weeks: TWeekProps[];
 }
 
 export default function BaselineForm({
   numberOfEntries,
-  handleReset,
+  handleSuccess,
+  weeks,
 }: BaselineFormProps) {
   const dispatch = useAppDispatch();
 
+  const project = useAppSelector((state) => state.projects.currentProject)!;
+
   const [formState, formAction] = useFormState(baselineEntriesAction, {
-    numberOfEntries: numberOfEntries,
+    project,
+    weeks,
+    numberOfEntries,
     notification: null,
   });
 
@@ -30,7 +37,7 @@ export default function BaselineForm({
       dispatch(uiActions.showNotification(formState.notification));
 
       if (formState.notification.status === "success") {
-        handleReset();
+        handleSuccess();
       }
     }
   }, [formState]);

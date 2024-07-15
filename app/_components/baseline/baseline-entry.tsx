@@ -23,9 +23,7 @@ export default function BaselineEntry({
     id: 0,
     name: "",
   });
-  const [numberOfWeeks, setNumberOfWeeks] = useState("1");
-
-  console.log(entryIndex);
+  const [numberOfWeeks, setNumberOfWeeks] = useState("");
 
   function handleWeekChange(id: number) {
     const newWeek = weeks.find((week) => week.id === id)!;
@@ -45,11 +43,9 @@ export default function BaselineEntry({
 
   useEffect(() => {
     if (isDelete) {
-      setNumberOfEntries((prevState) => {
-        const mutableState = [...prevState];
-        mutableState.splice(entryIndex, 1);
-        return mutableState;
-      });
+      setNumberOfEntries((prevState) =>
+        prevState.filter((entry) => entry !== entryIndex)
+      );
     }
   }, [isDelete]);
 
@@ -66,6 +62,7 @@ export default function BaselineEntry({
           data={resources}
           search={true}
           style="bg-purple-200 rounded-md"
+          form="baseline_entries_form"
         />
       </td>
       <td>
@@ -73,6 +70,7 @@ export default function BaselineEntry({
           id={"rate_grade_" + entryIndex}
           data={grades}
           style="bg-purple-200 rounded-md"
+          form="baseline_entries_form"
         />
       </td>
       <td>
@@ -82,6 +80,7 @@ export default function BaselineEntry({
           parentSelectedItem={startingWeek}
           onSelect={handleWeekChange}
           style="bg-blue-100 rounded-md"
+          form="baseline_entries_form"
         />
       </td>
       <td>
@@ -91,8 +90,9 @@ export default function BaselineEntry({
           min={0}
           max={5}
           name={"work_days_" + entryIndex}
+          form="baseline_entries_form"
           className={"bg-blue-100 w-full rounded-md text-right px-2 py-1"}
-          defaultValue={0}
+          defaultValue={""}
           // value={inputValue}
           // onChange={handleChange}
           // form="time_entries_form"
@@ -106,7 +106,8 @@ export default function BaselineEntry({
           step="1"
           min={1}
           max={maxNumberOfWeeks}
-          name={"number_of_working_days"}
+          name={"number_of_weeks_" + entryIndex}
+          form="baseline_entries_form"
           value={numberOfWeeks}
           onChange={handleNumberOfWeeksChange}
           className={"bg-blue-100 w-full rounded-md text-right px-2 py-1"}
