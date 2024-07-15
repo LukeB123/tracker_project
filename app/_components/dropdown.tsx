@@ -51,7 +51,9 @@ export default function Dropdown({
 
   const [searchString, setSearchString] = useState("");
 
-  const [selectedItem, setSelectedItem] = useState<DropdownItem | undefined>();
+  const [selectedItem, setSelectedItem] = useState<DropdownItem | undefined>(
+    parentSelectedItem ? { ...parentSelectedItem } : undefined
+  );
 
   let listData = [...data];
 
@@ -98,8 +100,8 @@ export default function Dropdown({
     setChangesMade && setChangesMade(true);
   }
 
-  function handleSearchChange(event: React.ChangeEvent<HTMLInputElement>) {
-    setSearchString(event.target.value);
+  function handleSearchChange(searchStringValue: string) {
+    setSearchString(searchStringValue);
   }
 
   useEffect(() => {
@@ -111,7 +113,7 @@ export default function Dropdown({
     } else {
       setSelectedItem(undefined);
     }
-  }, [parentSelectedItem?.id, data]);
+  }, [parentSelectedItem?.id, JSON.stringify(data)]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -132,19 +134,14 @@ export default function Dropdown({
       ? { ...parentSelectedItem }
       : undefined;
 
-    if (!changesMade && startingValue?.id !== selectedItem?.id) {
+    if (
+      changesMade !== undefined &&
+      !changesMade &&
+      startingValue?.id !== selectedItem?.id
+    ) {
       setSelectedItem(startingValue);
     }
   }, [changesMade]);
-
-  useEffect(() => {
-    if (parentSelectedItem)
-      setSelectedItem({
-        ...parentSelectedItem,
-      });
-  }, []);
-
-  // console.log("RENDERING DROPDOWN");
 
   return (
     <div ref={dropdownRef} className="relative w-full h-full">
@@ -159,25 +156,30 @@ export default function Dropdown({
         onClick={handleClick}
         disabled={disabled}
         className={dropDownClassName}
+        aria-required
       >
-        <input
-          className="hidden"
-          readOnly
-          id={id + "_id"}
-          name={id + "_id"}
-          form={form}
-          value={selectedItem ? selectedItem.id : ""}
-          onChange={() => {}}
-        />
-        <input
-          className="hidden"
-          readOnly
-          id={id}
-          name={id}
-          form={form}
-          value={selectedItem ? selectedItem.name : ""}
-          onChange={() => {}}
-        />
+        {form && (
+          <>
+            <input
+              className="hidden"
+              readOnly
+              id={id + "_id"}
+              name={id + "_id"}
+              form={form}
+              value={selectedItem ? selectedItem.id : ""}
+              onChange={() => {}}
+            />
+            <input
+              className="hidden"
+              readOnly
+              id={id}
+              name={id}
+              form={form}
+              value={selectedItem ? selectedItem.name : ""}
+              onChange={() => {}}
+            />
+          </>
+        )}
         <div className="truncate">{selectedItem?.name || title}</div>
         {!isOpen && (
           <div className="animate-dropDownClosed w-max">

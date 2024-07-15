@@ -44,7 +44,7 @@ const lineOfBusinesses = [
 ];
 
 export default function ProjectDetailsForm({
-  setIsEditing = undefined,
+  setIsEditing,
   newProject = false,
 }: ProjectDetailsFormParams) {
   const currentProjectState = useAppSelector(

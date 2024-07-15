@@ -15,19 +15,19 @@ export default function ProjectDetailsFormButtons({
   newProject,
   changesMade,
   setChangesMade,
-  setIsEditing = undefined,
+  setIsEditing,
   disabled = false,
 }: ProjectDetailsFormButtonsParmas) {
   const { pending } = useFormStatus();
 
   function handleClick() {
-    if (setIsEditing) setIsEditing(false);
     setChangesMade(false);
+    setIsEditing && setIsEditing(false);
   }
 
   let cancelAction: {
     href: string | undefined;
-    onClick: any;
+    onClick: (() => void) | undefined;
   } = { href: "/projects/", onClick: handleClick };
 
   if (newProject) {

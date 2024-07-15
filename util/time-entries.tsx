@@ -32,6 +32,7 @@ export type TTimeEntriesProps = {
   project_slug: string;
   project_title: string;
   resource_id: number;
+  rate_grade: string;
   week_commencing: string;
   work_days: number;
   unique_identifier: string;
@@ -42,6 +43,7 @@ export type TNewTimeEntriesProps = {
   project_slug: string;
   project_title: string;
   resource_id: number;
+  rate_grade: string;
   week_commencing: string;
   work_days: number;
   unique_identifier: string;
@@ -102,6 +104,22 @@ export async function getResourcesTimeEntries(
         AND week_commencing IN (${weeks.map(() => "?").join(",")})`
     )
     .all(resourceIds, weeks);
+}
+
+export async function getProjectTimeEntries(
+  projectId: number,
+  weeks: string[]
+): Promise<TTimeEntriesProps[]> {
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  return db
+    .prepare(
+      `
+        SELECT * FROM project_time_entries 
+        WHERE project_id = ?
+        AND week_commencing IN (${weeks.map(() => "?").join(",")})`
+    )
+    .all(projectId, weeks);
 }
 
 export async function updateProjectResourcesProjectTitle(
@@ -169,6 +187,7 @@ export async function updateTimeEntries(timeEntries: TTimeEntriesProps[]) {
         project_slug = @project_slug,
         project_title = @project_title,
         resource_id = @resource_id,
+        rate_grade = @rate_grade,
         week_commencing = @week_commencing,
         work_days = @work_days,
         unique_identifier = @unique_identifier
@@ -213,6 +232,7 @@ export async function addTimeEntries(timeEntries: TNewTimeEntriesProps[]) {
         @project_slug,
         @project_title,
         @resource_id,
+        @rate_grade,
         @week_commencing,
         @work_days,
         @unique_identifier
