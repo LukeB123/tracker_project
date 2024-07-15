@@ -40,6 +40,7 @@ export default function BaselineInput({
   weeks,
 }: BaselineInputProps) {
   const [numberOfEntries, setNumberOfEntries] = useState([0]);
+  const [tableBodyKey, setTableBodyKey] = useState(0);
 
   //   const selectableWeeks = weeks.filter(week => {
   //     if(week.year === initialYearMonthIndex.year)
@@ -65,7 +66,11 @@ export default function BaselineInput({
     };
   });
 
-  function handleSuccess() {}
+  function handleSuccess() {
+    setNumberOfEntries([0]);
+    setTableBodyKey((prevState) => prevState + 1);
+  }
+
   return (
     <>
       <h1 className="text-center mt-10 text-xl font-semibold">
@@ -92,7 +97,7 @@ export default function BaselineInput({
               </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody key={tableBodyKey}>
             {numberOfEntries.map((entry) => (
               <BaselineEntry
                 key={entry}

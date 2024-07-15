@@ -18,7 +18,7 @@ import {
   TProjectDetailsProps,
   updateProjectsLastUpdated,
 } from "@/util/projects";
-import { TWeekProps } from "./date";
+import { TWeekProps, getWeeks } from "./date";
 
 interface TFormState {
   project: TProjectDetailsProps;
@@ -79,10 +79,16 @@ export async function baselineEntriesAction(
           (week) => week.week_commencing === initialWeek
         );
 
-        const entryWeeks = prevState.weeks.slice(
-          iniialWeekIndex,
-          iniialWeekIndex + +numberOfWeeks
-        );
+        let entryWeeks: TWeekProps[];
+
+        if (iniialWeekIndex + +numberOfWeeks >= prevState.weeks.length) {
+          entryWeeks = prevState.weeks.slice(iniialWeekIndex);
+        } else {
+          entryWeeks = prevState.weeks.slice(
+            iniialWeekIndex,
+            iniialWeekIndex + +numberOfWeeks
+          );
+        }
 
         entryWeeks.forEach((entryWeek) => {
           const timeEntryUniqueId = uniqueId + "_" + entryWeek.week_commencing;
