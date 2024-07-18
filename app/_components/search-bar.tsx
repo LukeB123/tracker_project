@@ -4,7 +4,7 @@ import React from "react";
 interface SearchBarParams {
   label?: string;
   value: string;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (searchString: string) => void;
   disabled?: boolean;
   style?: string;
   autoFocus?: boolean;
@@ -31,17 +31,32 @@ export default function SearchBar({
     notDisabledLabel = `Search ${label}...`;
   }
 
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    onChange && onChange(event.target.value);
+  }
+
   return (
     <div className="flex justify-start items-center h-full w-full relative">
-      <input
-        type="text"
-        placeholder={disabled ? disabledLabel : notDisabledLabel}
-        className={className}
-        value={value}
-        onChange={onChange}
-        disabled={disabled}
-        autoFocus={autoFocus}
-      />
+      {onChange && (
+        <input
+          type="text"
+          placeholder={disabled ? disabledLabel : notDisabledLabel}
+          className={className}
+          value={value}
+          onChange={handleChange}
+          disabled={disabled}
+          autoFocus={autoFocus}
+        />
+      )}
+      {!onChange && (
+        <input
+          type="text"
+          placeholder={disabled ? disabledLabel : notDisabledLabel}
+          className={className}
+          disabled={disabled}
+          autoFocus={autoFocus}
+        />
+      )}
       <div className="h-1/2 aspect-square absolute left-2">
         <Icon iconName="search" color="#a46ede" />
       </div>
