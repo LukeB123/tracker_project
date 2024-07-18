@@ -36,9 +36,11 @@ export default function TimeEntries({
 }: TimeEntriesProps) {
   const [projectResources, setProjectResources] = useState<
     (TProjectResourcesProps | TNewProjectResourcesProps)[]
-  >(initialProjectResources);
-  const [timeEntries, setTimeEntries] =
-    useState<TTimeEntriesProps[]>(initialTimeEntries);
+  >(JSON.parse(JSON.stringify(initialProjectResources)));
+
+  const [timeEntries, setTimeEntries] = useState<
+    (TTimeEntriesProps | TNewTimeEntriesProps)[]
+  >(JSON.parse(JSON.stringify(initialTimeEntries)));
 
   const [formKey, setFormKey] = useState(0);
 
@@ -76,7 +78,10 @@ export default function TimeEntries({
 
   const initialProjectResourcesData: React.MutableRefObject<
     TProjectResourcesProps[]
-  > = useRef(JSON.parse(JSON.stringify(initialProjectResources)));
+  > = useRef(initialProjectResources);
+
+  const initialTimeEntriesData: React.MutableRefObject<TTimeEntriesProps[]> =
+    useRef(initialTimeEntries);
 
   const minYear = weeks.reduce(function (prev, week) {
     return prev.year < week.year ? prev : week;
@@ -112,6 +117,7 @@ export default function TimeEntries({
   function handleReset() {
     setChangesMade(false);
     setProjectResources(initialProjectResourcesData.current);
+    setTimeEntries(initialTimeEntriesData.current);
   }
 
   function handleCancelEdit() {
@@ -125,7 +131,7 @@ export default function TimeEntries({
   function handleAddProjectResource(
     event: React.MouseEvent<HTMLButtonElement>
   ) {
-    event.preventDefault();
+    // event.preventDefault();
 
     const projectResourceAdded =
       projectResources.length - initialProjectResourcesData.current.length;
@@ -230,7 +236,7 @@ export default function TimeEntries({
 
   useEffect(() => {
     setFormKey(Math.random());
-  }, [projectResources, initialProjectResourcesData]);
+  }, [projectResources, timeEntries]);
 
   // Fetch all resources if a new resource is added ONCE for project context
   useEffect(() => {
@@ -298,13 +304,12 @@ export default function TimeEntries({
                 <TimeEntriesTableRow
                   key={projectResource.unique_identifier}
                   context={context}
-                  projectResourceIndex={index}
                   projectResource={projectResource}
                   projectResources={projectResources}
                   setProjectResources={setProjectResources}
-                  initialProjectResourcesData={initialProjectResourcesData}
                   initialTimeEntriesIsLoading={initialTimeEntriesIsLoading}
                   timeEntries={timeEntries}
+                  setTimeEntries={setTimeEntries}
                   isEditing={isEditing}
                   weeks={weeks}
                   visibleWeeks={visibleWeeks}
@@ -343,13 +348,12 @@ export default function TimeEntries({
         projectResources={projectResources}
         initialProjectResourcesData={initialProjectResourcesData}
         timeEntries={timeEntries}
-        setTimeEntries={setTimeEntries}
+        initialTimeEntriesData={initialTimeEntriesData}
         weeks={weeks}
         isLoading={initialTimeEntriesIsLoading}
         isEditing={isEditing}
         setIsEditing={setIsEditing}
         changesMade={changesMade}
-        setChangesMade={setChangesMade}
         handleReset={handleReset}
         handleCancelEdit={handleCancelEdit}
       />

@@ -7,17 +7,21 @@ import { TProjectDetailsProps } from "@/util/projects";
 import { TWeekProps } from "@/util/date";
 import {
   TNewProjectResourcesProps,
+  TNewTimeEntriesProps,
   TProjectResourcesProps,
+  TTimeEntriesProps,
 } from "@/util/time-entries";
 import { useAppSelector } from "@/lib/hooks";
 
 interface TimeEntriesProjectResourceInputProps {
   context: "project" | "resource";
-  projectResourceIndex: number;
   projectResource: TProjectResourcesProps | TNewProjectResourcesProps;
   projectResources: (TProjectResourcesProps | TNewProjectResourcesProps)[];
   setProjectResources: React.Dispatch<
     React.SetStateAction<(TProjectResourcesProps | TNewProjectResourcesProps)[]>
+  >;
+  setTimeEntries: React.Dispatch<
+    React.SetStateAction<(TTimeEntriesProps | TNewTimeEntriesProps)[]>
   >;
   resourceOverAllocationWeeks: TWeekProps[];
   projectResourceSelection:
@@ -57,12 +61,18 @@ const grades = [
   { id: 7, name: "7" },
 ];
 
+type TResourceOverAllocationMonths = {
+  monthYearString: string;
+  monthIndex: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+  year: number;
+};
+
 export default function TimeEntriesProjectResourceInput({
   context,
-  projectResourceIndex,
   projectResource,
   projectResources,
   setProjectResources,
+  setTimeEntries,
   resourceOverAllocationWeeks,
   projectResourceSelection,
   isEditing,
@@ -78,11 +88,18 @@ export default function TimeEntriesProjectResourceInput({
     (state) => state.formStatus.formStatusIsPending
   );
 
-  type TResourceOverAllocationMonths = {
-    monthYearString: string;
-    monthIndex: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
-    year: number;
-  };
+  const showOverAllocationAlert =
+    resourceOverAllocationWeeks.length > 0 && !isDelete;
+
+  const showDuplicateAlert =
+    projectResources.filter(
+      (entry) =>
+        entry.project_id !== undefined &&
+        entry.resource_id !== undefined &&
+        entry.project_id === projectResource.project_id &&
+        entry.resource_id === projectResource.resource_id &&
+        entry.rate_grade === projectResource.rate_grade
+    ).length > 1 && !isDelete;
 
   const resourceOverAllocationMonths: TResourceOverAllocationMonths[] =
     resourceOverAllocationWeeks
@@ -100,29 +117,41 @@ export default function TimeEntriesProjectResourceInput({
           ) === index
       );
 
-  let projectResourceClass = "px-2 py-1 w-full h-8 font-semibold";
+  const projectResourceClass = "px-2 py-1 w-full h-8 font-semibold";
 
-  let colorClass = "";
+  let textColor = "";
+
+  let bgColor = "";
+
+  let gradeTextColor = "";
 
   if (isEditing && !isDelete) {
-    colorClass = " text-grey-900 bg-purple-200";
+    bgColor = " bg-purple-200";
+    textColor = " text-grey-900";
+    gradeTextColor = " text-grey-900";
 
     if (resourceOverAllocationWeeks.length > 0) {
-      colorClass += " text-red-400";
+      textColor += " text-red-400";
     }
   } else if (!isEditing && !isDelete) {
-    colorClass = " text-grey-50 bg-purple-500";
+    bgColor = " bg-purple-500";
+    textColor = " text-grey-50";
+    gradeTextColor = " text-grey-50";
 
     if (resourceOverAllocationWeeks.length > 0) {
-      colorClass += " text-red-600";
+      textColor += " text-red-600";
     }
   }
 
   if (isDelete) {
-    colorClass = "text-grey-300 bg-grey-100";
+    bgColor = " bg-grey-100";
+    textColor = " text-grey-300";
+    gradeTextColor = " text-grey-300";
   }
 
-  projectResourceClass += colorClass;
+  const projectResourceIndex = projectResources.findIndex(
+    (entry) => entry.unique_identifier === projectResource.unique_identifier
+  );
 
   function handleProjectResourceLabelChange(id: number) {
     // const newValue = options.find((entry) => entry.id === id);
@@ -134,19 +163,36 @@ export default function TimeEntriesProjectResourceInput({
 
       if (selectedResource) {
         setProjectResources((prevState) => {
-          const mutatableState: (
-            | TProjectResourcesProps
-            | TNewProjectResourcesProps
-          )[] = JSON.parse(JSON.stringify(prevState));
+          return [
+            ...prevState.slice(0, projectResourceIndex),
+            {
+              ...prevState[projectResourceIndex],
+              resource_id: selectedResource.id,
+              resource_name: selectedResource.name,
+              rate_grade: selectedResource.grade,
+            },
+            ...prevState.slice(projectResourceIndex + 1),
+          ];
+        });
 
-          mutatableState[projectResourceIndex].resource_id =
-            selectedResource.id;
-          mutatableState[projectResourceIndex].resource_name =
-            selectedResource.name;
-          mutatableState[projectResourceIndex].rate_grade =
-            selectedResource.grade;
+        setTimeEntries((prevState) => {
+          const newState: (TTimeEntriesProps | TNewTimeEntriesProps)[] =
+            prevState.map((entry) => {
+              if (
+                entry.unique_identifier.split("_").slice(0, -1).join("_") ===
+                projectResource.unique_identifier
+              ) {
+                return {
+                  ...entry,
+                  resource_id: selectedResource.id,
+                  rate_grade: selectedResource.grade,
+                };
+              } else {
+                return { ...entry };
+              }
+            });
 
-          return mutatableState;
+          return newState;
         });
       }
     }
@@ -158,18 +204,37 @@ export default function TimeEntriesProjectResourceInput({
 
       if (selectedProject) {
         setProjectResources((prevState) => {
-          const mutatableState: (
-            | TProjectResourcesProps
-            | TNewProjectResourcesProps
-          )[] = JSON.parse(JSON.stringify(prevState));
+          return [
+            ...prevState.slice(0, projectResourceIndex),
+            {
+              ...prevState[projectResourceIndex],
+              project_id: selectedProject.id,
+              project_slug: selectedProject.slug,
+              project_title: selectedProject.title,
+            },
+            ...prevState.slice(projectResourceIndex + 1),
+          ];
+        });
 
-          mutatableState[projectResourceIndex].project_id = selectedProject.id;
-          mutatableState[projectResourceIndex].project_slug =
-            selectedProject.slug;
-          mutatableState[projectResourceIndex].project_title =
-            selectedProject.title;
+        setTimeEntries((prevState) => {
+          const newState: (TTimeEntriesProps | TNewTimeEntriesProps)[] =
+            prevState.map((entry) => {
+              if (
+                entry.unique_identifier.split("_").slice(0, -1).join("_") ===
+                projectResource.unique_identifier
+              ) {
+                return {
+                  ...entry,
+                  project_id: selectedProject.id,
+                  project_slug: selectedProject.slug,
+                  project_title: selectedProject.title,
+                };
+              } else {
+                return { ...entry };
+              }
+            });
 
-          return mutatableState;
+          return newState;
         });
       }
     }
@@ -178,30 +243,51 @@ export default function TimeEntriesProjectResourceInput({
   }
 
   function handleGradeChange(gradeId: number) {
-    setProjectResources((prevState) => {
-      const mutatableState: (
-        | TProjectResourcesProps
-        | TNewProjectResourcesProps
-      )[] = JSON.parse(JSON.stringify(prevState));
+    const newGrade = grades.find((grade) => grade.id === gradeId)?.name;
 
-      const newGrade = grades.find((grade) => grade.id === gradeId)?.name;
+    if (newGrade) {
+      setProjectResources((prevState) => {
+        return [
+          ...prevState.slice(0, projectResourceIndex),
+          {
+            ...prevState[projectResourceIndex],
+            rate_grade: newGrade,
+          },
+          ...prevState.slice(projectResourceIndex + 1),
+        ];
+      });
 
-      mutatableState[projectResourceIndex].rate_grade = newGrade
-        ? newGrade
-        : "";
+      setTimeEntries((prevState) => {
+        const newState: (TTimeEntriesProps | TNewTimeEntriesProps)[] =
+          prevState.map((entry) => {
+            if (
+              entry.unique_identifier.split("_").slice(0, -1).join("_") ===
+              projectResource.unique_identifier
+            ) {
+              return {
+                ...entry,
+                rate_grade: newGrade,
+              };
+            } else {
+              return { ...entry };
+            }
+          });
 
-      return mutatableState;
-    });
+        return newState;
+      });
+    }
 
     setChangesMade(true);
   }
 
-  let projectResourceLabel = "";
+  let projectResourceLabel: string | undefined;
 
   let options: DropdownItem[] = [];
 
   if (context === "project") {
-    projectResourceLabel = projectResource.resource_name;
+    if (projectResource.resource_name !== "")
+      projectResourceLabel = projectResource.resource_name;
+
     options = projectResourceSelection
       ? projectResourceSelection.resources.map((resource) => {
           return {
@@ -210,10 +296,10 @@ export default function TimeEntriesProjectResourceInput({
           };
         })
       : [];
-  }
+  } else if (context === "resource") {
+    if (projectResource.project_title !== "")
+      projectResourceLabel = projectResource.project_title;
 
-  if (context === "resource") {
-    projectResourceLabel = projectResource.project_title;
     options = projectResourceSelection
       ? projectResourceSelection.projects.map((project) => {
           return {
@@ -224,40 +310,12 @@ export default function TimeEntriesProjectResourceInput({
       : [];
   }
 
-  let projectResourcesSelected: string[] = [];
-
-  if (context === "project")
-    projectResourcesSelected = projectResources.map(
-      (projectResource) => projectResource.resource_name
-    );
-
-  if (context === "resource")
-    projectResourcesSelected = projectResources.map(
-      (projectResource) => projectResource.project_title
-    );
-
-  const refinedOptions = options.filter(
-    (entry) => !projectResourcesSelected.includes(entry.name)
-  );
-
-  const showOverAllocationAlert =
-    resourceOverAllocationWeeks.length > 0 && !isDelete;
-
-  let dropdownTitle = "";
-
-  if (isLoading && projectResourceLabel !== "") {
-    dropdownTitle = projectResourceLabel;
-  } else {
-    dropdownTitle = "Select from dropdown";
-  }
-
   return (
     <td className="flex items-center w-full relative">
       {isEditing && (
         <>
           <div className="absolute -left-5 flex items-center">
             <DeleteIconButton
-              label={projectResourceLabel}
               isDelete={isDelete}
               setIsDelete={setIsDelete}
               setChangesMade={setChangesMade}
@@ -273,21 +331,25 @@ export default function TimeEntriesProjectResourceInput({
               form="time_entries_form"
             />
           </div>
-          <div className={"border-r-2 basis-3/4 flex items-center relative"}>
+          <div className="border-r-2 basis-3/4 flex items-center relative">
             <Dropdown
               id={projectResource.unique_identifier + "_project_resource_label"}
-              title={dropdownTitle}
-              form="time_entries_form"
+              title={projectResourceLabel}
               data={options}
-              visibledata={refinedOptions}
-              style={
-                showOverAllocationAlert
-                  ? projectResourceClass + " rounded-l-md truncate pl-6"
-                  : projectResourceClass + " rounded-l-md truncate"
-              }
               parentSelectedItem={options.find(
                 (option) => option.name === projectResourceLabel
               )}
+              style={
+                showOverAllocationAlert
+                  ? projectResourceClass +
+                    bgColor +
+                    textColor +
+                    " rounded-l-md truncate pl-6"
+                  : projectResourceClass +
+                    bgColor +
+                    textColor +
+                    " rounded-l-md truncate"
+              }
               search={true}
               changesMade={changesMade}
               setChangesMade={setChangesMade}
@@ -297,9 +359,7 @@ export default function TimeEntriesProjectResourceInput({
             />
             {resourceOverAllocationWeeks.length > 0 && !isDelete && (
               <div
-                className={
-                  "group absolute left-1 h-8 w-max flex items-center z-10"
-                }
+                className={"group absolute left-1 h-8 w-max flex items-center"}
               >
                 <Icon
                   iconName={"alert"}
@@ -329,20 +389,45 @@ export default function TimeEntriesProjectResourceInput({
               </div>
             )}
           </div>
-          <div className="basis-1/4">
+          <div className="basis-1/4 flex items-center relative">
             <Dropdown
               id={projectResource.unique_identifier + "_rate_grade"}
               data={grades}
-              parentSelectedItem={grades?.find(
+              parentSelectedItem={grades.find(
                 (grade) => grade.name === projectResource.rate_grade
               )}
-              style={projectResourceClass + " rounded-r-md"}
-              form="time_entries_form"
+              style={
+                showDuplicateAlert
+                  ? projectResourceClass +
+                    bgColor +
+                    gradeTextColor +
+                    " rounded-r-md truncate pl-6 yellow-600"
+                  : projectResourceClass +
+                    bgColor +
+                    gradeTextColor +
+                    " rounded-r-md truncate"
+              }
               changesMade={changesMade}
               setChangesMade={setChangesMade}
               onSelect={handleGradeChange}
+              disabled={isDelete || formStatusIsPending}
               isLoading={isLoading}
             />
+            {showDuplicateAlert && !isDelete && (
+              <div
+                className={"group absolute left-1 h-8 w-max flex items-center"}
+              >
+                <Icon
+                  iconName={"alert"}
+                  color={"#f6c709"}
+                  height="15px"
+                  width="15px"
+                />
+                <div className="hidden group-hover:block absolute top-5 -right-1 z-10 bg-blue-100 rounded-md border-2 border-blue-300 py-1 px-2 w-max h-fit text-sm text-grey-900 shadow-md">
+                  <h2 className="pb-1">Duplicate Resource Grade</h2>
+                </div>
+              </div>
+            )}
           </div>
         </>
       )}
@@ -352,8 +437,14 @@ export default function TimeEntriesProjectResourceInput({
             <p
               className={
                 showOverAllocationAlert
-                  ? projectResourceClass + " rounded-l-md truncate pl-6"
-                  : projectResourceClass + " rounded-l-md truncate"
+                  ? projectResourceClass +
+                    bgColor +
+                    textColor +
+                    " rounded-l-md truncate pl-6"
+                  : projectResourceClass +
+                    bgColor +
+                    textColor +
+                    " rounded-l-md truncate"
               }
             >
               {projectResourceLabel}
@@ -393,10 +484,38 @@ export default function TimeEntriesProjectResourceInput({
               </div>
             )}
           </div>
-          <div className="basis-1/4">
-            <p className={projectResourceClass + " text-center rounded-r-md"}>
+          <div className="basis-1/4 flex items-center relative">
+            <p
+              className={
+                showDuplicateAlert
+                  ? projectResourceClass +
+                    bgColor +
+                    gradeTextColor +
+                    " text-center rounded-r-md truncate pl-6"
+                  : projectResourceClass +
+                    bgColor +
+                    gradeTextColor +
+                    " text-center rounded-r-md truncate"
+              }
+            >
               {projectResource.rate_grade}
             </p>
+
+            {showDuplicateAlert && !isDelete && (
+              <div
+                className={"group absolute left-1 h-8 w-max flex items-center"}
+              >
+                <Icon
+                  iconName={"alert"}
+                  color={"#f6c709"}
+                  height="15px"
+                  width="15px"
+                />
+                <div className="hidden group-hover:block absolute top-5 -right-1 z-10 bg-blue-100 rounded-md border-2 border-blue-300 py-1 px-2 w-max h-fit text-sm text-grey-900 shadow-md">
+                  <h2 className="pb-1">Duplicate Resource Grade</h2>
+                </div>
+              </div>
+            )}
           </div>
         </>
       )}

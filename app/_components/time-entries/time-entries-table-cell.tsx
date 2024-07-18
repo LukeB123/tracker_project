@@ -3,139 +3,178 @@ import { useEffect, useState } from "react";
 import ProjectTimeEntriesTableCellPopover from "@/app/_components/time-entries/time-entries-table-call-popover";
 import Icon from "@/app/_components/icons/icons";
 
-import { TTimeEntriesProps } from "@/util/time-entries";
+import {
+  TNewProjectResourcesProps,
+  TNewTimeEntriesProps,
+  TProjectResourcesProps,
+  TTimeEntriesProps,
+} from "@/util/time-entries";
 import { TWeekProps } from "@/util/date";
 import { useAppSelector } from "@/lib/hooks";
 
 interface TimeEntriesTableCellProps {
   isEditing: boolean;
-  uniqueId: string;
+  isDelete: boolean;
+  projectResource: TProjectResourcesProps | TNewProjectResourcesProps;
   week: TWeekProps;
   total_working_days: number;
-  initialTimeEntry: TTimeEntriesProps | undefined;
-  otherResourceTimeEntry: TTimeEntriesProps[] | undefined;
-  setResourceOverAllocationWeeks: React.Dispatch<
-    React.SetStateAction<TWeekProps[]>
+  timeEntry: TTimeEntriesProps | TNewTimeEntriesProps | undefined;
+  setTimeEntries: React.Dispatch<
+    React.SetStateAction<(TTimeEntriesProps | TNewTimeEntriesProps)[]>
   >;
-  changesMade: boolean;
+  allResourceTimeEntry: (TTimeEntriesProps | TNewTimeEntriesProps)[];
   setChangesMade: React.Dispatch<React.SetStateAction<boolean>>;
   activeWeek: boolean;
 }
 
 export default function TimeEntriesTableCell({
   isEditing,
-  uniqueId,
+  isDelete,
+  projectResource,
   week,
   total_working_days,
-  initialTimeEntry,
-  otherResourceTimeEntry,
-  setResourceOverAllocationWeeks,
-  changesMade,
+  timeEntry,
+  setTimeEntries,
+  allResourceTimeEntry,
   setChangesMade,
   activeWeek,
 }: TimeEntriesTableCellProps) {
-  const [inputValue, setInputValue] = useState(
-    initialTimeEntry ? initialTimeEntry.work_days : 0
+  // const [inputValue, setInputValue] = useState(
+  //   initialTimeEntry ? initialTimeEntry.work_days : 0
+  // );
+  const currentProject = useAppSelector(
+    (state) => state.projects.currentProject
   );
 
   const formStatusIsPending = useAppSelector(
     (state) => state.formStatus.formStatusIsPending
   );
 
-  const startingValue = initialTimeEntry ? initialTimeEntry.work_days : 0;
+  const inputValue = timeEntry ? timeEntry.work_days : 0;
 
-  let totalOtherTimeEntries = otherResourceTimeEntry?.reduce(
-    (accumulator, project) => accumulator + project.work_days,
-    0
+  const currentProjectTimeEntries = allResourceTimeEntry?.filter(
+    (entry) => entry.project_id === currentProject?.id
+  );
+
+  const otherResourceTimeEntries = allResourceTimeEntry?.filter(
+    (entry) => entry.project_id !== currentProject?.id
   );
 
   let className = "text-right px-2 py-1 w-full rounded-md h-8 font-semibold";
+
+  let textColor = "";
+
+  let bgColor = "";
 
   let iconColor = "";
 
   let isOverAllocated = false;
 
   if (
-    otherResourceTimeEntry &&
-    totalOtherTimeEntries !== undefined &&
-    inputValue > 0
+    allResourceTimeEntry &&
+    currentProjectTimeEntries &&
+    currentProjectTimeEntries.length > 0
   ) {
-    isOverAllocated = totalOtherTimeEntries + inputValue > total_working_days;
+    const totalTimeEntries = allResourceTimeEntry.reduce(
+      (accumulator, project) => accumulator + project.work_days,
+      0
+    );
+
+    isOverAllocated = totalTimeEntries > total_working_days;
   }
 
-  if (isOverAllocated && activeWeek) {
+  if (isDelete) {
+    textColor = " text-grey-300";
+    bgColor = " bg-grey-100";
+
+    if (inputValue === 0) textColor = " text-grey-100";
+  } else if (isOverAllocated && activeWeek) {
     if (isEditing) {
-      className += " bg-red-200 text-red-800";
+      textColor = " text-red-800";
+      bgColor = " bg-red-200";
       iconColor = "#fe677b";
+      if (inputValue === 0) textColor = " text-red-200";
     } else {
-      className += " bg-red-300 text-red-900";
+      textColor = " text-red-900";
+      bgColor = " bg-red-300";
       iconColor = "#fe344f";
+      if (inputValue === 0) textColor = " text-red-300";
     }
   } else if (activeWeek) {
     if (isEditing) {
-      className += " bg-blue-100";
+      bgColor = " bg-blue-100";
       iconColor = "#99d5ff";
-      if (inputValue === 0) className += " text-blue-100";
+      if (inputValue === 0) textColor = " text-blue-100";
     } else {
-      className += " bg-blue-200";
+      bgColor = " bg-blue-200";
       iconColor = "#66bfff";
-      if (inputValue === 0) className += " text-blue-200";
+      if (inputValue === 0) textColor = " text-blue-200";
     }
   } else if (!activeWeek) {
-    className += " bg-grey-100";
+    bgColor = " bg-grey-100";
     if (inputValue === 0) {
-      className += " text-grey-100";
+      textColor = " text-grey-100";
     } else {
-      className += " text-grey-300";
+      textColor = " text-grey-300";
     }
   }
+
+  className += bgColor + textColor;
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    setInputValue(+event.target.value);
+    const newWorkingDaysValue = +event.target.value;
+
+    const newTimeEntry: TTimeEntriesProps | TNewTimeEntriesProps = {
+      project_id: projectResource.project_id!,
+      project_slug: projectResource.project_slug,
+      project_title: projectResource.project_title,
+      resource_id: projectResource.resource_id!,
+      rate_grade: projectResource.rate_grade,
+      week_commencing: week.week_commencing,
+      work_days: newWorkingDaysValue,
+      unique_identifier:
+        projectResource.unique_identifier + "_" + week.week_commencing,
+    };
+
+    setTimeEntries((prevState) => {
+      if (timeEntry) {
+        const timeEntryIndex = prevState.findIndex(
+          (entry) => entry.unique_identifier === timeEntry.unique_identifier
+        );
+
+        if ("id" in timeEntry)
+          return [
+            ...prevState.slice(0, timeEntryIndex),
+            { ...newTimeEntry, id: timeEntry.id },
+            ...prevState.slice(timeEntryIndex + 1),
+          ];
+
+        if (newWorkingDaysValue > 0)
+          return [
+            ...prevState.slice(0, timeEntryIndex),
+            newTimeEntry,
+            ...prevState.slice(timeEntryIndex + 1),
+          ];
+      }
+
+      if (newWorkingDaysValue > 0) return [...prevState, newTimeEntry];
+
+      return prevState.filter(
+        (entry) =>
+          entry.unique_identifier !==
+          projectResource.unique_identifier + "_" + week.week_commencing
+      );
+    });
+
     setChangesMade(true);
   }
-
-  useEffect(() => {
-    if (!changesMade && startingValue !== inputValue) {
-      setInputValue(startingValue);
-    }
-  }, [changesMade]);
-
-  useEffect(() => {
-    if (isOverAllocated) {
-      setResourceOverAllocationWeeks((prevState) => {
-        if (
-          !prevState
-            .map((week) => week.week_commencing)
-            .includes(week.week_commencing)
-        )
-          return [...prevState, week];
-
-        return prevState;
-      });
-    } else {
-      setResourceOverAllocationWeeks((prevState) => {
-        if (
-          prevState
-            .map((week) => week.week_commencing)
-            .includes(week.week_commencing)
-        )
-          return prevState.filter(
-            (overAllocationWeeks) =>
-              overAllocationWeeks.week_commencing !== week.week_commencing
-          );
-
-        return prevState;
-      });
-    }
-  }, [inputValue, otherResourceTimeEntry]);
 
   return (
     <div className="relative">
       {activeWeek &&
-        otherResourceTimeEntry &&
-        totalOtherTimeEntries !== undefined &&
-        totalOtherTimeEntries > 0 && (
+        !isDelete &&
+        ((otherResourceTimeEntries && otherResourceTimeEntries.length > 0) ||
+          isOverAllocated) && (
           <div className="group">
             <div className="absolute left-2 top-2 z-10 cursor-pointer">
               <Icon
@@ -146,39 +185,24 @@ export default function TimeEntriesTableCell({
               />
             </div>
             <ProjectTimeEntriesTableCellPopover
-              inputValue={inputValue}
-              otherResourceTimeEntry={otherResourceTimeEntry}
+              currentProjectTimeEntries={currentProjectTimeEntries}
+              otherResourceTimeEntries={otherResourceTimeEntries}
               total_working_days={total_working_days}
             />
           </div>
         )}
-      {/* <input
-        name={uniqueId + "_id"}
-        defaultValue={initialTimeEntry?.id}
-        className="hidden"
-        readOnly
-        form="time_entries_form"
-      />
-      <input
-        name={uniqueId + "_changed"}
-        value={startingValue === inputValue ? 0 : 1}
-        onChange={() => {}}
-        className="hidden"
-        readOnly
-        form="time_entries_form"
-      /> */}
       <input
         type="number"
         step="0.5"
         min={0}
         max={total_working_days}
-        name={uniqueId}
+        name={projectResource.unique_identifier}
         value={inputValue}
         onChange={handleChange}
         className={className}
         form="time_entries_form"
         readOnly={!activeWeek || formStatusIsPending}
-        disabled={!isEditing}
+        disabled={!isEditing || isDelete}
       />
     </div>
   );

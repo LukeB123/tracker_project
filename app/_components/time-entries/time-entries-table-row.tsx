@@ -7,6 +7,7 @@ import TimeEntriesTableCell from "@/app/_components/time-entries/time-entries-ta
 
 import {
   TNewProjectResourcesProps,
+  TNewTimeEntriesProps,
   TProjectResourcesProps,
   TTimeEntriesProps,
 } from "@/util/time-entries";
@@ -16,15 +17,16 @@ import { TWeekProps } from "@/util/date";
 
 interface TimeEntriesTableRowProps {
   context: "project" | "resource";
-  projectResourceIndex: number;
   projectResource: TProjectResourcesProps | TNewProjectResourcesProps;
   projectResources: (TProjectResourcesProps | TNewProjectResourcesProps)[];
   setProjectResources: React.Dispatch<
     React.SetStateAction<(TProjectResourcesProps | TNewProjectResourcesProps)[]>
   >;
-  initialProjectResourcesData: React.MutableRefObject<TProjectResourcesProps[]>;
   initialTimeEntriesIsLoading: boolean;
-  timeEntries: TTimeEntriesProps[];
+  timeEntries: (TTimeEntriesProps | TNewTimeEntriesProps)[];
+  setTimeEntries: React.Dispatch<
+    React.SetStateAction<(TTimeEntriesProps | TNewTimeEntriesProps)[]>
+  >;
   isEditing: boolean;
   weeks: TWeekProps[];
   visibleWeeks: string[];
@@ -49,13 +51,12 @@ interface TimeEntriesTableRowProps {
 
 export default function TimeEntriesTableRow({
   context,
-  projectResourceIndex,
   projectResource,
   projectResources,
   setProjectResources,
-  initialProjectResourcesData,
   initialTimeEntriesIsLoading,
   timeEntries,
+  setTimeEntries,
   isEditing,
   weeks,
   visibleWeeks,
@@ -69,25 +70,23 @@ export default function TimeEntriesTableRow({
 }: TimeEntriesTableRowProps) {
   const [isDelete, setIsDelete] = useState(false);
 
-  const [resourceOverAllocationWeeks, setResourceOverAllocationWeeks] =
-    useState<TWeekProps[]>([]);
+  const overAllocationWeeks: TWeekProps[] = [];
 
-  let initialProjectResourceTimeEntries: TTimeEntriesProps[] = [];
+  const resourceTimeEntries = timeEntries.filter(
+    (entry) => entry.resource_id === projectResource.resource_id
+  );
 
-  if ("id" in projectResource) {
-    const initialProjectResource = initialProjectResourcesData.current.find(
-      (initialProjectResource) =>
-        initialProjectResource.id === projectResource.id
-    );
+  weeks.forEach((week) => {
+    const totalTrackerDays = resourceTimeEntries
+      .filter((entry) => entry.week_commencing === week.week_commencing)
+      .map((entry) => entry.work_days)
+      .reduce((accumulator, currentValue) => {
+        return accumulator + currentValue;
+      }, 0);
 
-    if (initialProjectResource) {
-      initialProjectResourceTimeEntries = timeEntries.filter(
-        (timeEntry) =>
-          timeEntry.resource_id === initialProjectResource.resource_id &&
-          timeEntry.project_id === initialProjectResource.project_id
-      );
-    }
-  }
+    if (totalTrackerDays > week.total_working_days)
+      overAllocationWeeks.push(week);
+  });
 
   useEffect(() => {
     if (!changesMade) {
@@ -107,11 +106,11 @@ export default function TimeEntriesTableRow({
     >
       <TimeEntriesProjectResourceInput
         context={context}
-        projectResourceIndex={projectResourceIndex}
         projectResource={projectResource}
         projectResources={projectResources}
         setProjectResources={setProjectResources}
-        resourceOverAllocationWeeks={resourceOverAllocationWeeks}
+        setTimeEntries={setTimeEntries}
+        resourceOverAllocationWeeks={overAllocationWeeks}
         projectResourceSelection={projectResourceSelection}
         isEditing={isEditing}
         isLoading={isLoading}
@@ -123,16 +122,19 @@ export default function TimeEntriesTableRow({
         setYearMonthIndex={setYearMonthIndex}
       />
       {!initialTimeEntriesIsLoading &&
+        projectResource.project_id &&
+        projectResource.resource_id &&
         weeks.map((week) => {
-          const initialTimeEntry = initialProjectResourceTimeEntries.find(
-            (timeEntry) => timeEntry.week_commencing === week.week_commencing
+          const timeEntry = timeEntries.find(
+            (timeEntry) =>
+              timeEntry.unique_identifier ===
+              projectResource.unique_identifier + "_" + week.week_commencing
           );
 
-          const otherResourceTimeEntry = timeEntries?.filter(
+          const allResourceTimeEntry = timeEntries.filter(
             (timeEntry) =>
               timeEntry.resource_id === projectResource.resource_id &&
-              timeEntry.week_commencing === week.week_commencing &&
-              timeEntry.project_id !== projectResource.project_id
+              timeEntry.week_commencing === week.week_commencing
           );
 
           return (
@@ -141,24 +143,18 @@ export default function TimeEntriesTableRow({
                 projectResource.unique_identifier + "_" + week.week_commencing
               }
               className={
-                !visibleWeeks.includes(week.week_commencing) || isDelete
-                  ? "hidden"
-                  : ""
+                !visibleWeeks.includes(week.week_commencing) ? "hidden" : ""
               }
             >
               <TimeEntriesTableCell
                 isEditing={isEditing}
-                uniqueId={
-                  projectResource.unique_identifier + "_" + week.week_commencing
-                }
+                isDelete={isDelete}
+                projectResource={projectResource}
                 week={week}
                 total_working_days={week.total_working_days}
-                initialTimeEntry={initialTimeEntry}
-                otherResourceTimeEntry={
-                  context === "project" ? otherResourceTimeEntry : undefined
-                }
-                setResourceOverAllocationWeeks={setResourceOverAllocationWeeks}
-                changesMade={changesMade}
+                timeEntry={timeEntry}
+                allResourceTimeEntry={allResourceTimeEntry}
+                setTimeEntries={setTimeEntries}
                 setChangesMade={setChangesMade}
                 activeWeek={activeWeeks.includes(week.week_commencing)}
               />
