@@ -50,7 +50,7 @@ export default function TimeEntriesTableCell({
     (state) => state.formStatus.formStatusIsPending
   );
 
-  const inputValue = timeEntry ? timeEntry.work_days : 0;
+  const inputValue: number | "" = timeEntry ? timeEntry.work_days : "";
 
   const currentProjectTimeEntries = allResourceTimeEntry?.filter(
     (entry) => entry.project_id === currentProject?.id
@@ -86,37 +86,27 @@ export default function TimeEntriesTableCell({
   if (isDelete) {
     textColor = " text-grey-300";
     bgColor = " bg-grey-100";
-
-    if (inputValue === 0) textColor = " text-grey-100";
   } else if (isOverAllocated && activeWeek) {
     if (isEditing) {
       textColor = " text-red-800";
       bgColor = " bg-red-200";
       iconColor = "#fe677b";
-      if (inputValue === 0) textColor = " text-red-200";
     } else {
       textColor = " text-red-900";
       bgColor = " bg-red-300";
       iconColor = "#fe344f";
-      if (inputValue === 0) textColor = " text-red-300";
     }
   } else if (activeWeek) {
     if (isEditing) {
       bgColor = " bg-blue-100";
       iconColor = "#99d5ff";
-      if (inputValue === 0) textColor = " text-blue-100";
     } else {
       bgColor = " bg-blue-200";
       iconColor = "#66bfff";
-      if (inputValue === 0) textColor = " text-blue-200";
     }
   } else if (!activeWeek) {
     bgColor = " bg-grey-100";
-    if (inputValue === 0) {
-      textColor = " text-grey-100";
-    } else {
-      textColor = " text-grey-300";
-    }
+    textColor = " text-grey-300";
   }
 
   className += bgColor + textColor;
@@ -142,22 +132,26 @@ export default function TimeEntriesTableCell({
           (entry) => entry.unique_identifier === timeEntry.unique_identifier
         );
 
-        if ("id" in timeEntry)
+        if ("id" in timeEntry) {
           return [
             ...prevState.slice(0, timeEntryIndex),
             { ...newTimeEntry, id: timeEntry.id },
             ...prevState.slice(timeEntryIndex + 1),
           ];
+        }
 
-        if (newWorkingDaysValue > 0)
+        if (newWorkingDaysValue > 0) {
           return [
             ...prevState.slice(0, timeEntryIndex),
             newTimeEntry,
             ...prevState.slice(timeEntryIndex + 1),
           ];
+        }
       }
 
-      if (newWorkingDaysValue > 0) return [...prevState, newTimeEntry];
+      if (newWorkingDaysValue > 0) {
+        return [...prevState, newTimeEntry];
+      }
 
       return prevState.filter(
         (entry) =>

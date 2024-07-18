@@ -10,12 +10,11 @@ import {
   TTimeEntriesProps,
   addProjectResources,
   addTimeEntries,
-  deleteZeroedTimeEntries,
   updateTimeEntries,
   updateProjectResources,
   deleteProjectResources,
   deleteTimeEnties,
-  getProjectResourceByProjectResource,
+  getProjectResourceByUniqueIds,
   getResourcesTimeEntries,
 } from "@/util/time-entries";
 import {
@@ -28,7 +27,8 @@ interface TFormState {
   context: "project" | "resource";
   projectResources: (TProjectResourcesProps | TNewProjectResourcesProps)[];
   initialProjectResources: TProjectResourcesProps[];
-  timeEntries: TTimeEntriesProps[];
+  timeEntries: (TTimeEntriesProps | TNewTimeEntriesProps)[];
+  initialTimeEntries: TTimeEntriesProps[];
   weeks: TWeekProps[];
   notification: TNotificationState | null;
 }
@@ -37,6 +37,8 @@ export async function projectTimeEntriesAction(
   prevState: TFormState,
   formData: any
 ): Promise<TFormState> {
+  const newProjectResourceUniqueIds: string[] = [];
+
   const newProjectResources: TNewProjectResourcesProps[] = [];
   const newTimeEntries: TNewTimeEntriesProps[] = [];
 
@@ -46,172 +48,342 @@ export async function projectTimeEntriesAction(
   const deletedProjectResourceIds: number[] = [];
   const deletedTimeEntryIds: number[] = [];
 
-  const updatedProjectIds: number[] = [];
+  const projectIds: number[] = [];
 
-  const newProjectResourcesState: (
-    | TProjectResourcesProps
-    | TNewProjectResourcesProps
-  )[] = [];
+  const resourceIds: number[] = [];
 
-  // console.log(prevState.projectResources);
+  try {
+    prevState.projectResources.forEach((projectResource) => {
+      if (
+        projectResource.project_id &&
+        !projectIds.includes(projectResource.project_id)
+      )
+        projectIds.push(projectResource.project_id);
 
-  prevState.projectResources.forEach((projectResource) => {
-    if (
-      projectResource.project_id &&
-      !updatedProjectIds.includes(projectResource.project_id)
-    )
-      updatedProjectIds.push(projectResource.project_id);
+      const newUniqueId =
+        projectResource.project_id +
+        "_" +
+        projectResource.resource_id +
+        "_" +
+        projectResource.rate_grade;
 
-    let initialProjectResource: TProjectResourcesProps | undefined;
+      newProjectResourceUniqueIds.push(newUniqueId);
 
-    const isDeleted =
-      +formData.get(projectResource.unique_identifier + "_delete") === 1;
+      if (
+        newProjectResourceUniqueIds.filter((entry) => entry === newUniqueId)
+          .length > 1
+      ) {
+        throw new Error();
+      }
 
-    let isUpdatedProjectResource = false;
+      const isNewProjectResource = !("id" in projectResource);
 
-    const isNewProjectResource = !("id" in projectResource);
+      const isDeleted =
+        +formData.get(projectResource.unique_identifier + "_delete") === 1;
 
-    if (!isNewProjectResource)
-      initialProjectResource = prevState.initialProjectResources.find(
-        (initialProjectResource) =>
-          initialProjectResource.id === projectResource.id
-      );
+      if (
+        !isDeleted &&
+        projectResource.resource_id &&
+        !resourceIds.includes(projectResource.resource_id)
+      )
+        resourceIds.push(projectResource.resource_id);
 
-    const newUniqueId =
-      projectResource.project_id +
-      "_" +
-      projectResource.resource_id +
-      "_" +
-      projectResource.rate_grade;
+      if (!isNewProjectResource) {
+        const initialProjectResource = prevState.initialProjectResources.find(
+          (initialProjectResource) =>
+            initialProjectResource.id === projectResource.id
+        )!;
 
-    if (!isNewProjectResource) {
-      if (isDeleted) {
-        deletedProjectResourceIds.push(projectResource.id);
-      } else {
-        isUpdatedProjectResource =
-          initialProjectResource !== undefined &&
+        const isUpdatedProjectResource =
           initialProjectResource.unique_identifier !== newUniqueId;
 
-        const isUpdatedRateGrade =
-          initialProjectResource !== undefined &&
-          initialProjectResource.rate_grade !== projectResource.rate_grade;
+        if (isDeleted) {
+          deletedProjectResourceIds.push(projectResource.id);
+        } else {
+          if (isUpdatedProjectResource) {
+            const updatedProjectResourceEntry: TProjectResourcesProps = {
+              ...projectResource,
+              unique_identifier: newUniqueId,
+            };
 
-        if (isUpdatedProjectResource || isUpdatedRateGrade) {
-          const updatedProjectResourceEntry: TProjectResourcesProps = {
-            id: projectResource.id,
-            project_id: projectResource.project_id,
-            project_slug: projectResource.project_slug,
-            project_title: projectResource.project_title,
-            resource_id: projectResource.resource_id,
-            resource_name: projectResource.resource_name,
-            rate_grade: projectResource.rate_grade,
-            unique_identifier: newUniqueId,
-          };
-          updatedProjectResources.push(updatedProjectResourceEntry);
-
-          newProjectResourcesState.push(updatedProjectResourceEntry);
-        } else if (initialProjectResource) {
-          newProjectResourcesState.push(initialProjectResource);
+            updatedProjectResources.push(updatedProjectResourceEntry);
+          }
         }
+      } else if (
+        !isDeleted &&
+        projectResource.project_id !== undefined &&
+        projectResource.resource_id !== undefined &&
+        projectResource.rate_grade !== ""
+      ) {
+        const newProjectResourceEntry: TNewProjectResourcesProps = {
+          ...projectResource,
+          unique_identifier: newUniqueId,
+        };
+
+        newProjectResources.push(newProjectResourceEntry);
+      } else if (!isDeleted) {
+        throw new Error("empty_resource");
+      } else {
+        // New Entries Marked as Deleted
+        return;
+      }
+    });
+  } catch (error: any) {
+    if ("message" in error && error.message === "empty_resource") {
+      return {
+        ...prevState,
+        notification: {
+          status: "netural",
+          title: "Project Time Entry",
+          message: "Please Fill Out All Resources",
+        },
+      };
+    } else {
+      return {
+        ...prevState,
+        notification: {
+          status: "netural",
+          title: "Project Time Entry",
+          message: "Duplicate Resource And Grade Combination",
+        },
+      };
+    }
+  }
+
+  prevState.timeEntries.forEach((timeEntry) => {
+    const newUniqueId =
+      timeEntry.project_id +
+      "_" +
+      timeEntry.resource_id +
+      "_" +
+      timeEntry.rate_grade +
+      "_" +
+      timeEntry.week_commencing;
+
+    const isNewTimeEntry = !("id" in timeEntry);
+
+    const isDeleted =
+      +formData.get(
+        timeEntry.unique_identifier.split("_").slice(0, -1).join("_") +
+          "_delete"
+      ) === 1;
+
+    if (!isNewTimeEntry) {
+      const initialTimeEntry = prevState.initialTimeEntries.find(
+        (initialTimeEntry) => initialTimeEntry.id === timeEntry.id
+      )!;
+
+      const isUpdatedTimeEntry =
+        initialTimeEntry.work_days !== timeEntry.work_days ||
+        initialTimeEntry.unique_identifier !== newUniqueId;
+
+      if (isDeleted || timeEntry.work_days === 0) {
+        deletedTimeEntryIds.push(timeEntry.id);
+      } else if (isUpdatedTimeEntry) {
+        const updateTimeEntry: TTimeEntriesProps = {
+          ...timeEntry,
+          unique_identifier: newUniqueId,
+        };
+
+        updatedTimeEntries.push(updateTimeEntry);
       }
     } else if (
       !isDeleted &&
-      projectResource.project_id !== undefined &&
-      projectResource.resource_id !== undefined
+      timeEntry.work_days > 0 &&
+      timeEntry.project_id !== undefined &&
+      timeEntry.resource_id !== undefined &&
+      timeEntry.rate_grade !== ""
     ) {
-      const newProjectResourceEntry: TNewProjectResourcesProps = {
-        project_id: projectResource.project_id,
-        project_slug: projectResource.project_slug,
-        project_title: projectResource.project_title,
-        resource_id: projectResource.resource_id,
-        resource_name: projectResource.resource_name,
-        rate_grade: projectResource.rate_grade,
+      const newTimeEntry: TNewTimeEntriesProps = {
+        ...timeEntry,
         unique_identifier: newUniqueId,
       };
 
-      newProjectResources.push(newProjectResourceEntry);
-
-      newProjectResourcesState.push(newProjectResourceEntry);
-    } else {
-      return;
+      newTimeEntries.push(newTimeEntry);
     }
-
-    // Iterate over the weeks to handle each time entry
-    prevState.weeks.map((week) => {
-      let initialTimeEntry = prevState.timeEntries.find(
-        (timeEntry) =>
-          timeEntry.unique_identifier ===
-          projectResource.unique_identifier + "_" + week.week_commencing
-      );
-
-      const newTimeEntryValue: number = +formData.get(
-        projectResource.unique_identifier + "_" + week.week_commencing
-      );
-
-      if (
-        !isNewProjectResource &&
-        initialTimeEntry &&
-        (isDeleted || newTimeEntryValue === 0)
-      ) {
-        // Existing Time Entry to be deleted
-
-        deletedTimeEntryIds.push(initialTimeEntry.id);
-      } else if (
-        !isNewProjectResource &&
-        initialTimeEntry &&
-        newTimeEntryValue > 0
-      ) {
-        const timeEntryChanged =
-          initialTimeEntry.work_days !== newTimeEntryValue;
-
-        if (timeEntryChanged || isUpdatedProjectResource) {
-          // Existing Time Entry to be updated
-
-          const updateTimeEntry: TTimeEntriesProps = {
-            id: initialTimeEntry.id,
-            project_id: projectResource.project_id,
-            project_slug: projectResource.project_slug,
-            project_title: projectResource.project_title,
-            resource_id: projectResource.resource_id,
-            rate_grade: projectResource.rate_grade,
-            week_commencing: week.week_commencing,
-            work_days: newTimeEntryValue,
-            unique_identifier: newUniqueId + "_" + week.week_commencing,
-          };
-
-          updatedTimeEntries.push(updateTimeEntry);
-        }
-      } else if (
-        (isNewProjectResource || !initialTimeEntry) &&
-        newTimeEntryValue > 0 &&
-        projectResource.project_id !== undefined &&
-        projectResource.resource_id !== undefined
-      ) {
-        // New Time Entry
-        // Only add time entries with value greater than zero
-        const newTimeEntry: TNewTimeEntriesProps = {
-          project_id: projectResource.project_id,
-          project_slug: projectResource.project_slug,
-          project_title: projectResource.project_title,
-          resource_id: projectResource.resource_id,
-          rate_grade: projectResource.rate_grade,
-          week_commencing: week.week_commencing,
-          work_days: newTimeEntryValue,
-          unique_identifier: newUniqueId + "_" + week.week_commencing,
-        };
-
-        newTimeEntries.push(newTimeEntry);
-      }
-    });
   });
 
-  // console.log("newProjectResources", newProjectResources);
-  // console.log("updatedProjectResources", updatedProjectResources);
-  // console.log("newTimeEntries", newTimeEntries);
-  // console.log("updatedTimeEntries", updatedTimeEntries);
-  // console.log("deletedProjectResourceIds", deletedProjectResourceIds);
-  // console.log("deletedTimeEntryIds", deletedTimeEntryIds);
-  // console.log("updatedProjectIds", updatedProjectIds);
+  // try {
+  //   prevState.projectResources.forEach((projectResource) => {
+  //     const isDeleted =
+  //       +formData.get(projectResource.unique_identifier + "_delete") === 1;
+
+  //     let isUpdatedProjectResource = false;
+
+  //     const isNewProjectResource = !("id" in projectResource);
+
+  //     const newUniqueId =
+  //       projectResource.project_id +
+  //       "_" +
+  //       projectResource.resource_id +
+  //       "_" +
+  //       projectResource.rate_grade;
+
+  //     newUniqueIds.push(newUniqueId);
+
+  //     if (newUniqueIds.filter((entry) => entry === newUniqueId).length > 1) {
+  //       throw new Error();
+  //     }
+
+  //     if (!isNewProjectResource) {
+  //       const initialProjectResource = prevState.initialProjectResources.find(
+  //         (initialProjectResource) =>
+  //           initialProjectResource.id === projectResource.id
+  //       )!;
+
+  //       if (isDeleted) {
+  //         deletedProjectResourceIds.push(projectResource.id);
+  //       } else {
+  //         const updatedProjectResourceEntry: TProjectResourcesProps = {
+  //           id: projectResource.id,
+  //           project_id: projectResource.project_id,
+  //           project_slug: projectResource.project_slug,
+  //           project_title: projectResource.project_title,
+  //           resource_id: projectResource.resource_id,
+  //           resource_name: projectResource.resource_name,
+  //           rate_grade: projectResource.rate_grade,
+  //           unique_identifier: newUniqueId,
+  //         };
+
+  //         newProjectResourcesState.push(updatedProjectResourceEntry);
+
+  //         isUpdatedProjectResource =
+  //           initialProjectResource.unique_identifier !== newUniqueId;
+
+  //         if (isUpdatedProjectResource)
+  //           updatedProjectResources.push(updatedProjectResourceEntry);
+  //       }
+  //     } else if (
+  //       !isDeleted &&
+  //       projectResource.project_id !== undefined &&
+  //       projectResource.resource_id !== undefined &&
+  //       projectResource.rate_grade !== ""
+  //     ) {
+  //       const newProjectResourceEntry: TNewProjectResourcesProps = {
+  //         project_id: projectResource.project_id,
+  //         project_slug: projectResource.project_slug,
+  //         project_title: projectResource.project_title,
+  //         resource_id: projectResource.resource_id,
+  //         resource_name: projectResource.resource_name,
+  //         rate_grade: projectResource.rate_grade,
+  //         unique_identifier: newUniqueId,
+  //       };
+
+  //       newProjectResources.push(newProjectResourceEntry);
+
+  //       newProjectResourcesState.push(newProjectResourceEntry);
+  //     } else if (!isDeleted) {
+  //       throw new Error("empty_resource");
+  //     } else {
+  //       return;
+  //     }
+
+  //     // prevState.projectResources.forEach((projectResource) => {
+  // Iterate over the weeks to handle each time entry
+  // prevState.weeks.map((week) => {
+  //   let initialTimeEntry = prevState.timeEntries.find(
+  //     (timeEntry) =>
+  //       timeEntry.unique_identifier ===
+  //       projectResource.unique_identifier + "_" + week.week_commencing
+  //   );
+
+  //   const newTimeEntryValue: number = +formData.get(
+  //     projectResource.unique_identifier + "_" + week.week_commencing
+  //   );
+
+  //   if (
+  //     !isNewProjectResource &&
+  //     initialTimeEntry &&
+  //     (isDeleted || newTimeEntryValue === 0)
+  //   ) {
+  //     // Existing Time Entry to be deleted
+  //     // deletedTimeEntryIds.push(initialTimeEntry.id);
+  //   } else if (
+  //     !isNewProjectResource &&
+  //     initialTimeEntry &&
+  //     newTimeEntryValue > 0
+  //   ) {
+  //     const timeEntryChanged =
+  //       initialTimeEntry.work_days !== newTimeEntryValue;
+
+  //     if (timeEntryChanged || isUpdatedProjectResource) {
+  //       // Existing Time Entry to be updated
+
+  //       const updateTimeEntry: TNewTimeEntriesProps = {
+  //         // id: initialTimeEntry.id,
+  //         project_id: projectResource.project_id,
+  //         project_slug: projectResource.project_slug,
+  //         project_title: projectResource.project_title,
+  //         resource_id: projectResource.resource_id,
+  //         rate_grade: projectResource.rate_grade,
+  //         week_commencing: week.week_commencing,
+  //         work_days: newTimeEntryValue,
+  //         unique_identifier: newUniqueId + "_" + week.week_commencing,
+  //       };
+
+  //       // updatedTimeEntries.push(updateTimeEntry);
+  //     }
+  //   } else if (
+  //     (isNewProjectResource || !initialTimeEntry) &&
+  //     newTimeEntryValue > 0 &&
+  //     projectResource.project_id !== undefined &&
+  //     projectResource.resource_id !== undefined &&
+  //     projectResource.rate_grade !== ""
+  //   ) {
+  //     // New Time Entry
+  //     // Only add time entries with value greater than zero
+  //     const newTimeEntry: TNewTimeEntriesProps = {
+  //       project_id: projectResource.project_id,
+  //       project_slug: projectResource.project_slug,
+  //       project_title: projectResource.project_title,
+  //       resource_id: projectResource.resource_id,
+  //       rate_grade: projectResource.rate_grade,
+  //       week_commencing: week.week_commencing,
+  //       work_days: newTimeEntryValue,
+  //       unique_identifier: newUniqueId + "_" + week.week_commencing,
+  //     };
+
+  //     newTimeEntries.push(newTimeEntry);
+  //   }
+  // });
+
+  // if (
+  //   projectResource.project_id &&
+  //   !updatedProjectIds.includes(projectResource.project_id)
+  // )
+  //   updatedProjectIds.push(projectResource.project_id);
+  // });
+  // } catch (error: any) {
+  //   if ("message" in error && error.message === "empty_resource") {
+  //     return {
+  //       ...prevState,
+  //       notification: {
+  //         status: "netural",
+  //         title: "Project Time Entry",
+  //         message: "Please Fill Out All Resources",
+  //       },
+  //     };
+  //   } else {
+  //     return {
+  //       ...prevState,
+  //       notification: {
+  //         status: "netural",
+  //         title: "Project Time Entry",
+  //         message: "Duplicate Resource And Grade Combination",
+  //       },
+  //     };
+  //   }
+  // }
+
+  console.log("newProjectResources", newProjectResources);
+  console.log("updatedProjectResources", updatedProjectResources);
+  console.log("newTimeEntries", newTimeEntries);
+  console.log("updatedTimeEntries", updatedTimeEntries);
+  console.log("deletedProjectResourceIds", deletedProjectResourceIds);
+  console.log("deletedTimeEntryIds", deletedTimeEntryIds);
+  console.log("newProjectResourceUniqueIds", newProjectResourceUniqueIds);
+  console.log("projectIds", projectIds);
+  console.log("resourceIds", resourceIds);
 
   try {
     if (newProjectResources.length > 0)
@@ -243,26 +415,16 @@ export async function projectTimeEntriesAction(
       0
     ) {
       // UPDATE PROJECT UPDATED TIMES
-      await updateProjectsLastUpdated(updatedProjectIds);
+      await updateProjectsLastUpdated(projectIds);
 
-      const updatedNewProjectResourcesState = await Promise.all(
-        newProjectResourcesState.map((projectResource) => {
-          if ("id" in projectResource) return projectResource;
-
-          return getProjectResourceByProjectResource(
-            projectResource.unique_identifier
-          );
-        })
+      const updatedNewProjectResources = await getProjectResourceByUniqueIds(
+        newProjectResourceUniqueIds
       );
 
-      const resourceIds = updatedNewProjectResourcesState.map(
-        (entry) => entry.resource_id
-      );
-
-      let updatedTimeEntriesState: TTimeEntriesProps[] = [];
+      let updatedNewTimeEntries: TTimeEntriesProps[] = [];
 
       if (resourceIds.length > 0) {
-        updatedTimeEntriesState = await getResourcesTimeEntries(
+        updatedNewTimeEntries = await getResourcesTimeEntries(
           resourceIds,
           prevState.weeks.map((week) => week.week_commencing)
         );
@@ -276,9 +438,10 @@ export async function projectTimeEntriesAction(
 
       return {
         ...prevState,
-        projectResources: updatedNewProjectResourcesState,
-        initialProjectResources: updatedNewProjectResourcesState,
-        timeEntries: updatedTimeEntriesState,
+        // projectResources: updatedNewProjectResources,
+        initialProjectResources: updatedNewProjectResources,
+        // timeEntries: updatedNewTimeEntries,
+        initialTimeEntries: updatedNewTimeEntries,
         notification: {
           status: "success",
           title: "Project Time Entry",
@@ -288,7 +451,6 @@ export async function projectTimeEntriesAction(
     } else {
       return {
         ...prevState,
-        projectResources: newProjectResourcesState,
         notification: {
           status: "neutral",
           title: "Project Time Entry",

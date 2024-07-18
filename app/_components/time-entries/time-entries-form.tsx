@@ -7,6 +7,7 @@ import TimeEntriesButtons from "@/app/_components/time-entries/time-entries-butt
 
 import {
   TNewProjectResourcesProps,
+  TNewTimeEntriesProps,
   TProjectResourcesProps,
   TTimeEntriesProps,
 } from "@/util/time-entries";
@@ -20,15 +21,14 @@ interface ProjectTimeEntriesProps {
   context: "project" | "resource";
   projectResources: (TProjectResourcesProps | TNewProjectResourcesProps)[];
   initialProjectResourcesData: React.MutableRefObject<TProjectResourcesProps[]>;
-  timeEntries: TTimeEntriesProps[];
-  setTimeEntries: React.Dispatch<React.SetStateAction<TTimeEntriesProps[]>>;
+  timeEntries: (TTimeEntriesProps | TNewTimeEntriesProps)[];
+  initialTimeEntriesData: React.MutableRefObject<TTimeEntriesProps[]>;
   weeks: TWeekProps[];
   isEditing: boolean;
   isLoading: boolean;
   handleReset: () => void;
   handleCancelEdit: () => void;
   changesMade: boolean;
-  setChangesMade: React.Dispatch<React.SetStateAction<boolean>>;
   setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -37,7 +37,7 @@ export default function TimeEntriesForm({
   projectResources,
   initialProjectResourcesData,
   timeEntries,
-  setTimeEntries,
+  initialTimeEntriesData,
   weeks,
   isEditing,
   isLoading,
@@ -53,6 +53,7 @@ export default function TimeEntriesForm({
     projectResources,
     initialProjectResources: initialProjectResourcesData.current,
     timeEntries,
+    initialTimeEntries: initialTimeEntriesData.current,
     weeks,
     notification: null,
   });
@@ -62,18 +63,12 @@ export default function TimeEntriesForm({
     if (formState.notification) {
       dispatch(uiActions.showNotification(formState.notification));
 
-      initialProjectResourcesData.current = formState.projectResources.filter(
-        (
-          projectResource: TProjectResourcesProps | TNewProjectResourcesProps
-        ): projectResource is TProjectResourcesProps =>
-          projectResource !== undefined
-      );
-
-      setTimeEntries(formState.timeEntries);
-
-      handleReset();
-
       if (formState.notification.status === "success") {
+        initialProjectResourcesData.current = formState.initialProjectResources;
+
+        initialTimeEntriesData.current = formState.initialTimeEntries;
+
+        handleReset();
         setIsEditing(false);
       }
     }

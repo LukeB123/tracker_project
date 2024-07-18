@@ -79,14 +79,18 @@ export async function getProjectResourcesByResource(
     .all(resourceId);
 }
 
-export async function getProjectResourceByProjectResource(
-  uniqueId: string
-): Promise<TProjectResourcesProps> {
+export async function getProjectResourceByUniqueIds(
+  uniqueIds: string[]
+): Promise<TProjectResourcesProps[]> {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   return db
-    .prepare("SELECT * FROM project_resources WHERE unique_identifier = ?")
-    .get(uniqueId);
+    .prepare(
+      `SELECT * FROM project_resources WHERE unique_identifier IN (${uniqueIds
+        .map(() => "?")
+        .join(",")})`
+    )
+    .all(uniqueIds);
 }
 
 // Add date range
