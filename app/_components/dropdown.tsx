@@ -182,7 +182,13 @@ export default function Dropdown({
         )}
         <div className="truncate">{selectedItem?.name || title}</div>
         {!isOpen && (
-          <div className="animate-dropDownClosed w-max">
+          <div
+            className={
+              disabled
+                ? "invisible animate-dropDownClosed"
+                : "animate-dropDownClosed"
+            }
+          >
             <Icon
               iconName="downArrow"
               width="20px"
@@ -192,7 +198,7 @@ export default function Dropdown({
           </div>
         )}
         {isOpen && (
-          <div className="animate-dropDownOpened w-max">
+          <div className="animate-dropDownOpened">
             <Icon
               iconName="upArrow"
               width="20px"
