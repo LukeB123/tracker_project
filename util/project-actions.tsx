@@ -12,7 +12,7 @@ import {
 import { revalidatePath } from "next/cache";
 
 import { TNotificationState } from "@/lib/ui";
-import { getResources } from "./people";
+import { getResources } from "./resources";
 import {
   deleteProjectResourcesByProjectId,
   updateProjectResourcesProjectTitle,

@@ -12,6 +12,8 @@ export type TProjectResourcesProps = {
   project_title: string;
   resource_id: number;
   resource_name: string;
+  role_id: number;
+  role: string;
   rate_grade: string;
   unique_identifier: string;
 };
@@ -22,6 +24,8 @@ export type TNewProjectResourcesProps = {
   project_title: string;
   resource_id: number | undefined;
   resource_name: string;
+  role_id: number | undefined;
+  role: string;
   rate_grade: string;
   unique_identifier: string;
 };
@@ -32,6 +36,7 @@ export type TTimeEntriesProps = {
   project_slug: string;
   project_title: string;
   resource_id: number;
+  role_id: number;
   rate_grade: string;
   week_commencing: string;
   work_days: number;
@@ -43,6 +48,7 @@ export type TNewTimeEntriesProps = {
   project_slug: string;
   project_title: string;
   resource_id: number;
+  role_id: number;
   rate_grade: string;
   week_commencing: string;
   work_days: number;
@@ -55,7 +61,9 @@ export async function getProjectResourcesByProjectId(
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   return db
-    .prepare("SELECT * FROM project_resources WHERE project_id = ?")
+    .prepare(
+      "SELECT * FROM project_resources WHERE project_id = ? ORDER BY resource_name, role, rate_grade"
+    )
     .all(projectId);
 }
 
@@ -65,7 +73,9 @@ export async function getProjectResourcesByProjectSlug(
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   return db
-    .prepare("SELECT * FROM project_resources WHERE project_slug = ?")
+    .prepare(
+      "SELECT * FROM project_resources WHERE project_slug = ? ORDER BY resource_name, role, rate_grade"
+    )
     .all(projectSlug);
 }
 
@@ -75,7 +85,9 @@ export async function getProjectResourcesByResource(
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   return db
-    .prepare("SELECT * FROM project_resources WHERE resource_id = ?")
+    .prepare(
+      "SELECT * FROM project_resources WHERE resource_id = ? ORDER BY resource_name, role, rate_grade"
+    )
     .all(resourceId);
 }
 
@@ -88,7 +100,8 @@ export async function getProjectResourceByUniqueIds(
     .prepare(
       `SELECT * FROM project_resources WHERE unique_identifier IN (${uniqueIds
         .map(() => "?")
-        .join(",")})`
+        .join(",")})
+        ORDER BY resource_name, role, rate_grade`
     )
     .all(uniqueIds);
 }
@@ -170,6 +183,8 @@ export async function updateProjectResources(
           project_title = @project_title,
           resource_id = @resource_id,
           resource_name = @resource_name,
+          role_id = @role_id,
+          role = @role,
           rate_grade = @rate_grade,
           unique_identifier = @unique_identifier
         WHERE id = @id`
@@ -191,6 +206,7 @@ export async function updateTimeEntries(timeEntries: TTimeEntriesProps[]) {
         project_slug = @project_slug,
         project_title = @project_title,
         resource_id = @resource_id,
+        role_id = @role_id,
         rate_grade = @rate_grade,
         week_commencing = @week_commencing,
         work_days = @work_days,
@@ -216,6 +232,8 @@ export async function addProjectResources(
         @project_title,
         @resource_id,
         @resource_name,
+        @role_id,
+        @role,
         @rate_grade,
         @unique_identifier
       )
@@ -236,6 +254,7 @@ export async function addTimeEntries(timeEntries: TNewTimeEntriesProps[]) {
         @project_slug,
         @project_title,
         @resource_id,
+        @role_id,
         @rate_grade,
         @week_commencing,
         @work_days,

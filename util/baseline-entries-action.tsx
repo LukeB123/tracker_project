@@ -49,15 +49,24 @@ export async function baselineEntriesAction(
     entryIds.forEach((entryId) => {
       const resourceId = +formData.get("resource_" + entryId + "_id");
       const resourceName: string = formData.get("resource_" + entryId);
+      const roleID = +formData.get("role_" + entryId + "_id");
+      const roleName: string = formData.get("role_" + entryId);
       const rateGrade: string = formData.get("rate_grade_" + entryId);
       const initialWeek: string = formData.get("week_commencing_" + entryId);
       const daysPerWeek: string = formData.get("work_days_" + entryId);
       const numberOfWeeks: string = formData.get("number_of_weeks_" + entryId);
       const uniqueId =
-        prevState.project.id + "_" + resourceId.toString() + "_" + rateGrade;
+        prevState.project.id +
+        "_" +
+        resourceId.toString() +
+        "_" +
+        roleID.toString() +
+        "_" +
+        rateGrade;
 
       if (
         resourceId > 0 &&
+        roleID > 0 &&
         rateGrade !== "" &&
         initialWeek !== "" &&
         daysPerWeek !== "" &&
@@ -71,6 +80,8 @@ export async function baselineEntriesAction(
           project_title: prevState.project.title,
           resource_id: resourceId,
           resource_name: resourceName,
+          role_id: roleID,
+          role: roleName,
           rate_grade: rateGrade,
           unique_identifier: uniqueId,
         });
@@ -98,6 +109,7 @@ export async function baselineEntriesAction(
             project_slug: prevState.project.slug,
             project_title: prevState.project.title,
             resource_id: resourceId,
+            role_id: roleID,
             rate_grade: rateGrade,
             week_commencing: entryWeek.week_commencing,
             work_days: +daysPerWeek,
@@ -139,8 +151,6 @@ export async function baselineEntriesAction(
       prevState.project.id
     );
 
-    console.log("existingProjectResources", existingProjectResources);
-
     modelledDataProjectResources.forEach((entry) => {
       const isNewProjectResource =
         !existingProjectResources
@@ -157,8 +167,6 @@ export async function baselineEntriesAction(
       prevState.project.id,
       prevState.weeks.map((week) => week.week_commencing)
     );
-
-    console.log("existingTimeEntries", existingTimeEntries);
 
     modelledDataTimeEntries.forEach((timeEntry) => {
       const isNewTimeEntry = !existingTimeEntries
@@ -190,10 +198,10 @@ export async function baselineEntriesAction(
     };
   }
 
-  console.log("newProjectResources", newProjectResources);
-  console.log("newTimeEntries", newTimeEntries);
-  console.log("updatedTimeEntries", updatedTimeEntries);
-  console.log("deletedTimeEntryIds", deletedTimeEntryIds);
+  // console.log("newProjectResources", newProjectResources);
+  // console.log("newTimeEntries", newTimeEntries);
+  // console.log("updatedTimeEntries", updatedTimeEntries);
+  // console.log("deletedTimeEntryIds", deletedTimeEntryIds);
 
   try {
     if (newProjectResources.length > 0)

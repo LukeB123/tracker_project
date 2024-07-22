@@ -2,9 +2,11 @@ import Dropdown, { DropdownItem } from "@/app/_components/dropdown";
 import DeleteIconButton from "@/app/_components/delete-icon-button";
 import React, { useEffect, useState } from "react";
 import Icon from "../icons/icons";
+import { TRole } from "@/util/resources";
 
 interface BaselineEntryProps {
   resources: DropdownItem[];
+  roles: TRole[];
   weeks: DropdownItem[];
   grades: DropdownItem[];
   entryIndex: number;
@@ -13,6 +15,7 @@ interface BaselineEntryProps {
 
 export default function BaselineEntry({
   resources,
+  roles,
   weeks,
   grades,
   entryIndex,
@@ -60,6 +63,17 @@ export default function BaselineEntry({
         <Dropdown
           id={"resource_" + entryIndex}
           data={resources}
+          search={true}
+          style="bg-purple-200 rounded-md"
+          form="baseline_entries_form"
+        />
+      </td>
+      <td>
+        <Dropdown
+          id={"role_" + entryIndex}
+          data={roles.map((role) => {
+            return { id: role.id, name: role.role };
+          })}
           search={true}
           style="bg-purple-200 rounded-md"
           form="baseline_entries_form"

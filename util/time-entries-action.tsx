@@ -54,16 +54,12 @@ export async function projectTimeEntriesAction(
 
   try {
     prevState.projectResources.forEach((projectResource) => {
-      if (
-        projectResource.project_id &&
-        !projectIds.includes(projectResource.project_id)
-      )
-        projectIds.push(projectResource.project_id);
-
       const newUniqueId =
         projectResource.project_id +
         "_" +
         projectResource.resource_id +
+        "_" +
+        projectResource.role_id +
         "_" +
         projectResource.rate_grade;
 
@@ -76,8 +72,6 @@ export async function projectTimeEntriesAction(
         throw new Error();
       }
 
-      const isNewProjectResource = !("id" in projectResource);
-
       const isDeleted =
         +formData.get(projectResource.unique_identifier + "_delete") === 1;
 
@@ -88,19 +82,24 @@ export async function projectTimeEntriesAction(
       )
         resourceIds.push(projectResource.resource_id);
 
+      if (
+        projectResource.project_id &&
+        !projectIds.includes(projectResource.project_id)
+      )
+        projectIds.push(projectResource.project_id);
+
+      const isNewProjectResource = !("id" in projectResource);
+
       if (!isNewProjectResource) {
         const initialProjectResource = prevState.initialProjectResources.find(
           (initialProjectResource) =>
             initialProjectResource.id === projectResource.id
         )!;
 
-        const isUpdatedProjectResource =
-          initialProjectResource.unique_identifier !== newUniqueId;
-
         if (isDeleted) {
           deletedProjectResourceIds.push(projectResource.id);
         } else {
-          if (isUpdatedProjectResource) {
+          if (initialProjectResource.unique_identifier !== newUniqueId) {
             const updatedProjectResourceEntry: TProjectResourcesProps = {
               ...projectResource,
               unique_identifier: newUniqueId,
@@ -113,6 +112,7 @@ export async function projectTimeEntriesAction(
         !isDeleted &&
         projectResource.project_id !== undefined &&
         projectResource.resource_id !== undefined &&
+        projectResource.role_id !== undefined &&
         projectResource.rate_grade !== ""
       ) {
         const newProjectResourceEntry: TNewProjectResourcesProps = {
@@ -155,6 +155,8 @@ export async function projectTimeEntriesAction(
       timeEntry.project_id +
       "_" +
       timeEntry.resource_id +
+      "_" +
+      timeEntry.role_id +
       "_" +
       timeEntry.rate_grade +
       "_" +

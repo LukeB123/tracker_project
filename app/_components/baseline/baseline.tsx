@@ -1,14 +1,15 @@
 "use client";
 import { TWeekProps } from "@/util/date";
-import { TPeopleProps } from "@/util/people";
+import { TResourceProps, TRole } from "@/util/resources";
 import { useState } from "react";
 import BaselineEntry from "./baseline-entry";
 import AddEntryButton from "../buttons/add-entry-button";
 import BaselineForm from "./baseline-form";
 
 interface BaselineInputProps {
-  resources: TPeopleProps[];
+  resources: TResourceProps[];
   weeks: TWeekProps[];
+  roles: TRole[];
 }
 
 const todayDate = new Date();
@@ -38,6 +39,7 @@ const grades = [
 export default function BaselineInput({
   resources,
   weeks,
+  roles,
 }: BaselineInputProps) {
   const [numberOfEntries, setNumberOfEntries] = useState([0]);
   const [tableBodyKey, setTableBodyKey] = useState(0);
@@ -83,6 +85,9 @@ export default function BaselineInput({
               <th className="min-w-40 font-medium border-b-2 border-purple-600 px-2 py-1">
                 Resource
               </th>
+              <th className="min-w-40 font-medium border-b-2 border-purple-600 px-2 py-1">
+                Role
+              </th>
               <th className="min-w-28 font-medium border-b-2 border-purple-600 px-2 py-1">
                 Grade
               </th>
@@ -102,6 +107,7 @@ export default function BaselineInput({
               <BaselineEntry
                 key={entry}
                 resources={resourceOptions}
+                roles={roles}
                 weeks={[{ id: 0, name: "" }, ...weekOptions]}
                 grades={grades}
                 setNumberOfEntries={setNumberOfEntries}

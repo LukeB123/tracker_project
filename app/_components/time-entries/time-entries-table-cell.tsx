@@ -60,7 +60,7 @@ export default function TimeEntriesTableCell({
     (entry) => entry.project_id !== currentProject?.id
   );
 
-  let className = "text-right px-2 py-1 w-full rounded-md h-8 font-semibold";
+  let className = "text-right px-2 py-1 w-full rounded-md h-full font-semibold";
 
   let textColor = "";
 
@@ -119,6 +119,7 @@ export default function TimeEntriesTableCell({
       project_slug: projectResource.project_slug,
       project_title: projectResource.project_title,
       resource_id: projectResource.resource_id!,
+      role_id: projectResource.role_id!,
       rate_grade: projectResource.rate_grade,
       week_commencing: week.week_commencing,
       work_days: newWorkingDaysValue,
@@ -170,7 +171,7 @@ export default function TimeEntriesTableCell({
         ((otherResourceTimeEntries && otherResourceTimeEntries.length > 0) ||
           isOverAllocated) && (
           <div className="group">
-            <div className="absolute left-2 top-2 z-10 cursor-pointer">
+            <div className="absolute left-2 top-1 lg:top-2 z-10 cursor-pointer">
               <Icon
                 iconName={isOverAllocated ? "alert" : "info"}
                 color={iconColor}

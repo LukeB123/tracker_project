@@ -2,7 +2,7 @@ import Icon from "@/app/_components/icons/icons";
 import DeleteIconButton from "@/app/_components/delete-icon-button";
 import Dropdown from "@/app/_components/dropdown";
 
-import { TPeopleProps } from "@/util/people";
+import { TResourceProps, TRole } from "@/util/resources";
 import { TProjectDetailsProps } from "@/util/projects";
 import { TWeekProps } from "@/util/date";
 import {
@@ -27,7 +27,8 @@ interface TimeEntriesProjectResourceInputProps {
   projectResourceSelection:
     | {
         projects: TProjectDetailsProps[];
-        resources: TPeopleProps[];
+        resources: TResourceProps[];
+        roles: TRole[];
       }
     | undefined;
   isEditing: boolean;
@@ -88,6 +89,16 @@ export default function TimeEntriesProjectResourceInput({
     (state) => state.formStatus.formStatusIsPending
   );
 
+  const roles = projectResourceSelection
+    ? projectResourceSelection.roles.map((role) => {
+        return { id: role.id, name: role.role };
+      })
+    : [];
+
+  const projectResourceRole = projectResource.role_id
+    ? projectResource.role
+    : undefined;
+
   const showOverAllocationAlert =
     resourceOverAllocationWeeks.length > 0 && !isDelete;
 
@@ -98,6 +109,7 @@ export default function TimeEntriesProjectResourceInput({
         entry.resource_id !== undefined &&
         entry.project_id === projectResource.project_id &&
         entry.resource_id === projectResource.resource_id &&
+        entry.role === projectResource.role &&
         entry.rate_grade === projectResource.rate_grade
     ).length > 1 && !isDelete;
 
@@ -117,7 +129,9 @@ export default function TimeEntriesProjectResourceInput({
           ) === index
       );
 
-  const projectResourceClass = "px-2 py-1 w-full h-8 font-semibold";
+  let projectResourceClass = "px-2 py-1 w-full h-full font-semibold";
+
+  if (!isEditing) projectResourceClass += " pr-8";
 
   let textColor = "";
 
@@ -169,6 +183,8 @@ export default function TimeEntriesProjectResourceInput({
               ...prevState[projectResourceIndex],
               resource_id: selectedResource.id,
               resource_name: selectedResource.name,
+              role_id: selectedResource.role_id,
+              role: selectedResource.role,
               rate_grade: selectedResource.grade,
             },
             ...prevState.slice(projectResourceIndex + 1),
@@ -185,6 +201,7 @@ export default function TimeEntriesProjectResourceInput({
                 return {
                   ...entry,
                   resource_id: selectedResource.id,
+                  role_id: selectedResource.role_id,
                   rate_grade: selectedResource.grade,
                 };
               } else {
@@ -237,6 +254,45 @@ export default function TimeEntriesProjectResourceInput({
           return newState;
         });
       }
+    }
+
+    setChangesMade(true);
+  }
+
+  function handleRoleChange(roleId: number) {
+    const newRole = roles.find((role) => role.id === roleId);
+
+    if (newRole) {
+      setProjectResources((prevState) => {
+        return [
+          ...prevState.slice(0, projectResourceIndex),
+          {
+            ...prevState[projectResourceIndex],
+            role_id: newRole.id,
+            role: newRole.name,
+          },
+          ...prevState.slice(projectResourceIndex + 1),
+        ];
+      });
+
+      setTimeEntries((prevState) => {
+        const newState: (TTimeEntriesProps | TNewTimeEntriesProps)[] =
+          prevState.map((entry) => {
+            if (
+              entry.unique_identifier.split("_").slice(0, -1).join("_") ===
+              projectResource.unique_identifier
+            ) {
+              return {
+                ...entry,
+                role_id: newRole.id,
+              };
+            } else {
+              return { ...entry };
+            }
+          });
+
+        return newState;
+      });
     }
 
     setChangesMade(true);
@@ -311,10 +367,10 @@ export default function TimeEntriesProjectResourceInput({
   }
 
   return (
-    <td className="flex items-center w-full relative">
-      {isEditing && (
-        <>
-          <div className="absolute -left-5 flex items-center">
+    <>
+      <td className="relative">
+        {isEditing && (
+          <div className="absolute -left-5 flex items-center h-full">
             <DeleteIconButton
               isDelete={isDelete}
               setIsDelete={setIsDelete}
@@ -331,194 +387,149 @@ export default function TimeEntriesProjectResourceInput({
               form="time_entries_form"
             />
           </div>
-          <div className="border-r-2 basis-3/4 flex items-center relative">
-            <Dropdown
-              id={projectResource.unique_identifier + "_project_resource_label"}
-              title={projectResourceLabel}
-              data={options}
-              parentSelectedItem={options.find(
-                (option) => option.name === projectResourceLabel
-              )}
-              style={
-                showOverAllocationAlert
-                  ? projectResourceClass +
-                    bgColor +
-                    textColor +
-                    " rounded-l-md truncate pl-6"
-                  : projectResourceClass +
-                    bgColor +
-                    textColor +
-                    " rounded-l-md truncate"
-              }
-              search={true}
-              changesMade={changesMade}
-              setChangesMade={setChangesMade}
-              onSelect={handleProjectResourceLabelChange}
-              disabled={isDelete || formStatusIsPending}
-              isLoading={isLoading}
-            />
-            {resourceOverAllocationWeeks.length > 0 && !isDelete && (
-              <div
-                className={"group absolute left-1 h-8 w-max flex items-center"}
-              >
-                <Icon
-                  iconName={"alert"}
-                  color={"#fe677b"}
-                  height="15px"
-                  width="15px"
-                />
-                <div className="hidden group-hover:block absolute top-5 -left-1 z-10 bg-blue-100 rounded-md border-2 border-blue-300 py-1 px-2 w-max h-fit text-sm text-grey-900 shadow-md">
-                  <h2 className="pb-1">Resource Over Allocated in Month(s):</h2>
-                  <ul className="list-inside list-disc">
-                    {resourceOverAllocationMonths.map((month) => (
-                      <li key={month.monthYearString}>
-                        <button
-                          onClick={() =>
-                            setYearMonthIndex({
-                              year: month.year,
-                              monthIndex: month.monthIndex,
-                            })
-                          }
-                        >
-                          {month.monthYearString}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
+        )}
+        <div className="relative flex items-center">
+          <Dropdown
+            id={projectResource.unique_identifier + "_project_resource_label"}
+            title={projectResourceLabel}
+            data={options}
+            parentSelectedItem={options.find(
+              (option) => option.name === projectResourceLabel
             )}
-          </div>
-          <div className="basis-1/4 flex items-center relative">
-            <Dropdown
-              id={projectResource.unique_identifier + "_rate_grade"}
-              data={grades}
-              parentSelectedItem={grades.find(
-                (grade) => grade.name === projectResource.rate_grade
-              )}
-              style={
-                showDuplicateAlert
-                  ? projectResourceClass +
-                    bgColor +
-                    gradeTextColor +
-                    " rounded-r-md truncate pl-6 yellow-600"
-                  : projectResourceClass +
-                    bgColor +
-                    gradeTextColor +
-                    " rounded-r-md truncate"
-              }
-              changesMade={changesMade}
-              setChangesMade={setChangesMade}
-              onSelect={handleGradeChange}
-              disabled={isDelete || formStatusIsPending}
-              isLoading={isLoading}
-            />
-            {showDuplicateAlert && !isDelete && (
-              <div
-                className={"group absolute left-1 h-8 w-max flex items-center"}
-              >
-                <Icon
-                  iconName={"alert"}
-                  color={"#f6c709"}
-                  height="15px"
-                  width="15px"
-                />
-                <div className="hidden group-hover:block absolute top-5 -right-1 z-10 bg-blue-100 rounded-md border-2 border-blue-300 py-1 px-2 w-max h-fit text-sm text-grey-900 shadow-md">
-                  <h2 className="pb-1">Duplicate Resource Grade</h2>
-                </div>
-              </div>
-            )}
-          </div>
-        </>
-      )}
-      {!isEditing && (
-        <>
-          <div className={"border-r-2 basis-3/4 flex items-center relative"}>
-            <p
-              className={
-                showOverAllocationAlert
-                  ? projectResourceClass +
-                    bgColor +
-                    textColor +
-                    " rounded-l-md truncate pl-6"
-                  : projectResourceClass +
-                    bgColor +
-                    textColor +
-                    " rounded-l-md truncate"
-              }
+            style={
+              showOverAllocationAlert
+                ? projectResourceClass +
+                  bgColor +
+                  textColor +
+                  " rounded-l-md truncate pl-6"
+                : projectResourceClass +
+                  bgColor +
+                  textColor +
+                  " rounded-l-md truncate"
+            }
+            search={true}
+            changesMade={changesMade}
+            setChangesMade={setChangesMade}
+            onSelect={handleProjectResourceLabelChange}
+            disabled={isDelete || formStatusIsPending || !isEditing}
+            isLoading={isLoading}
+          />
+          {resourceOverAllocationWeeks.length > 0 && !isDelete && (
+            <div
+              className={"group absolute left-1 h-full w-max flex items-center"}
             >
-              {projectResourceLabel}
-            </p>
-
-            {resourceOverAllocationWeeks.length > 0 && !isDelete && (
-              <div
-                className={"group absolute left-1 h-8 w-max flex items-center"}
-              >
-                <div className="cursor-pointer">
-                  <Icon
-                    iconName={"alert"}
-                    color={"#fe344f"}
-                    height="15px"
-                    width="15px"
-                  />
-                </div>
-                <div className="hidden group-hover:block absolute top-5 -left-1 z-10 bg-blue-100 rounded-md border-2 border-blue-300 py-1 px-2 w-max h-fit text-sm text-grey-900 shadow-md">
-                  <h2 className="pb-1">Resource Over Allocated in Month(s):</h2>
-                  <ul className="list-inside list-disc">
-                    {resourceOverAllocationMonths.map((month) => (
-                      <li key={month.monthYearString}>
-                        <button
-                          onClick={() =>
-                            setYearMonthIndex({
-                              year: month.year,
-                              monthIndex: month.monthIndex,
-                            })
-                          }
-                        >
-                          {month.monthYearString}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+              <Icon
+                iconName={"alert"}
+                color={"#fe677b"}
+                height="15px"
+                width="15px"
+              />
+              <div className="hidden group-hover:block absolute top-5 -left-1 z-10 bg-blue-100 rounded-md border-2 border-blue-300 py-1 px-2 w-max h-fit text-sm text-grey-900 shadow-md">
+                <h2 className="pb-1">Resource Over Allocated in Month(s):</h2>
+                <ul className="list-inside list-disc">
+                  {resourceOverAllocationMonths.map((month) => (
+                    <li key={month.monthYearString}>
+                      <button
+                        onClick={() =>
+                          setYearMonthIndex({
+                            year: month.year,
+                            monthIndex: month.monthIndex,
+                          })
+                        }
+                      >
+                        {month.monthYearString}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               </div>
+            </div>
+          )}
+        </div>
+      </td>
+      <td>
+        <div className="flex items-center relative">
+          <Dropdown
+            id={projectResource.unique_identifier + "_role"}
+            data={roles}
+            title={projectResourceRole}
+            parentSelectedItem={roles.find(
+              (role) => role.id === projectResource.role_id
             )}
-          </div>
-          <div className="basis-1/4 flex items-center relative">
-            <p
-              className={
-                showDuplicateAlert
-                  ? projectResourceClass +
-                    bgColor +
-                    gradeTextColor +
-                    " text-center rounded-r-md truncate pl-6"
-                  : projectResourceClass +
-                    bgColor +
-                    gradeTextColor +
-                    " text-center rounded-r-md truncate"
-              }
+            style={
+              showDuplicateAlert
+                ? projectResourceClass +
+                  bgColor +
+                  gradeTextColor +
+                  " truncate pl-6 yellow-600"
+                : projectResourceClass + bgColor + gradeTextColor + " truncate"
+            }
+            search={true}
+            changesMade={changesMade}
+            setChangesMade={setChangesMade}
+            onSelect={handleRoleChange}
+            disabled={isDelete || formStatusIsPending || !isEditing}
+            isLoading={isLoading}
+          />
+          {showDuplicateAlert && !isDelete && (
+            <div
+              className={"group absolute left-1 h-full w-max flex items-center"}
             >
-              {projectResource.rate_grade}
-            </p>
-
-            {showDuplicateAlert && !isDelete && (
-              <div
-                className={"group absolute left-1 h-8 w-max flex items-center"}
-              >
-                <Icon
-                  iconName={"alert"}
-                  color={"#f6c709"}
-                  height="15px"
-                  width="15px"
-                />
-                <div className="hidden group-hover:block absolute top-5 -right-1 z-10 bg-blue-100 rounded-md border-2 border-blue-300 py-1 px-2 w-max h-fit text-sm text-grey-900 shadow-md">
-                  <h2 className="pb-1">Duplicate Resource Grade</h2>
-                </div>
+              <Icon
+                iconName={"alert"}
+                color={"#f6c709"}
+                height="15px"
+                width="15px"
+              />
+              <div className="hidden group-hover:block absolute top-5 -right-1 z-10 bg-blue-100 rounded-md border-2 border-blue-300 py-1 px-2 w-max h-fit text-sm text-grey-900 shadow-md">
+                <h2 className="pb-1">Duplicate Resource Grade</h2>
               </div>
+            </div>
+          )}
+        </div>
+      </td>
+      <td>
+        <div className="flex items-center relative">
+          <Dropdown
+            id={projectResource.unique_identifier + "_rate_grade"}
+            data={grades}
+            parentSelectedItem={grades.find(
+              (grade) => grade.name === projectResource.rate_grade
             )}
-          </div>
-        </>
-      )}
-    </td>
+            style={
+              showDuplicateAlert
+                ? projectResourceClass +
+                  bgColor +
+                  gradeTextColor +
+                  " rounded-r-md truncate pl-6 yellow-600"
+                : projectResourceClass +
+                  bgColor +
+                  gradeTextColor +
+                  " rounded-r-md truncate"
+            }
+            changesMade={changesMade}
+            setChangesMade={setChangesMade}
+            onSelect={handleGradeChange}
+            disabled={isDelete || formStatusIsPending || !isEditing}
+            isLoading={isLoading}
+          />
+          {showDuplicateAlert && !isDelete && (
+            <div
+              className={"group absolute left-1 h-full w-max flex items-center"}
+            >
+              <Icon
+                iconName={"alert"}
+                color={"#f6c709"}
+                height="15px"
+                width="15px"
+              />
+              <div className="hidden group-hover:block absolute top-5 -right-1 z-10 bg-blue-100 rounded-md border-2 border-blue-300 py-1 px-2 w-max h-fit text-sm text-grey-900 shadow-md">
+                <h2 className="pb-1">Duplicate Resource Grade</h2>
+              </div>
+            </div>
+          )}
+        </div>
+      </td>
+    </>
   );
 }

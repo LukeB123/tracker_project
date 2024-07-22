@@ -11,9 +11,11 @@ import {
   TProjectResourcesProps,
   TTimeEntriesProps,
 } from "@/util/time-entries";
-import { TPeopleProps } from "@/util/people";
+import { TResourceProps, TRole } from "@/util/resources";
 import { TProjectDetailsProps } from "@/util/projects";
 import { TWeekProps } from "@/util/date";
+import DeleteIconButton from "../delete-icon-button";
+import { useAppSelector } from "@/lib/hooks";
 
 interface TimeEntriesTableRowProps {
   context: "project" | "resource";
@@ -34,7 +36,8 @@ interface TimeEntriesTableRowProps {
   projectResourceSelection:
     | {
         projects: TProjectDetailsProps[];
-        resources: TPeopleProps[];
+        resources: TResourceProps[];
+        roles: TRole[];
       }
     | undefined;
   isLoading: boolean;
@@ -68,6 +71,9 @@ export default function TimeEntriesTableRow({
   setChangesMade,
   setYearMonthIndex,
 }: TimeEntriesTableRowProps) {
+  const formStatusIsPending = useAppSelector(
+    (state) => state.formStatus.formStatusIsPending
+  );
   const [isDelete, setIsDelete] = useState(false);
 
   const overAllocationWeeks: TWeekProps[] = [];
@@ -101,7 +107,7 @@ export default function TimeEntriesTableRow({
         (projectResource.project_title === "" ||
           projectResource.resource_name === "")
           ? "hidden"
-          : undefined
+          : "relative"
       }
     >
       <TimeEntriesProjectResourceInput
@@ -166,7 +172,7 @@ export default function TimeEntriesTableRow({
           .fill(0)
           .map((v, i) => (
             <td key={i} className="animate-pulse">
-              <div className="rounded-md bg-grey-100 h-8"></div>
+              <div className="rounded-md bg-grey-100 h-5 lg:h-8"></div>
             </td>
           ))}
     </tr>

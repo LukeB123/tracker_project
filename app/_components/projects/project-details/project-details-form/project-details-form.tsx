@@ -13,7 +13,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { uiActions } from "@/lib/ui";
 
 import { projectFormAction } from "@/util/project-actions";
-import { TPeopleProps, getResources } from "@/util/people";
+import { TResourceProps, getResources } from "@/util/resources";
 import { projectsActions } from "@/lib/projects";
 import { TProjectDetailsProps } from "@/util/projects";
 
@@ -62,9 +62,7 @@ export default function ProjectDetailsForm({
   const [changesMade, setChangesMade] = useState(false);
   const [error, setError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [resources, setResources] = useState<
-    { id: number; name: string }[] | undefined
-  >();
+  const [resources, setResources] = useState<TResourceProps[] | undefined>();
 
   const [formState, formAction] = useFormState(projectFormAction, {
     project,
@@ -79,11 +77,7 @@ export default function ProjectDetailsForm({
       try {
         const fetchedResources = await getResources();
 
-        setResources(
-          fetchedResources.map((resource) => {
-            return { id: resource.id, name: resource.name };
-          })
-        );
+        setResources(fetchedResources);
 
         setError(false);
       } catch (error) {
@@ -133,7 +127,11 @@ export default function ProjectDetailsForm({
                   }
                 : undefined
             }
-            selection={resources}
+            selection={resources
+              ?.filter((resource) => resource.is_project_manager)
+              .map((resource) => {
+                return { id: resource.id, name: resource.name };
+              })}
             search={true}
             changesMade={changesMade}
             setChangesMade={setChangesMade}
@@ -152,7 +150,11 @@ export default function ProjectDetailsForm({
                 : undefined
             }
             search={true}
-            selection={resources}
+            selection={resources
+              ?.filter((resource) => resource.is_delivery_manager)
+              .map((resource) => {
+                return { id: resource.id, name: resource.name };
+              })}
             changesMade={changesMade}
             setChangesMade={setChangesMade}
             isLoading={isLoading}
@@ -167,7 +169,11 @@ export default function ProjectDetailsForm({
                 : undefined
             }
             search={true}
-            selection={resources}
+            selection={resources
+              ?.filter((resource) => resource.is_scrum_master)
+              .map((resource) => {
+                return { id: resource.id, name: resource.name };
+              })}
             changesMade={changesMade}
             setChangesMade={setChangesMade}
             isLoading={isLoading}

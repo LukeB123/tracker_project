@@ -1,7 +1,7 @@
 import Icon from "@/app/_components/icons/icons";
 import BaselineInput from "@/app/_components/baseline/baseline";
 import { getWeeks } from "@/util/date";
-import { getResources } from "@/util/people";
+import { getResources, getRoles } from "@/util/resources";
 import { Suspense } from "react";
 
 async function FetchedResources() {
@@ -10,7 +10,9 @@ async function FetchedResources() {
 
     const weeks = await getWeeks();
 
-    return <BaselineInput resources={resources} weeks={weeks} />;
+    const roles = await getRoles();
+
+    return <BaselineInput resources={resources} roles={roles} weeks={weeks} />;
   } catch (error) {
     return (
       <p className="text-center p-2 text-purple-700 font-semibold">

@@ -15,7 +15,12 @@ import {
   TTimeEntriesProps,
 } from "@/util/time-entries";
 import { TWeekProps } from "@/util/date";
-import { TPeopleProps, getResources } from "@/util/people";
+import {
+  TResourceProps,
+  TRole,
+  getResources,
+  getRoles,
+} from "@/util/resources";
 import { TProjectDetailsProps, getProjects } from "@/util/projects";
 import { useAppSelector } from "@/lib/hooks";
 
@@ -49,7 +54,8 @@ export default function TimeEntries({
   const [projectResourceSelection, setProjectResourceSelection] = useState<
     | {
         projects: TProjectDetailsProps[];
-        resources: TPeopleProps[];
+        resources: TResourceProps[];
+        roles: TRole[];
       }
     | undefined
   >();
@@ -65,11 +71,16 @@ export default function TimeEntries({
   );
 
   // const currentResource = useAppSelector((state) => state.resources.currentResource);
-  const currentResource: TPeopleProps = {
+  const currentResource: TResourceProps = {
     id: 30,
     name: "Luke",
     grade: "5",
-    role: "Fullstack Developer",
+    role_id: 3,
+    role: "Developer",
+    team: "Wolfpack",
+    is_delivery_manager: 0,
+    is_project_manager: 0,
+    is_scrum_master: 0,
   };
 
   const formStatusPending = useAppSelector(
@@ -145,6 +156,8 @@ export default function TimeEntries({
         project_title: currentProject.title,
         resource_id: undefined,
         resource_name: "",
+        role_id: undefined,
+        role: "",
         rate_grade: "",
         unique_identifier: "newProjectResource_" + (projectResourceAdded + 1),
       };
@@ -161,6 +174,8 @@ export default function TimeEntries({
         project_title: "",
         resource_id: currentResource.id,
         resource_name: currentResource.name,
+        role_id: currentResource.role_id,
+        role: currentResource.role,
         rate_grade: currentResource.grade,
         unique_identifier: "newProjectResource_" + (projectResourceAdded + 1),
       };
@@ -246,15 +261,25 @@ export default function TimeEntries({
         setIsError(false);
 
         try {
+          const roles = await getRoles();
+
           if (context === "project") {
             const response = await getResources();
 
-            setProjectResourceSelection({ projects: [], resources: response });
+            setProjectResourceSelection({
+              projects: [],
+              resources: response,
+              roles,
+            });
           }
           if (context === "resource") {
             const response = await getProjects();
 
-            setProjectResourceSelection({ projects: response, resources: [] });
+            setProjectResourceSelection({
+              projects: response,
+              resources: [],
+              roles,
+            });
           }
         } catch (error) {
           setIsError(true);
@@ -277,7 +302,7 @@ export default function TimeEntries({
         handleMonthChange={handleMonthChange}
         isDisabled={initialTimeEntriesIsLoading}
       />
-      <div className="flex lg:justify-center">
+      <div className="flex lg:justify-center text-xs lg:text-base">
         <table className="my-4 mx-8 border-separate border-spacing border-spacing-y-1">
           <thead>
             <TimeEntriesTableHeader
@@ -326,11 +351,11 @@ export default function TimeEntries({
           </tbody>
           <tfoot>
             <tr>
-              <td className="min-w-96">
+              <td colSpan={3}>
                 {isEditing && (
                   <button
                     type="button"
-                    className="w-full h-8"
+                    className="w-full h-6 lg:h-8"
                     onClick={handleAddProjectResource}
                     disabled={formStatusPending}
                   >

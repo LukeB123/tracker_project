@@ -18,12 +18,17 @@ export default function TimeEntriesTableHeader({
 }: TimeEntriesTableHeaderProps) {
   return (
     <tr>
-      <th className="bg-purple-700 text-grey-50 font-semibold rounded-t-md py-1 px-2 flex">
-        <div className="basis-3/4">{title}</div>
-        <div className="basis-1/4 ">Grade</div>
+      <th className="bg-purple-700 text-grey-50 font-semibold rounded-tl-md py-1 px-2">
+        {title}
+      </th>
+      <th className="bg-purple-700 text-grey-50 font-semibold py-1 px-2">
+        Role
+      </th>
+      <th className="bg-purple-700 text-grey-50 font-semibold rounded-tr-md py-1 px-2">
+        Grade
       </th>
       {weeks.map((week) => {
-        let className = "w-40 min-w-28 font-semibold p-1";
+        let className = "w-40 min-w-24 font-semibold p-1";
 
         if (!visibleWeeks.includes(week.week_commencing)) {
           className += " hidden";
@@ -37,7 +42,7 @@ export default function TimeEntriesTableHeader({
 
         return (
           <th key={week.week_commencing} className={className}>
-            <div className="flex justify-center items-center gap-1">
+            <div className="flex justify-center items-center lg:gap-1">
               {week.total_working_days < 5 &&
                 activeWeeks.includes(week.week_commencing) && (
                   <div className="group relative text-left">
@@ -49,9 +54,9 @@ export default function TimeEntriesTableHeader({
                         width="15px"
                       />
                     </div>
-                    <div className="hidden group-hover:block absolute -left-2 -top-14 z-20 bg-purple-100 rounded-md border-2 border-purple-300 py-1 px-2 w-max h-fit text-sm shadow-md">
+                    <div className="hidden group-hover:block absolute -left-2 -top-14 z-20 bg-purple-100 rounded-md border-2 border-purple-300 py-1 px-2 w-max h-fit lg:text-sm shadow-md">
                       <h2 className="pb-1">Contains Public Holiday(s)</h2>
-                      <p className="font-normal">
+                      <p className="lg:font-normal">
                         Total working days:{" "}
                         <span className="font-semibold">
                           {week.total_working_days}
