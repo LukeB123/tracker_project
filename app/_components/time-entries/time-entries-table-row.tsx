@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import TimeEntriesProjectResourceInput from "@/app/_components/time-entries/time-entries-project-resource-input";
 import TimeEntriesTableCell from "@/app/_components/time-entries/time-entries-table-cell";
@@ -14,7 +14,6 @@ import {
 import { TResourceProps, TRole } from "@/util/resources";
 import { TProjectDetailsProps } from "@/util/projects";
 import { TWeekProps } from "@/util/date";
-import DeleteIconButton from "../delete-icon-button";
 import { useAppSelector } from "@/lib/hooks";
 
 interface TimeEntriesTableRowProps {
@@ -25,6 +24,7 @@ interface TimeEntriesTableRowProps {
     React.SetStateAction<(TProjectResourcesProps | TNewProjectResourcesProps)[]>
   >;
   initialTimeEntriesIsLoading: boolean;
+  initialProjectResourcesData: React.MutableRefObject<TProjectResourcesProps[]>;
   timeEntries: (TTimeEntriesProps | TNewTimeEntriesProps)[];
   setTimeEntries: React.Dispatch<
     React.SetStateAction<(TTimeEntriesProps | TNewTimeEntriesProps)[]>
@@ -58,6 +58,7 @@ export default function TimeEntriesTableRow({
   projectResources,
   setProjectResources,
   initialTimeEntriesIsLoading,
+  initialProjectResourcesData,
   timeEntries,
   setTimeEntries,
   isEditing,
@@ -90,7 +91,7 @@ export default function TimeEntriesTableRow({
         return accumulator + currentValue;
       }, 0);
 
-    if (totalTrackerDays > week.total_working_days)
+    if (totalTrackerDays > week.total_working_days && context === "project")
       overAllocationWeeks.push(week);
   });
 
@@ -115,6 +116,7 @@ export default function TimeEntriesTableRow({
         projectResource={projectResource}
         projectResources={projectResources}
         setProjectResources={setProjectResources}
+        initialProjectResourcesData={initialProjectResourcesData}
         setTimeEntries={setTimeEntries}
         resourceOverAllocationWeeks={overAllocationWeeks}
         projectResourceSelection={projectResourceSelection}
@@ -153,6 +155,7 @@ export default function TimeEntriesTableRow({
               }
             >
               <TimeEntriesTableCell
+                context={context}
                 isEditing={isEditing}
                 isDelete={isDelete}
                 projectResource={projectResource}

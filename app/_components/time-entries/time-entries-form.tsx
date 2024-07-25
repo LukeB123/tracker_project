@@ -71,6 +71,10 @@ export default function TimeEntriesForm({
         handleReset();
         setIsEditing(false);
       }
+
+      if (formState.notification.message === "No Changes Detected") {
+        handleReset();
+      }
     }
   }, [formState]);
 

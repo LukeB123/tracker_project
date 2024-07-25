@@ -18,7 +18,7 @@ export async function getWeeks(): Promise<TWeekProps[]> {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   //   return db.prepare("SELECT * FROM date ORDER BY date").all();
-  return [
+  const weeks = [
     {
       week_commencing: "2024-03-30",
       weekIndex: 1,
@@ -436,4 +436,10 @@ export async function getWeeks(): Promise<TWeekProps[]> {
       total_working_days: 5,
     },
   ];
+
+  const sortedWeeks = weeks.sort((a, b) =>
+    a.week_commencing > b.week_commencing ? 1 : -1
+  );
+
+  return sortedWeeks as TWeekProps[];
 }

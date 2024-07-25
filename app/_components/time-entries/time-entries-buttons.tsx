@@ -34,6 +34,14 @@ export default function TimeEntriesButtons({
 
   const project = useAppSelector((state) => state.projects.currentProject);
 
+  const resource = useAppSelector((state) => state.resources.currentResource);
+
+  let href = "";
+
+  if (context === "project") href = "/projects/" + project?.slug;
+
+  if (context === "resource") href = "/projects/" + resource?.id;
+
   useEffect(() => {
     dispatch(formSatusActions.setFormSatusIsPending(pending));
   }, [pending]);
@@ -44,7 +52,7 @@ export default function TimeEntriesButtons({
 
   return (
     <>
-      {isEditing && project && (
+      {isEditing && (
         <div className="mt-4 flex justify-center gap-8">
           <Button
             buttonStyle="secondary"
@@ -85,15 +93,9 @@ export default function TimeEntriesButtons({
           </Button>
         </div>
       )}
-      {!isEditing && project && (
+      {!isEditing && (
         <div className="mt-4 flex justify-center gap-8">
-          <Button
-            buttonStyle="secondary"
-            href={
-              context === "project" ? "/projects/" + project?.slug : undefined
-            }
-            width={"w-20"}
-          >
+          <Button buttonStyle="secondary" href={href} width={"w-20"}>
             Back
           </Button>
           <Button

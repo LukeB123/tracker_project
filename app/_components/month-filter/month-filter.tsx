@@ -9,14 +9,6 @@ interface MonthFilterProps {
     year: number;
     monthIndex: number;
   };
-  minYearMonthIndex: {
-    year: number;
-    monthIndex: number;
-  };
-  maxYearMonthIndex: {
-    year: number;
-    monthIndex: number;
-  };
   handleMonthChange: (type: "decrease" | "increase") => void;
   isDisabled: boolean;
 }
@@ -24,33 +16,23 @@ interface MonthFilterProps {
 export default function MonthFilter({
   weeks,
   yearMonthIndex,
-  minYearMonthIndex,
-  maxYearMonthIndex,
   handleMonthChange,
   isDisabled,
 }: MonthFilterProps) {
-  let leftDisable = isDisabled;
-  let rightDisable = isDisabled;
-
-  if (
-    yearMonthIndex.year === minYearMonthIndex.year &&
-    yearMonthIndex.monthIndex === minYearMonthIndex.monthIndex
-  ) {
-    leftDisable = true;
-  }
-
-  if (
-    yearMonthIndex.year === maxYearMonthIndex.year &&
-    yearMonthIndex.monthIndex === maxYearMonthIndex.monthIndex
-  ) {
-    rightDisable = true;
-  }
-
-  const displayValue = weeks.filter(
+  const currentMonth = weeks.filter(
     (week) =>
       week.year === yearMonthIndex.year &&
       week.monthIndex === yearMonthIndex.monthIndex
-  )[0].monthYearString;
+  )[0];
+
+  const leftDisable =
+    isDisabled ||
+    (currentMonth.year === weeks[0].year &&
+      currentMonth.monthIndex === weeks[0].monthIndex);
+  const rightDisable =
+    isDisabled ||
+    (currentMonth.year === weeks.slice(-1)[0].year &&
+      currentMonth.monthIndex === weeks.slice(-1)[0].monthIndex);
 
   return (
     <div className="pt-10 flex justify-between w-1/3 h-24 items-center relative start-1/3">
@@ -61,7 +43,9 @@ export default function MonthFilter({
           isDisabled={leftDisable}
         />
       </div>
-      <p className="basis-3/4 text-center text-xl">{displayValue}</p>
+      <p className="basis-3/4 text-center text-xl">
+        {currentMonth.monthYearString}
+      </p>
       <div className="basis-1/8 h-full">
         <ArrowButton
           label="right"

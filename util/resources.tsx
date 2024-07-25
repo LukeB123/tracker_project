@@ -28,6 +28,12 @@ export async function getResources(): Promise<TResourceProps[]> {
   return db.prepare("SELECT * FROM resources ORDER BY name").all();
 }
 
+export async function getResource(id: number): Promise<TResourceProps> {
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  return db.prepare("SELECT * FROM resources WHERE id = ?").get(id);
+}
+
 export async function getRoles(): Promise<TRole[]> {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 

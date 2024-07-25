@@ -44,10 +44,6 @@ export default function BaselineInput({
   const [numberOfEntries, setNumberOfEntries] = useState([0]);
   const [tableBodyKey, setTableBodyKey] = useState(0);
 
-  //   const selectableWeeks = weeks.filter(week => {
-  //     if(week.year === initialYearMonthIndex.year)
-  //   })
-
   const resourceOptions = resources.map((resource) => {
     return {
       id: resource.id,
@@ -117,7 +113,7 @@ export default function BaselineInput({
           </tbody>
           <tfoot>
             <tr>
-              <td colSpan={2}>
+              <td colSpan={3}>
                 <button
                   type="button"
                   className="w-full h-8"

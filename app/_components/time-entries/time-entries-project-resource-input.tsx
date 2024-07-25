@@ -12,6 +12,7 @@ import {
   TTimeEntriesProps,
 } from "@/util/time-entries";
 import { useAppSelector } from "@/lib/hooks";
+import Link from "next/link";
 
 interface TimeEntriesProjectResourceInputProps {
   context: "project" | "resource";
@@ -20,6 +21,7 @@ interface TimeEntriesProjectResourceInputProps {
   setProjectResources: React.Dispatch<
     React.SetStateAction<(TProjectResourcesProps | TNewProjectResourcesProps)[]>
   >;
+  initialProjectResourcesData: React.MutableRefObject<TProjectResourcesProps[]>;
   setTimeEntries: React.Dispatch<
     React.SetStateAction<(TTimeEntriesProps | TNewTimeEntriesProps)[]>
   >;
@@ -73,6 +75,7 @@ export default function TimeEntriesProjectResourceInput({
   projectResource,
   projectResources,
   setProjectResources,
+  initialProjectResourcesData,
   setTimeEntries,
   resourceOverAllocationWeeks,
   projectResourceSelection,
@@ -166,6 +169,67 @@ export default function TimeEntriesProjectResourceInput({
   const projectResourceIndex = projectResources.findIndex(
     (entry) => entry.unique_identifier === projectResource.unique_identifier
   );
+
+  const isExistingEntry = "id" in projectResource;
+
+  let isEdited = false;
+
+  if (isExistingEntry) {
+    const newUniqueId =
+      projectResource.project_id +
+      "_" +
+      projectResource.resource_id +
+      "_" +
+      projectResource.role_id +
+      "_" +
+      projectResource.rate_grade;
+
+    isEdited = projectResource.unique_identifier !== newUniqueId;
+  }
+
+  function handleResetProjectResource() {
+    if (isExistingEntry) {
+      const initialProjectResource = {
+        ...initialProjectResourcesData.current.find(
+          (entry) => entry.id === projectResource.id
+        )!,
+      };
+
+      setProjectResources((prevState) => {
+        return [
+          ...prevState.slice(0, projectResourceIndex),
+          {
+            ...initialProjectResource,
+          },
+          ...prevState.slice(projectResourceIndex + 1),
+        ];
+      });
+
+      setTimeEntries((prevState) => {
+        const newState: (TTimeEntriesProps | TNewTimeEntriesProps)[] =
+          prevState.map((entry) => {
+            if (
+              entry.unique_identifier.split("_").slice(0, -1).join("_") ===
+              projectResource.unique_identifier
+            ) {
+              return {
+                ...entry,
+                project_id: initialProjectResource.project_id,
+                project_slug: initialProjectResource.project_slug,
+                project_title: initialProjectResource.project_title,
+                resource_id: initialProjectResource.resource_id,
+                role_id: initialProjectResource.role_id,
+                rate_grade: initialProjectResource.rate_grade,
+              };
+            } else {
+              return { ...entry };
+            }
+          });
+
+        return newState;
+      });
+    }
+  }
 
   function handleProjectResourceLabelChange(id: number) {
     // const newValue = options.find((entry) => entry.id === id);
@@ -340,6 +404,8 @@ export default function TimeEntriesProjectResourceInput({
 
   let options: DropdownItem[] = [];
 
+  let href = "";
+
   if (context === "project") {
     if (projectResource.resource_name !== "")
       projectResourceLabel = projectResource.resource_name;
@@ -352,6 +418,8 @@ export default function TimeEntriesProjectResourceInput({
           };
         })
       : [];
+
+    href = "/resources/" + projectResource.resource_id;
   } else if (context === "resource") {
     if (projectResource.project_title !== "")
       projectResourceLabel = projectResource.project_title;
@@ -364,12 +432,14 @@ export default function TimeEntriesProjectResourceInput({
           };
         })
       : [];
+
+    href = "/projects/" + projectResource.project_slug;
   }
 
   return (
     <>
       <td className="relative">
-        {isEditing && (
+        {isEditing && !isEdited && (
           <div className="absolute -left-5 flex items-center h-full">
             <DeleteIconButton
               isDelete={isDelete}
@@ -386,6 +456,23 @@ export default function TimeEntriesProjectResourceInput({
               readOnly
               form="time_entries_form"
             />
+          </div>
+        )}
+        {isEditing && isEdited && (
+          <div className="absolute -left-5 flex items-center h-full">
+            <button
+              type="button"
+              className={"w-max"}
+              onClick={handleResetProjectResource}
+              disabled={formStatusIsPending}
+            >
+              <Icon
+                iconName="undo"
+                color={formStatusIsPending ? "#cccccc" : "#5f249f"}
+                height="20px"
+                width="20px"
+              />
+            </button>
           </div>
         )}
         <div className="relative flex items-center">
@@ -414,6 +501,13 @@ export default function TimeEntriesProjectResourceInput({
             disabled={isDelete || formStatusIsPending || !isEditing}
             isLoading={isLoading}
           />
+          {!isEditing && (
+            <Link
+              href={href}
+              target="_blank"
+              className="absolute w-full h-full"
+            ></Link>
+          )}
           {resourceOverAllocationWeeks.length > 0 && !isDelete && (
             <div
               className={"group absolute left-1 h-full w-max flex items-center"}

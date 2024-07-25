@@ -13,7 +13,7 @@ async function FetchedProjects() {
   } catch (error) {
     return (
       <p className="text-center p-2 text-purple-700 font-semibold">
-        Error Fetching Project Details.
+        Error Fetching Projects.
       </p>
     );
   }

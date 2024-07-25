@@ -13,6 +13,7 @@ import { TWeekProps } from "@/util/date";
 import { useAppSelector } from "@/lib/hooks";
 
 interface TimeEntriesTableCellProps {
+  context: "project" | "resource";
   isEditing: boolean;
   isDelete: boolean;
   projectResource: TProjectResourcesProps | TNewProjectResourcesProps;
@@ -28,6 +29,7 @@ interface TimeEntriesTableCellProps {
 }
 
 export default function TimeEntriesTableCell({
+  context,
   isEditing,
   isDelete,
   projectResource,
@@ -52,13 +54,20 @@ export default function TimeEntriesTableCell({
 
   const inputValue: number | "" = timeEntry ? timeEntry.work_days : "";
 
-  const currentProjectTimeEntries = allResourceTimeEntry?.filter(
-    (entry) => entry.project_id === currentProject?.id
-  );
+  let currentProjectTimeEntries: (TTimeEntriesProps | TNewTimeEntriesProps)[] =
+    [];
 
-  const otherResourceTimeEntries = allResourceTimeEntry?.filter(
-    (entry) => entry.project_id !== currentProject?.id
-  );
+  let otherResourceTimeEntries: (TTimeEntriesProps | TNewTimeEntriesProps)[] =
+    [];
+
+  if (context === "project") {
+    currentProjectTimeEntries = allResourceTimeEntry?.filter(
+      (entry) => entry.project_id === currentProject?.id
+    );
+    otherResourceTimeEntries = allResourceTimeEntry?.filter(
+      (entry) => entry.project_id !== currentProject?.id
+    );
+  }
 
   let className = "text-right px-2 py-1 w-full rounded-md h-full font-semibold";
 

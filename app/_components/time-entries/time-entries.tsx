@@ -7,6 +7,7 @@ import TimeEntriesTableHeader from "@/app/_components/time-entries/time-entries-
 import TimeEntriesTableRow from "@/app/_components/time-entries/time-entries-table-row";
 import AddEntryButton from "@/app/_components/buttons/add-entry-button";
 import TimeEntriesForm from "@/app/_components/time-entries/time-entries-form";
+import Icon from "@/app/_components/icons/icons";
 
 import {
   TNewProjectResourcesProps,
@@ -22,6 +23,7 @@ import {
   getRoles,
 } from "@/util/resources";
 import { TProjectDetailsProps, getProjects } from "@/util/projects";
+
 import { useAppSelector } from "@/lib/hooks";
 
 interface TimeEntriesProps {
@@ -31,6 +33,12 @@ interface TimeEntriesProps {
   initialTimeEntries: TTimeEntriesProps[];
   initialTimeEntriesIsLoading: boolean;
 }
+
+type TResourceOverAllocationMonths = {
+  monthYearString: string;
+  monthIndex: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+  year: number;
+};
 
 export default function TimeEntries({
   context,
@@ -70,18 +78,9 @@ export default function TimeEntries({
     (state) => state.projects.currentProject
   );
 
-  // const currentResource = useAppSelector((state) => state.resources.currentResource);
-  const currentResource: TResourceProps = {
-    id: 30,
-    name: "Luke",
-    grade: "5",
-    role_id: 3,
-    role: "Developer",
-    team: "Wolfpack",
-    is_delivery_manager: 0,
-    is_project_manager: 0,
-    is_scrum_master: 0,
-  };
+  const currentResource = useAppSelector(
+    (state) => state.resources.currentResource
+  );
 
   const formStatusPending = useAppSelector(
     (state) => state.formStatus.formStatusIsPending
@@ -93,16 +92,6 @@ export default function TimeEntries({
 
   const initialTimeEntriesData: React.MutableRefObject<TTimeEntriesProps[]> =
     useRef(initialTimeEntries);
-
-  const minYear = weeks.reduce(function (prev, week) {
-    return prev.year < week.year ? prev : week;
-  }).year;
-
-  const minMonthIndex = weeks
-    .filter((week) => week.year === minYear)
-    .reduce(function (prev, week) {
-      return prev.monthIndex < week.monthIndex ? prev : week;
-    }).monthIndex;
 
   function setInitialYearMonthIndex() {
     const todayDate = new Date();
@@ -120,7 +109,10 @@ export default function TimeEntries({
       ).length > 0;
 
     if (!isCurrentProject)
-      initialYearMonthIndex = { year: minYear, monthIndex: minMonthIndex };
+      initialYearMonthIndex = {
+        year: weeks[0].year,
+        monthIndex: weeks[0].monthIndex,
+      };
 
     return initialYearMonthIndex;
   }
@@ -214,19 +206,10 @@ export default function TimeEntries({
 
   const visibleWeeks = [...activeWeeks];
 
-  const maxYear = weeks.reduce(function (prev, week) {
-    return prev.year < week.year ? week : prev;
-  }).year;
-
-  const maxMonthIndex = weeks
-    .filter((week) => week.year === maxYear)
-    .reduce(function (prev, week) {
-      return prev.monthIndex < week.monthIndex ? week : prev;
-    }).monthIndex;
-
   if (
     visibleWeeks.length < 5 &&
-    (yearMonthIndex.year < maxYear || yearMonthIndex.monthIndex < maxMonthIndex)
+    (yearMonthIndex.year < weeks.slice(-1)[0].year ||
+      yearMonthIndex.monthIndex < weeks.slice(-1)[0].monthIndex)
   ) {
     let nextMonthWeeks: TWeekProps[];
 
@@ -292,13 +275,68 @@ export default function TimeEntries({
     fetchSelection();
   }, [context, isEditing]);
 
+  const weekTotals: { week: string; total: number; max: number }[] = [];
+
+  const overAllocationWeeks: TWeekProps[] = [];
+
+  {
+    weeks.map((week) => {
+      let totalTimeEntry = 0;
+
+      if (context === "project") {
+        totalTimeEntry = timeEntries
+          .filter(
+            (timeEntry) =>
+              timeEntry.week_commencing === week.week_commencing &&
+              timeEntry.project_id === currentProject?.id
+          )
+          .reduce(
+            (accumulator, currentEntry) => accumulator + currentEntry.work_days,
+            0
+          );
+      } else if (context === "resource") {
+        totalTimeEntry = timeEntries
+          .filter(
+            (timeEntry) => timeEntry.week_commencing === week.week_commencing
+          )
+          .reduce(
+            (accumulator, currentEntry) => accumulator + currentEntry.work_days,
+            0
+          );
+
+        if (totalTimeEntry > week.total_working_days)
+          overAllocationWeeks.push(week);
+      }
+
+      weekTotals.push({
+        week: week.week_commencing,
+        total: totalTimeEntry,
+        max: week.total_working_days,
+      });
+    });
+  }
+
+  const resourceOverAllocationMonths: TResourceOverAllocationMonths[] =
+    overAllocationWeeks
+      .map((week) => {
+        return {
+          monthYearString: week.monthYearString,
+          monthIndex: week.monthIndex,
+          year: week.year,
+        };
+      })
+      .filter(
+        (month, index, array) =>
+          array.findIndex(
+            (element) => element.monthIndex === month.monthIndex
+          ) === index
+      );
+
   return (
     <>
       <MonthFilter
         weeks={weeks}
         yearMonthIndex={yearMonthIndex}
-        minYearMonthIndex={{ year: minYear, monthIndex: minMonthIndex }}
-        maxYearMonthIndex={{ year: maxYear, monthIndex: maxMonthIndex }}
         handleMonthChange={handleMonthChange}
         isDisabled={initialTimeEntriesIsLoading}
       />
@@ -315,7 +353,7 @@ export default function TimeEntries({
           <tbody>
             {!(projectResources.length > 0) && !isEditing && (
               <tr>
-                <td className="">
+                <td colSpan={3} className="">
                   <p className="px-2 py-1 text-center text-purple-700 font-semibold bg-grey-200 border-2 rounded-md">
                     {context === "project"
                       ? "No resources have been assigned"
@@ -332,6 +370,7 @@ export default function TimeEntries({
                   projectResource={projectResource}
                   projectResources={projectResources}
                   setProjectResources={setProjectResources}
+                  initialProjectResourcesData={initialProjectResourcesData}
                   initialTimeEntriesIsLoading={initialTimeEntriesIsLoading}
                   timeEntries={timeEntries}
                   setTimeEntries={setTimeEntries}
@@ -350,9 +389,9 @@ export default function TimeEntries({
             })}
           </tbody>
           <tfoot>
-            <tr>
-              <td colSpan={3}>
-                {isEditing && (
+            {isEditing && (
+              <tr>
+                <td colSpan={3}>
                   <button
                     type="button"
                     className="w-full h-6 lg:h-8"
@@ -361,9 +400,79 @@ export default function TimeEntries({
                   >
                     <AddEntryButton isDisabled={formStatusPending} />
                   </button>
-                )}
-              </td>
-            </tr>
+                </td>
+              </tr>
+            )}
+            {!initialTimeEntriesIsLoading && (
+              <tr>
+                <td
+                  colSpan={3}
+                  className="font-semibold border-t-2 border-b-2 border-purple-700"
+                >
+                  <div
+                    className={
+                      overAllocationWeeks.length > 0
+                        ? "relative flex items-center pl-6"
+                        : "relative flex items-center"
+                    }
+                  >
+                    Totals:
+                    {overAllocationWeeks.length > 0 && (
+                      <div
+                        className={
+                          "group absolute left-1 h-full w-max flex items-center"
+                        }
+                      >
+                        <Icon
+                          iconName={"alert"}
+                          color={"#fe677b"}
+                          height="15px"
+                          width="15px"
+                        />
+                        <div className="hidden group-hover:block absolute top-5 -left-1 z-10 bg-blue-100 rounded-md border-2 border-blue-300 py-1 px-2 w-max h-fit text-sm text-grey-900 shadow-md">
+                          <h2 className="pb-1">
+                            Resource Over Allocated in Month(s):
+                          </h2>
+                          <ul className="list-inside list-disc">
+                            {resourceOverAllocationMonths.map((month) => (
+                              <li key={month.monthYearString}>
+                                <button
+                                  onClick={() =>
+                                    setYearMonthIndex({
+                                      year: month.year,
+                                      monthIndex: month.monthIndex,
+                                    })
+                                  }
+                                >
+                                  {month.monthYearString}
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </td>
+                {weekTotals.map((week) => {
+                  let className =
+                    "text-center font-semibold border-t-2 border-b-2 border-purple-700";
+
+                  if (week.total > week.max && context === "resource")
+                    className += " text-red-500";
+                  return (
+                    <td
+                      key={week.week}
+                      className={
+                        !visibleWeeks.includes(week.week) ? "hidden" : className
+                      }
+                    >
+                      {week.total}
+                    </td>
+                  );
+                })}
+              </tr>
+            )}
           </tfoot>
         </table>
       </div>

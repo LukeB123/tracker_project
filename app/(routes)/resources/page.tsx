@@ -1,43 +1,28 @@
-"use client";
+import { Suspense } from "react";
 
-import Dropdown from "@/app/_components/dropdown";
-import TEST from "@/app/_components/test";
+import LoadingResources from "@/app/_components/resources/loading-resources";
+import Resources from "@/app/_components/resources/resources";
 
-export default function TrackerPage() {
-  const data = [
-    {
-      id: 1,
-      name: "Luke",
-    },
-    {
-      id: 2,
-      name: "Ashley",
-    },
-    {
-      id: 3,
-      name: "Matt",
-    },
-    {
-      id: 4,
-      name: "Sam",
-    },
-    {
-      id: 5,
-      name: "Karim",
-    },
-  ];
+import { getResources } from "@/util/resources";
+
+async function FetchedResources() {
+  try {
+    const resources = await getResources();
+
+    return <Resources resources={resources} />;
+  } catch (error) {
+    return (
+      <p className="text-center p-2 text-purple-700 font-semibold">
+        Error Fetching Resources.
+      </p>
+    );
+  }
+}
+
+export default function ProjectsPage() {
   return (
-    <>
-      <h1>WELCOME TO RESOURCES</h1>
-      <div className="w-40">
-        <Dropdown
-          id="kbk"
-          title="PLEASE SELECT SOMETHING"
-          data={data}
-          parentSelectedItem={data[2]}
-        />
-      </div>
-      <TEST />
-    </>
+    <Suspense fallback={<LoadingResources />}>
+      <FetchedResources />
+    </Suspense>
   );
 }

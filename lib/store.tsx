@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import uiReducer from "./ui";
 import projectsReducer from "./projects";
+import resourcesReducer from "./resources";
 import formStatusReducer from "./formStatus";
 
 export const makeStore = () => {
@@ -8,6 +9,7 @@ export const makeStore = () => {
     reducer: {
       ui: uiReducer,
       projects: projectsReducer,
+      resources: resourcesReducer,
       formStatus: formStatusReducer,
     },
   });
