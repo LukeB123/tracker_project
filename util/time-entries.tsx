@@ -12,6 +12,7 @@ export type TProjectResourcesProps = {
   project_title: string;
   resource_id: number;
   resource_name: string;
+  resource_slug: string;
   role_id: number;
   role: string;
   rate_grade: string;
@@ -24,6 +25,7 @@ export type TNewProjectResourcesProps = {
   project_title: string;
   resource_id: number | undefined;
   resource_name: string;
+  resource_slug: string;
   role_id: number | undefined;
   role: string;
   rate_grade: string;
@@ -89,6 +91,18 @@ export async function getProjectResourcesByResource(
       "SELECT * FROM project_resources WHERE resource_id = ? ORDER BY resource_name, role, rate_grade"
     )
     .all(resourceId);
+}
+
+export async function getProjectResourcesByResourceSlug(
+  resourceSlug: string
+): Promise<TProjectResourcesProps[]> {
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  return db
+    .prepare(
+      "SELECT * FROM project_resources WHERE resource_slug = ? ORDER BY resource_name, role, rate_grade"
+    )
+    .all(resourceSlug);
 }
 
 export async function getProjectResourceByUniqueIds(
@@ -183,6 +197,7 @@ export async function updateProjectResources(
           project_title = @project_title,
           resource_id = @resource_id,
           resource_name = @resource_name,
+          resource_slug = @resource_slug,
           role_id = @role_id,
           role = @role,
           rate_grade = @rate_grade,
@@ -232,6 +247,7 @@ export async function addProjectResources(
         @project_title,
         @resource_id,
         @resource_name,
+        @resource_slug,
         @role_id,
         @role,
         @rate_grade,

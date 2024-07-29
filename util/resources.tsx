@@ -8,6 +8,7 @@ const db = sql("trackers.db");
 export type TResourceProps = {
   id: number;
   name: string;
+  slug: string;
   grade: string;
   role_id: number;
   role: string;
@@ -32,6 +33,14 @@ export async function getResource(id: number): Promise<TResourceProps> {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   return db.prepare("SELECT * FROM resources WHERE id = ?").get(id);
+}
+
+export async function getResourceFromSlug(
+  slug: string
+): Promise<TResourceProps> {
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  return db.prepare("SELECT * FROM resources WHERE slug = ?").get(slug);
 }
 
 export async function getRoles(): Promise<TRole[]> {

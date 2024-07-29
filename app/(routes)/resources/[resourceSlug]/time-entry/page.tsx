@@ -7,6 +7,7 @@ import {
   TProjectResourcesProps,
   TTimeEntriesProps,
   getProjectResourcesByResource,
+  getProjectResourcesByResourceSlug,
   getResourcesTimeEntries,
 } from "@/util/time-entries";
 import { TWeekProps, getWeeks } from "@/util/date";
@@ -57,8 +58,8 @@ async function FetchedTimeEntries({
 
 async function FetchedProjectResources({ params }: ParamsProp) {
   try {
-    const initialProjectResources = await getProjectResourcesByResource(
-      +params.resourceSlug
+    const initialProjectResources = await getProjectResourcesByResourceSlug(
+      params.resourceSlug
     );
 
     const weeks = await getWeeks();

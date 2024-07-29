@@ -11,6 +11,7 @@ const roles = [
 const resources = [
   {
     name: "Nick Fury",
+    slug: "nick-fury",
     grade: "7",
     role_id: 1,
     role: "Delivery Lead",
@@ -21,6 +22,7 @@ const resources = [
   },
   {
     name: "Iron Man",
+    slug: "iron-man",
     grade: "6",
     role_id: 2,
     role: "Project Manager",
@@ -31,6 +33,7 @@ const resources = [
   },
   {
     name: "Captain America",
+    slug: "captain-america",
     grade: "5",
     role_id: 2,
     role: "Project Manager",
@@ -41,6 +44,7 @@ const resources = [
   },
   {
     name: "Black Widow",
+    slug: "black-widow",
     grade: "4",
     role_id: 4,
     role: "Analyst",
@@ -51,6 +55,7 @@ const resources = [
   },
   {
     name: "Spider Man",
+    slug: "spider-man",
     grade: "3",
     role_id: 3,
     role: "Developer",
@@ -61,6 +66,7 @@ const resources = [
   },
   {
     name: "Captain Marvel",
+    slug: "captain-marvel",
     grade: "6",
     role_id: 1,
     role: "Delivery Lead",
@@ -71,6 +77,7 @@ const resources = [
   },
   {
     name: "Thor",
+    slug: "thor",
     grade: "6",
     role_id: 2,
     role: "Project Manager",
@@ -81,6 +88,7 @@ const resources = [
   },
   {
     name: "Loki",
+    slug: "loki",
     grade: "6",
     role_id: 4,
     role: "Analyst",
@@ -91,6 +99,7 @@ const resources = [
   },
   {
     name: "Hulk",
+    slug: "hulk",
     grade: "6",
     role_id: 2,
     role: "Project Manager",
@@ -101,6 +110,7 @@ const resources = [
   },
   {
     name: "Hawkeye",
+    slug: "hawkeye",
     grade: "3",
     role_id: 4,
     role: "Analyst",
@@ -111,6 +121,7 @@ const resources = [
   },
   {
     name: "Black Panter",
+    slug: "black-panter",
     grade: "5",
     role_id: 3,
     role: "Developer",
@@ -121,6 +132,7 @@ const resources = [
   },
   {
     name: "Ant Man",
+    slug: "ant-man",
     grade: "3",
     role_id: 3,
     role: "Developer",
@@ -131,6 +143,7 @@ const resources = [
   },
   {
     name: "Wasp",
+    slug: "wasp",
     grade: "3",
     role_id: 3,
     role: "Developer",
@@ -141,6 +154,7 @@ const resources = [
   },
   {
     name: "Scarlet Witch",
+    slug: "scarlet-witch",
     grade: "6",
     role_id: 2,
     role: "Project Manager",
@@ -151,6 +165,7 @@ const resources = [
   },
   {
     name: "Vision",
+    slug: "vision",
     grade: "7",
     role_id: 1,
     role: "Delivery Lead",
@@ -161,6 +176,7 @@ const resources = [
   },
   {
     name: "Dr Strange",
+    slug: "dr-strange",
     grade: "6",
     role_id: 1,
     role: "Delivery Lead",
@@ -245,6 +261,7 @@ const dummyProjectResources = [
     project_title: "Project 1",
     resource_id: 1,
     resource_name: "Nick Fury",
+    resource_slug: "nick-fury",
     role_id: 1,
     role: "Delivery Lead",
     rate_grade: "4",
@@ -256,6 +273,7 @@ const dummyProjectResources = [
     project_title: "Project 1",
     resource_id: 2,
     resource_name: "Iron Man",
+    resource_slug: "iron-man",
     role_id: 2,
     role: "Project Manager",
     rate_grade: "4",
@@ -267,6 +285,7 @@ const dummyProjectResources = [
     project_title: "Project 1",
     resource_id: 3,
     resource_name: "Captain America",
+    resource_slug: "captain-america",
     role_id: 2,
     role: "Project Manager",
     rate_grade: "5",
@@ -278,6 +297,7 @@ const dummyProjectResources = [
     project_title: "Project 2",
     resource_id: 4,
     resource_name: "Black Widow",
+    resource_slug: "black-widow",
     role_id: 4,
     role: "Analyst",
     rate_grade: "4",
@@ -289,6 +309,7 @@ const dummyProjectResources = [
     project_title: "Project 2",
     resource_id: 5,
     resource_name: "Spider Man",
+    resource_slug: "spider-man",
     role_id: 3,
     role: "Developer",
     rate_grade: "6",
@@ -300,6 +321,7 @@ const dummyProjectResources = [
     project_title: "Project 2",
     resource_id: 1,
     resource_name: "Nick Fury",
+    resource_slug: "nick-fury",
     role_id: 1,
     role: "Delivery Lead",
     rate_grade: "6",
@@ -567,6 +589,7 @@ db.prepare(
     CREATE TABLE IF NOT EXISTS resources (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE,
+        slug TEXT NOT NULL UNIQUE,
         grade TEXT NOT NULL,
         role_id NUMBER NOT NULL,
         role TEXT NOT NULL,
@@ -594,6 +617,7 @@ db.prepare(
         project_title TEXT NOT NULL,
         resource_id INTEGER NOT NULL,
         resource_name TEXT NOT NULL,
+        resource_slug TEXT NOT NULL,
         role_id INTEGER NOT NULL,
         role TEXT NOT NULL,
         rate_grade TEXT NOT NULL,
@@ -646,6 +670,7 @@ async function initData() {
   INSERT INTO resources VALUES (
       null,
       @name,
+      @slug,
       @grade,
       @role_id,
       @role,
@@ -679,6 +704,7 @@ async function initData() {
       @project_title,
       @resource_id,
       @resource_name,
+      @resource_slug,
       @role_id,
       @role,
       @rate_grade,

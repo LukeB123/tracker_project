@@ -205,15 +205,15 @@ export async function projectTimeEntriesAction(
     }
   });
 
-  console.log("newProjectResources", newProjectResources);
-  console.log("updatedProjectResources", updatedProjectResources);
-  console.log("newTimeEntries", newTimeEntries);
-  console.log("updatedTimeEntries", updatedTimeEntries);
-  console.log("deletedProjectResourceIds", deletedProjectResourceIds);
-  console.log("deletedTimeEntryIds", deletedTimeEntryIds);
-  console.log("newProjectResourceUniqueIds", newProjectResourceUniqueIds);
-  console.log("projectIds", projectIds);
-  console.log("resourceIds", resourceIds);
+  // console.log("newProjectResources", newProjectResources);
+  // console.log("updatedProjectResources", updatedProjectResources);
+  // console.log("newTimeEntries", newTimeEntries);
+  // console.log("updatedTimeEntries", updatedTimeEntries);
+  // console.log("deletedProjectResourceIds", deletedProjectResourceIds);
+  // console.log("deletedTimeEntryIds", deletedTimeEntryIds);
+  // console.log("newProjectResourceUniqueIds", newProjectResourceUniqueIds);
+  // console.log("projectIds", projectIds);
+  // console.log("resourceIds", resourceIds);
 
   try {
     if (newProjectResources.length > 0)

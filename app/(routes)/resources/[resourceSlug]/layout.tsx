@@ -4,7 +4,7 @@ import NavButton from "@/app/_components/buttons/nav-button";
 import Icon from "@/app/_components/icons/icons";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { resourcesActions } from "@/lib/resources";
-import { getResource } from "@/util/resources";
+import { getResource, getResourceFromSlug } from "@/util/resources";
 import { useEffect, useState } from "react";
 
 interface ResourceDetailsPageParams {
@@ -26,7 +26,7 @@ export default function ProjectsLayout({
     async function fetchResource() {
       if (!resource) {
         try {
-          const responce = await getResource(+params.resourceSlug);
+          const responce = await getResourceFromSlug(params.resourceSlug);
 
           dispatch(resourcesActions.setCurrentResource(responce));
           setError(false);

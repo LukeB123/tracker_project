@@ -15,7 +15,9 @@ export default function ResourceLink({ resource }: ResourceLinkParams) {
 
   function handleClick() {
     dispatch(resourcesActions.setCurrentResource(resource));
-    router.push(`/resources/${resource.id}`);
+    router.push(
+      `/resources/${resource.name.toLowerCase().replaceAll(" ", "-")}`
+    );
   }
 
   return (

@@ -80,6 +80,7 @@ export async function baselineEntriesAction(
           project_title: prevState.project.title,
           resource_id: resourceId,
           resource_name: resourceName,
+          resource_slug: resourceName.toLowerCase().replaceAll(" ", "-"),
           role_id: roleID,
           role: roleName,
           rate_grade: rateGrade,

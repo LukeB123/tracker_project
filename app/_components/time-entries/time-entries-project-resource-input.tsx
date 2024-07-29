@@ -247,6 +247,7 @@ export default function TimeEntriesProjectResourceInput({
               ...prevState[projectResourceIndex],
               resource_id: selectedResource.id,
               resource_name: selectedResource.name,
+              resource_slug: selectedResource.slug,
               role_id: selectedResource.role_id,
               role: selectedResource.role,
               rate_grade: selectedResource.grade,
@@ -419,7 +420,7 @@ export default function TimeEntriesProjectResourceInput({
         })
       : [];
 
-    href = "/resources/" + projectResource.resource_id;
+    href = "/resources/" + projectResource.resource_slug;
   } else if (context === "resource") {
     if (projectResource.project_title !== "")
       projectResourceLabel = projectResource.project_title;
