@@ -74,6 +74,10 @@ export default function TimeEntries({
     setInitialYearMonthIndex
   );
 
+  const [rowTotalType, setRowTotalType] = useState<"monthly" | "allTime">(
+    "monthly"
+  );
+
   const currentProject = useAppSelector(
     (state) => state.projects.currentProject
   );
@@ -148,6 +152,7 @@ export default function TimeEntries({
         project_title: currentProject.title,
         resource_id: undefined,
         resource_name: "",
+        resource_slug: "",
         role_id: undefined,
         role: "",
         rate_grade: "",
@@ -166,6 +171,7 @@ export default function TimeEntries({
         project_title: "",
         resource_id: currentResource.id,
         resource_name: currentResource.name,
+        resource_slug: currentResource.slug,
         role_id: currentResource.role_id,
         role: currentResource.role,
         rate_grade: currentResource.grade,
@@ -348,6 +354,10 @@ export default function TimeEntries({
               weeks={weeks}
               visibleWeeks={visibleWeeks}
               activeWeeks={activeWeeks}
+              rowTotalType={
+                projectResources.length > 0 ? rowTotalType : undefined
+              }
+              setRowTotalType={setRowTotalType}
             />
           </thead>
           <tbody>
@@ -384,6 +394,7 @@ export default function TimeEntries({
                   changesMade={changesMade}
                   setChangesMade={setChangesMade}
                   setYearMonthIndex={setYearMonthIndex}
+                  rowTotalType={rowTotalType}
                 />
               );
             })}
@@ -403,7 +414,7 @@ export default function TimeEntries({
                 </td>
               </tr>
             )}
-            {!initialTimeEntriesIsLoading && (
+            {!initialTimeEntriesIsLoading && projectResources.length > 0 && (
               <tr>
                 <td
                   colSpan={3}

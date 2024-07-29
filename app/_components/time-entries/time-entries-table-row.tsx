@@ -50,6 +50,7 @@ interface TimeEntriesTableRowProps {
       monthIndex: number;
     }>
   >;
+  rowTotalType: "monthly" | "allTime";
 }
 
 export default function TimeEntriesTableRow({
@@ -71,6 +72,7 @@ export default function TimeEntriesTableRow({
   changesMade,
   setChangesMade,
   setYearMonthIndex,
+  rowTotalType,
 }: TimeEntriesTableRowProps) {
   const formStatusIsPending = useAppSelector(
     (state) => state.formStatus.formStatusIsPending
@@ -83,6 +85,8 @@ export default function TimeEntriesTableRow({
     (entry) => entry.resource_id === projectResource.resource_id
   );
 
+  let rowTotal = 0;
+
   weeks.forEach((week) => {
     const totalTrackerDays = resourceTimeEntries
       .filter((entry) => entry.week_commencing === week.week_commencing)
@@ -93,6 +97,25 @@ export default function TimeEntriesTableRow({
 
     if (totalTrackerDays > week.total_working_days && context === "project")
       overAllocationWeeks.push(week);
+
+    let rowTimeEntry: number | undefined;
+
+    if (rowTotalType === "monthly") {
+      rowTimeEntry = timeEntries.find(
+        (entry) =>
+          entry.unique_identifier ===
+            projectResource.unique_identifier + "_" + week.week_commencing &&
+          activeWeeks.includes(week.week_commencing)
+      )?.work_days;
+    } else {
+      rowTimeEntry = timeEntries.find(
+        (entry) =>
+          entry.unique_identifier ===
+          projectResource.unique_identifier + "_" + week.week_commencing
+      )?.work_days;
+    }
+
+    if (rowTimeEntry) rowTotal += rowTimeEntry;
   });
 
   useEffect(() => {
@@ -170,6 +193,13 @@ export default function TimeEntriesTableRow({
             </td>
           );
         })}
+      {!initialTimeEntriesIsLoading &&
+        projectResource.project_id &&
+        projectResource.resource_id && (
+          <td className="font-semibold border-l-2 px-1 border-purple-700 text-center">
+            {rowTotal}
+          </td>
+        )}
       {initialTimeEntriesIsLoading &&
         Array(5)
           .fill(0)

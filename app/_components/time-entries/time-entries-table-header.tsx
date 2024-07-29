@@ -8,6 +8,8 @@ interface TimeEntriesTableHeaderProps {
   weeks: TWeekProps[];
   visibleWeeks: string[];
   activeWeeks: string[];
+  rowTotalType: "monthly" | "allTime" | undefined;
+  setRowTotalType: React.Dispatch<React.SetStateAction<"monthly" | "allTime">>;
 }
 
 export default function TimeEntriesTableHeader({
@@ -15,6 +17,8 @@ export default function TimeEntriesTableHeader({
   weeks,
   visibleWeeks,
   activeWeeks,
+  rowTotalType,
+  setRowTotalType,
 }: TimeEntriesTableHeaderProps) {
   return (
     <tr>
@@ -70,6 +74,19 @@ export default function TimeEntriesTableHeader({
           </th>
         );
       })}
+      {rowTotalType && (
+        <th className="font-semibold border-l-2 px-1 border-purple-700 text-center">
+          <button
+            onClick={() => {
+              setRowTotalType((prevState) =>
+                prevState === "monthly" ? "allTime" : "monthly"
+              );
+            }}
+          >
+            {rowTotalType === "monthly" ? "Monthly " : ""}Total
+          </button>
+        </th>
+      )}
     </tr>
   );
 }
