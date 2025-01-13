@@ -1,4 +1,4 @@
-import Dropdown, { DropdownItem } from "@/app/_components/dropdown";
+import Dropdown, { DropdownItem } from "@/app/_components/buttons/dropdown";
 import DeleteIconButton from "@/app/_components/delete-icon-button";
 import React, { useEffect, useState } from "react";
 import Icon from "../icons/icons";

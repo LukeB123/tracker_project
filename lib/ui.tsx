@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 export interface TNotificationState {
-  status: string;
+  status: "error" | "neutral" | "success";
   title: string;
   message: string;
 }

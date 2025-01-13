@@ -4,23 +4,26 @@ import { useFormStatus } from "react-dom";
 import Button from "@/app/_components/buttons/button";
 import Icon from "@/app/_components/icons/icons";
 
-interface ProjectDetailsFormButtonsParmas {
-  newProject: boolean;
+interface DetailsFormButtonsParmas {
+  disabled?: boolean;
+  newProjectResource: boolean;
   changesMade: boolean;
   setChangesMade: React.Dispatch<React.SetStateAction<boolean>>;
   setIsEditing?: React.Dispatch<React.SetStateAction<boolean>>;
-  disabled?: boolean;
+  context: "project" | "resource";
 }
-export default function ProjectDetailsFormButtons({
-  newProject,
+
+export default function DetailsFormButtons({
+  disabled = false,
+  newProjectResource,
   changesMade,
   setChangesMade,
   setIsEditing,
-  disabled = false,
-}: ProjectDetailsFormButtonsParmas) {
+  context,
+}: DetailsFormButtonsParmas) {
   const { pending } = useFormStatus();
 
-  function handleClick() {
+  function handleCancel() {
     setChangesMade(false);
     setIsEditing && setIsEditing(false);
   }
@@ -28,12 +31,12 @@ export default function ProjectDetailsFormButtons({
   let cancelAction: {
     href: string | undefined;
     onClick: (() => void) | undefined;
-  } = { href: "/projects/", onClick: handleClick };
+  } = { href: undefined, onClick: undefined };
 
-  if (newProject) {
-    cancelAction.onClick = undefined;
+  if (newProjectResource) {
+    cancelAction.href = `/${context}s/`;
   } else {
-    cancelAction.href = undefined;
+    cancelAction.onClick = handleCancel;
   }
 
   return (

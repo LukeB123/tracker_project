@@ -1,10 +1,8 @@
-interface ProjectDetailsTableHeaderParams {
+interface DetailsTableHeaderParams {
   title: string;
 }
 
-export default function ProjectDetailsFormHeader({
-  title,
-}: ProjectDetailsTableHeaderParams) {
+export default function DetailsFormHeader({ title }: DetailsTableHeaderParams) {
   return (
     <>
       <header className="text-2xl text-center bg-white w-full">

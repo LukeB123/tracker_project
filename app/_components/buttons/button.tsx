@@ -45,11 +45,17 @@ export default function Button({
   width,
   children,
 }: PrimaryButtonParams) {
-  let className = "text-center py-1 px-2 rounded-md ";
+  let className = "text-center py-1 px-2 rounded-md";
 
-  if (height) className += height;
+  if (height) {
+    className += " ";
+    className += height;
+  }
 
-  if (width) className += width;
+  if (width) {
+    className += " ";
+    className += width;
+  }
 
   if (buttonStyle === "primary")
     className +=

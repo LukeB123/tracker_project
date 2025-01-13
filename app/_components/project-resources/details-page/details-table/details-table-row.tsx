@@ -1,12 +1,9 @@
-interface ProjectDetailsTableRowParams {
+interface DetailsTableRowParams {
   label: string;
   value: number | string;
 }
 
-export default function ProjectDetailsRow({
-  label,
-  value,
-}: ProjectDetailsTableRowParams) {
+export default function DetailsRow({ label, value }: DetailsTableRowParams) {
   let valueClass =
     "basis-1/2 text-right rounded-md bg-grey-100 border-2 text-purple-700 font-medium py-1 px-2";
 

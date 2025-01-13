@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
-import LoadingResources from "@/app/_components/resources/loading-resources";
-import Resources from "@/app/_components/resources/resources";
+import ProjectResources from "@/app/_components/project-resources/project-resources";
+import Loading from "@/app/_components/project-resources/loading";
 
 import { getResources } from "@/util/resources";
 
@@ -9,7 +9,7 @@ async function FetchedResources() {
   try {
     const resources = await getResources();
 
-    return <Resources resources={resources} />;
+    return <ProjectResources resources={resources} context="resource" />;
   } catch (error) {
     return (
       <p className="text-center p-2 text-purple-700 font-semibold">
@@ -21,7 +21,7 @@ async function FetchedResources() {
 
 export default function ProjectsPage() {
   return (
-    <Suspense fallback={<LoadingResources />}>
+    <Suspense fallback={<Loading context="resource" />}>
       <FetchedResources />
     </Suspense>
   );

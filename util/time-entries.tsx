@@ -183,6 +183,25 @@ export async function updateProjectResourcesProjectTitle(
     .run(projectSlug, projectTitle, projectId);
 }
 
+export async function updateProjectResourcesResourceName(
+  resourceId: number,
+  resourceSlug: string,
+  resourceName: string
+) {
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  await db
+    .prepare(
+      `
+    UPDATE project_resources
+    SET
+      resource_slug = ?,
+      resource_name = ?
+    WHERE resource_id = ?`
+    )
+    .run(resourceSlug, resourceName, resourceId);
+}
+
 export async function updateProjectResources(
   projectResources: TProjectResourcesProps[]
 ) {
@@ -315,6 +334,18 @@ export async function deleteProjectResourcesByProjectId(projectId: number) {
 
   db.prepare("DELETE FROM project_time_entries WHERE project_id = ?").run(
     projectId
+  );
+}
+
+export async function deleteProjectResourcesByResourceId(resourceId: number) {
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  db.prepare("DELETE FROM project_resources WHERE resource_id = ?").run(
+    resourceId
+  );
+
+  db.prepare("DELETE FROM project_time_entries WHERE resource_id = ?").run(
+    resourceId
   );
 }
 

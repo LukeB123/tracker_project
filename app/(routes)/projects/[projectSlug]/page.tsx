@@ -1,5 +1,5 @@
-import ProjectDetails from "@/app/_components/projects/project-details/project-details";
+import DetailsPage from "@/app/_components/project-resources/details-page/details";
 
 export default function ProjectDetailsPage() {
-  return <ProjectDetails />;
+  return <DetailsPage context="project" />;
 }

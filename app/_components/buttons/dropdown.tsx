@@ -25,7 +25,6 @@ interface DropdownProps {
   changesMade?: boolean;
   setChangesMade?: React.Dispatch<React.SetStateAction<boolean>>;
   disabled?: boolean;
-  visibledata?: DropdownItem[];
   isLoading?: boolean;
   isError?: boolean;
 }
@@ -43,7 +42,6 @@ export default function Dropdown({
   changesMade,
   setChangesMade,
   disabled = false,
-  visibledata,
   isLoading = false,
   isError = false,
 }: DropdownProps) {
@@ -55,17 +53,13 @@ export default function Dropdown({
     parentSelectedItem ? { ...parentSelectedItem } : undefined
   );
 
-  let listData = [...data];
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  if (visibledata) listData = [...visibledata];
+  let searchData = data.filter((entry) =>
+    entry.name.toLowerCase().includes(searchString.toLowerCase())
+  );
 
-  let searchData = [...listData];
-
-  if (search)
-    searchData = listData.filter((entry) =>
-      entry.name.toLowerCase().includes(searchString.toLowerCase())
-    );
-
+  // Styling
   let dropDownClassName =
     "flex justify-between gap-1 items-center w-full py-1 px-2 ";
 
@@ -76,7 +70,7 @@ export default function Dropdown({
   }
 
   let dropDownMenuClassName =
-    "absolute bg-grey-100 w-full min-w-max max-h-52 overflow-y-auto pb-3 rounded-md shadow-md z-10";
+    "absolute bg-grey-100 w-full min-w-max max-h-52 overflow-y-auto pb-3 rounded-md shadow-lg z-10";
 
   if (position === "bottom-left")
     dropDownMenuClassName += " top-full left-0 mt-1";
@@ -92,6 +86,7 @@ export default function Dropdown({
 
   if (!search) dropDownMenuClassName += " pt-3";
 
+  // Handle new item selection from dropdown list
   function handleChange(item: DropdownItem) {
     setSelectedItem(item);
     onSelect && onSelect(item.id);
@@ -100,10 +95,39 @@ export default function Dropdown({
     setChangesMade && setChangesMade(true);
   }
 
+  // Handle change to search string
   function handleSearchChange(searchStringValue: string) {
     setSearchString(searchStringValue);
   }
 
+  // Handle click outside of dropdown selection
+  useOutsideClick({
+    ref: dropdownRef,
+    handler: () => {
+      setIsOpen(false);
+      setSearchString("");
+    },
+  });
+
+  // Handle click on the dropdown box
+  function handleClick(event: React.MouseEvent<HTMLElement>) {
+    setIsOpen(!isOpen);
+  }
+
+  // If form is reset, set selectedItem state back to parent
+  useEffect(() => {
+    if (
+      changesMade !== undefined &&
+      !changesMade &&
+      parentSelectedItem?.id !== selectedItem?.id
+    ) {
+      setSelectedItem(
+        parentSelectedItem ? { ...parentSelectedItem } : undefined
+      );
+    }
+  }, [changesMade]);
+
+  // Update selectedItem once dropdown selection has been fetched, if beening pulled from backend
   useEffect(() => {
     if (parentSelectedItem && data) {
       const newSelectedItem = data.find(
@@ -114,34 +138,6 @@ export default function Dropdown({
       setSelectedItem(undefined);
     }
   }, [parentSelectedItem?.id, JSON.stringify(data)]);
-
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useOutsideClick({
-    ref: dropdownRef,
-    handler: () => {
-      setIsOpen(false);
-      setSearchString("");
-    },
-  });
-
-  function handleClick(event: React.MouseEvent<HTMLElement>) {
-    setIsOpen(!isOpen);
-  }
-
-  useEffect(() => {
-    const startingValue = parentSelectedItem
-      ? { ...parentSelectedItem }
-      : undefined;
-
-    if (
-      changesMade !== undefined &&
-      !changesMade &&
-      startingValue?.id !== selectedItem?.id
-    ) {
-      setSelectedItem(startingValue);
-    }
-  }, [changesMade]);
 
   return (
     <div ref={dropdownRef} className="relative w-full h-full">

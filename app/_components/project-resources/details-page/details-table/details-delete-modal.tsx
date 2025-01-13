@@ -6,27 +6,28 @@ import { useRouter } from "next/navigation";
 
 import Modal from "@/app/_components/modal";
 import Button from "@/app/_components/buttons/button";
+import Icon from "@/app/_components/icons/icons";
 
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { uiActions } from "@/lib/ui";
 
-import { deleteProjectAction } from "@/util/project-actions";
-import Icon from "@/app/_components/icons/icons";
+import { deleteProjectResourceAction } from "@/util/details-form-actions";
 
 interface TProjectDetailsDeleteModalProps {
   id: number;
   title: string;
   showDeleteModal: boolean;
   setShowDeleteModal: React.Dispatch<React.SetStateAction<boolean>>;
+  context: "project" | "resource";
 }
 
-export default function ProjectDetailsDeleteModal({
+export default function DetailsDeleteModal({
   id,
   title,
   showDeleteModal,
   setShowDeleteModal,
+  context,
 }: TProjectDetailsDeleteModalProps) {
-  const project = useAppSelector((state) => state.projects.currentProject);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const dispatch = useAppDispatch();
@@ -36,18 +37,19 @@ export default function ProjectDetailsDeleteModal({
   async function handleDelete() {
     setIsDeleting(true);
 
-    const responce = await deleteProjectAction(id);
+    let responce = await deleteProjectResourceAction(id, context);
 
     setIsDeleting(false);
 
-    dispatch(uiActions.showNotification(responce.notification));
+    if (responce && responce.notification) {
+      dispatch(uiActions.showNotification(responce.notification));
 
-    if (responce.notification.status === "success") {
-      setShowDeleteModal(false);
-      // remove project from redux store allProjects
+      if (responce.notification.status === "success") {
+        setShowDeleteModal(false);
+      }
     }
 
-    if (responce.redirect) {
+    if (responce && responce.redirect) {
       router.push(responce.redirect);
     }
   }

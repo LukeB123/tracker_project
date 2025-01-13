@@ -27,15 +27,15 @@ export type TNewProjectDetailsProps = {
   slug: string;
   title: string;
   delivery_manager: string;
-  delivery_manager_id: number | undefined;
+  delivery_manager_id: number;
   project_manager: string;
-  project_manager_id: number | undefined;
+  project_manager_id: number;
   delivery_stream: string;
   value_stream: string;
   scrum_master: string;
-  scrum_master_id: number | undefined;
+  scrum_master_id: number;
   project_type: string;
-  last_updated: undefined;
+  last_updated: string;
   line_of_business: string;
   task: string;
 };
@@ -158,12 +158,21 @@ export async function updateProjectsLastUpdated(projectIds: number[]) {
   }
 }
 
-export async function checkSlugUniquness(id: number | null, slug: string) {
+export async function checkProjectSlugUniquness(
+  id: number | null,
+  slug: string
+) {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  const result = db
-    .prepare("SELECT slug FROM projects WHERE slug = ? AND id <> ?")
-    .all(slug, id);
+  let result: any;
+
+  if (id === null) {
+    result = db.prepare("SELECT slug FROM projects WHERE slug = ?").all(slug);
+  } else {
+    result = db
+      .prepare("SELECT slug FROM projects WHERE slug = ? AND id <> ?")
+      .all(slug, id);
+  }
 
   return result.length < 1;
 }
