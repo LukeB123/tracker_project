@@ -437,9 +437,7 @@ export async function getWeeks(): Promise<TWeekProps[]> {
     },
   ];
 
-  const sortedWeeks = weeks.sort((a, b) =>
-    a.week_commencing > b.week_commencing ? 1 : -1
-  );
+  weeks.sort((a, b) => (a.week_commencing > b.week_commencing ? 1 : -1));
 
-  return sortedWeeks as TWeekProps[];
+  return weeks as TWeekProps[];
 }

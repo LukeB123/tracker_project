@@ -2,9 +2,9 @@
 import { TWeekProps } from "@/util/date";
 import { TResourceProps, TRole } from "@/util/resources";
 import { useState } from "react";
-import BaselineEntry from "./baseline-entry";
-import AddEntryButton from "../buttons/add-entry-button";
-import BaselineForm from "./baseline-form";
+import BaselineEntry from "@/app/_components/baseline/baseline-entry";
+import AddEntryButton from "@/app/_components/buttons/add-entry-button";
+import BaselineForm from "@/app/_components/baseline/baseline-form";
 
 interface BaselineInputProps {
   resources: TResourceProps[];
@@ -12,19 +12,19 @@ interface BaselineInputProps {
   roles: TRole[];
 }
 
-const todayDate = new Date();
-const startWeekCommencing = new Date();
+// const todayDate = new Date();
+// const startWeekCommencing = new Date();
 
-const todayDayOfWeek = todayDate.getDay();
+// const todayDayOfWeek = todayDate.getDay();
 
-const x = (todayDayOfWeek * -1 - 1) % 7;
+// const x = (todayDayOfWeek * -1 - 1) % 7;
 
-startWeekCommencing.setDate(todayDate.getDate() + x);
+// startWeekCommencing.setDate(todayDate.getDate() + x);
 
-const initialYearMonthIndex = {
-  year: startWeekCommencing.getFullYear(),
-  monthIndex: startWeekCommencing.getMonth() + 1,
-};
+// const initialYearMonthIndex = {
+//   year: startWeekCommencing.getFullYear(),
+//   monthIndex: startWeekCommencing.getMonth() + 1,
+// };
 
 const grades = [
   { id: 1, name: "1" },
@@ -127,7 +127,7 @@ export default function BaselineInput({
                   }}
                   // disabled={formStatusPending}
                 >
-                  <AddEntryButton isDisabled={false} />
+                  <AddEntryButton />
                 </button>
               </td>
             </tr>

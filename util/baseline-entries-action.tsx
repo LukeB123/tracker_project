@@ -18,7 +18,7 @@ import {
   TProjectDetailsProps,
   updateProjectsLastUpdated,
 } from "@/util/projects";
-import { TWeekProps, getWeeks } from "./date";
+import { TWeekProps, getWeeks } from "@/util/date";
 
 interface TFormState {
   project: TProjectDetailsProps;
@@ -44,8 +44,8 @@ export async function baselineEntriesAction(
 
   const deletedTimeEntryIds: number[] = [];
 
-  // Model the data for each row in the form
   try {
+    // Model the data for each row in the form
     entryIds.forEach((entryId) => {
       const resourceId = +formData.get("resource_" + entryId + "_id");
       const resourceName: string = formData.get("resource_" + entryId);
@@ -53,8 +53,9 @@ export async function baselineEntriesAction(
       const roleName: string = formData.get("role_" + entryId);
       const rateGrade: string = formData.get("rate_grade_" + entryId);
       const initialWeek: string = formData.get("week_commencing_" + entryId);
-      const daysPerWeek: string = formData.get("work_days_" + entryId);
-      const numberOfWeeks: string = formData.get("number_of_weeks_" + entryId);
+      const daysPerWeekString = formData.get("work_days_" + entryId);
+      const daysPerWeek = +formData.get("work_days_" + entryId);
+      const numberOfWeeks = +formData.get("number_of_weeks_" + entryId);
       const uniqueId =
         prevState.project.id +
         "_" +
@@ -65,14 +66,33 @@ export async function baselineEntriesAction(
         rateGrade;
 
       if (
-        resourceId > 0 &&
-        roleID > 0 &&
-        rateGrade !== "" &&
-        initialWeek !== "" &&
-        daysPerWeek !== "" &&
-        numberOfWeeks !== ""
+        resourceId === 0 ||
+        roleID === 0 ||
+        rateGrade === "" ||
+        initialWeek === "" ||
+        daysPerWeekString === "" ||
+        numberOfWeeks === 0
       ) {
+        throw new Error("Missing Input");
+      } else {
         // if (!resourceIds.includes(resourceId)) resourceIds.push(resourceId);
+
+        const iniialWeekIndex = prevState.weeks.findIndex(
+          (week) => week.week_commencing === initialWeek
+        );
+
+        let entryWeeks: TWeekProps[];
+
+        if (iniialWeekIndex + numberOfWeeks > prevState.weeks.length) {
+          throw new Error("Exceed Project Length");
+        } else if (iniialWeekIndex + numberOfWeeks === prevState.weeks.length) {
+          entryWeeks = prevState.weeks.slice(iniialWeekIndex);
+        } else {
+          entryWeeks = prevState.weeks.slice(
+            iniialWeekIndex,
+            iniialWeekIndex + numberOfWeeks
+          );
+        }
 
         modelledDataProjectResources.push({
           project_id: prevState.project.id,
@@ -87,21 +107,6 @@ export async function baselineEntriesAction(
           unique_identifier: uniqueId,
         });
 
-        const iniialWeekIndex = prevState.weeks.findIndex(
-          (week) => week.week_commencing === initialWeek
-        );
-
-        let entryWeeks: TWeekProps[];
-
-        if (iniialWeekIndex + +numberOfWeeks >= prevState.weeks.length) {
-          entryWeeks = prevState.weeks.slice(iniialWeekIndex);
-        } else {
-          entryWeeks = prevState.weeks.slice(
-            iniialWeekIndex,
-            iniialWeekIndex + +numberOfWeeks
-          );
-        }
-
         entryWeeks.forEach((entryWeek) => {
           const timeEntryUniqueId = uniqueId + "_" + entryWeek.week_commencing;
 
@@ -113,7 +118,7 @@ export async function baselineEntriesAction(
             role_id: roleID,
             rate_grade: rateGrade,
             week_commencing: entryWeek.week_commencing,
-            work_days: +daysPerWeek,
+            work_days: daysPerWeek,
             unique_identifier: timeEntryUniqueId,
           };
 
@@ -129,20 +134,30 @@ export async function baselineEntriesAction(
             modelledDataTimeEntries[timeEntryIndex] = weekTimeEntry;
           }
         });
-      } else {
-        // Throw an error if the form contains empty inputs
-        throw new Error();
       }
     });
-  } catch (error) {
-    return {
-      ...prevState,
-      notification: {
-        status: "netural",
-        title: "Project Baseline Entry",
-        message: "Please Fill Out Entire Form",
-      },
-    };
+  } catch (error: any) {
+    if (error.message === "Missing Input") {
+      return {
+        ...prevState,
+        notification: {
+          status: "neutral",
+          title: "Project Baseline Entry",
+          message: "Please Fill Out Entire Form.",
+        },
+      };
+    }
+
+    if (error.message === "Exceed Project Length") {
+      return {
+        ...prevState,
+        notification: {
+          status: "error",
+          title: "Project Baseline Entry",
+          message: "Submission Exceeds the Length of the Project.",
+        },
+      };
+    }
   }
 
   // Add new project resources to array
@@ -194,15 +209,10 @@ export async function baselineEntriesAction(
       notification: {
         status: "error",
         title: "Project Baseline Entry",
-        message: "Error Fetching Data From Database",
+        message: "Error Fetching Data From Database.",
       },
     };
   }
-
-  // console.log("newProjectResources", newProjectResources);
-  // console.log("newTimeEntries", newTimeEntries);
-  // console.log("updatedTimeEntries", updatedTimeEntries);
-  // console.log("deletedTimeEntryIds", deletedTimeEntryIds);
 
   try {
     if (newProjectResources.length > 0)
@@ -225,12 +235,6 @@ export async function baselineEntriesAction(
     ) {
       // UPDATE PROJECT UPDATED TIMES
       await updateProjectsLastUpdated([prevState.project.id]);
-
-      // if (prevState.currentProject && prevState.context === "project") {
-      //   revalidatePath(
-      //     "/projects/" + prevState.currentProject.slug + "/time-entry"
-      //   );
-      // }
     }
 
     return {
@@ -238,7 +242,7 @@ export async function baselineEntriesAction(
       notification: {
         status: "success",
         title: "Project Baseline Entry",
-        message: "Time Entries Updated Successfully",
+        message: "Time Entries Updated Successfully.",
       },
     };
   } catch (error) {
@@ -247,7 +251,7 @@ export async function baselineEntriesAction(
       notification: {
         status: "error",
         title: "Project Baseline Entry",
-        message: "Error Updating Data From Database",
+        message: "Error with Database.",
       },
     };
   }

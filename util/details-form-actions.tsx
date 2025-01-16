@@ -365,7 +365,7 @@ export async function deleteProjectResourceAction(
         notification: {
           status: "success",
           title: "Project Details Delete",
-          message: "Project deleted successfully",
+          message: "Project deleted successfully.",
         },
         redirect: "/projects/",
       };
@@ -376,7 +376,7 @@ export async function deleteProjectResourceAction(
         notification: {
           status: "error",
           title: "Project Details Delete",
-          message: "Error deleting project!",
+          message: "Error deleting project.",
         },
         redirect: null,
       };
@@ -395,7 +395,7 @@ export async function deleteProjectResourceAction(
         notification: {
           status: "success",
           title: "Resource Details Delete",
-          message: "Resource deleted successfully",
+          message: "Resource deleted successfully.",
         },
         redirect: "/resources/",
       };
@@ -406,7 +406,7 @@ export async function deleteProjectResourceAction(
         notification: {
           status: "error",
           title: "Resource Details Delete",
-          message: "Error deleting resource!",
+          message: "Error deleting resource.",
         },
         redirect: null,
       };
@@ -417,7 +417,7 @@ export async function deleteProjectResourceAction(
     notification: {
       status: "error",
       title: "Details Delete",
-      message: "Unknown Context",
+      message: "Unknown Context.",
     },
     redirect: null,
   };

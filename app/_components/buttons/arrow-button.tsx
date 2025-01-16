@@ -1,4 +1,4 @@
-import Icon from "../icons/icons";
+import Icon from "@/app/_components/icons/icons";
 
 export default function ArrowButton({
   label,

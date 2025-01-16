@@ -1,7 +1,8 @@
 import Dropdown, { DropdownItem } from "@/app/_components/buttons/dropdown";
 import DeleteIconButton from "@/app/_components/delete-icon-button";
 import React, { useEffect, useState } from "react";
-import Icon from "../icons/icons";
+import { useAppSelector } from "@/lib/hooks";
+import Icon from "@/app/_components/icons/icons";
 import { TRole } from "@/util/resources";
 
 interface BaselineEntryProps {
@@ -27,6 +28,10 @@ export default function BaselineEntry({
     name: "",
   });
   const [numberOfWeeks, setNumberOfWeeks] = useState("");
+
+  const formStatusIsPending = useAppSelector(
+    (state) => state.formStatus.formStatusIsPending
+  )!;
 
   function handleWeekChange(id: number) {
     const newWeek = weeks.find((week) => week.id === id)!;
@@ -62,72 +67,70 @@ export default function BaselineEntry({
         )}
         <Dropdown
           id={"resource_" + entryIndex}
-          data={resources}
-          search={true}
-          style="bg-purple-200 rounded-md"
           form="baseline_entries_form"
+          data={resources}
+          style="bg-purple-200 rounded-md"
+          search={true}
+          disabled={formStatusIsPending}
         />
       </td>
       <td>
         <Dropdown
           id={"role_" + entryIndex}
+          form="baseline_entries_form"
           data={roles.map((role) => {
             return { id: role.id, name: role.role };
           })}
-          search={true}
           style="bg-purple-200 rounded-md"
-          form="baseline_entries_form"
+          search={true}
+          disabled={formStatusIsPending}
         />
       </td>
       <td>
         <Dropdown
           id={"rate_grade_" + entryIndex}
+          form="baseline_entries_form"
           data={grades}
           style="bg-purple-200 rounded-md"
-          form="baseline_entries_form"
+          disabled={formStatusIsPending}
         />
       </td>
       <td>
         <Dropdown
           id={"week_commencing_" + entryIndex}
+          form="baseline_entries_form"
           data={weeks}
+          style="bg-blue-100 rounded-md"
           parentSelectedItem={startingWeek}
           onSelect={handleWeekChange}
-          style="bg-blue-100 rounded-md"
-          form="baseline_entries_form"
+          disabled={formStatusIsPending}
         />
       </td>
       <td>
         <input
           type="number"
+          form="baseline_entries_form"
           step="0.5"
           min={0}
           max={5}
           name={"work_days_" + entryIndex}
-          form="baseline_entries_form"
           className={"bg-blue-100 w-full rounded-md text-right px-2 py-1"}
           defaultValue={""}
-          // value={inputValue}
-          // onChange={handleChange}
-          // form="time_entries_form"
-          // readOnly={!activeWeek || formStatusIsPending}
-          // disabled={!isEditing}
+          disabled={formStatusIsPending}
         />
       </td>
       <td className="relative">
         <input
           type="number"
+          form="baseline_entries_form"
           step="1"
           min={1}
           max={maxNumberOfWeeks}
           name={"number_of_weeks_" + entryIndex}
-          form="baseline_entries_form"
           value={numberOfWeeks}
           onChange={handleNumberOfWeeksChange}
           className={"bg-blue-100 w-full rounded-md text-right px-2 py-1"}
-          // form="time_entries_form"
-          // readOnly={!activeWeek || formStatusIsPending}
-          // disabled={!isEditing}
+          disabled={formStatusIsPending}
         />
         {+numberOfWeeks > maxNumberOfWeeks && (
           <div
