@@ -1,5 +1,5 @@
 import Icon from "@/app/_components/icons/icons";
-import DeleteIconButton from "@/app/_components/delete-icon-button";
+import DeleteIconButton from "@/app/_components/buttons/delete-icon-button";
 import Dropdown from "@/app/_components/buttons/dropdown";
 
 import { TResourceProps, TRole } from "@/util/resources";

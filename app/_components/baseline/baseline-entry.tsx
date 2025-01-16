@@ -1,5 +1,5 @@
 import Dropdown, { DropdownItem } from "@/app/_components/buttons/dropdown";
-import DeleteIconButton from "@/app/_components/delete-icon-button";
+import DeleteIconButton from "@/app/_components/buttons/delete-icon-button";
 import React, { useEffect, useState } from "react";
 import { useAppSelector } from "@/lib/hooks";
 import Icon from "@/app/_components/icons/icons";
