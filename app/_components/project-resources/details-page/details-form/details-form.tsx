@@ -10,7 +10,7 @@ import DetailsFormRow from "@/app/_components/project-resources/details-page/det
 import DetailsFormButtons from "@/app/_components/project-resources/details-page/details-form/details-form-buttons";
 
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { uiActions } from "@/lib/ui";
+import { uiActions } from "@/lib/features/ui/uiSlice";
 
 import { detailsFormAction } from "@/app/actions/details-form-actions";
 import {
@@ -19,9 +19,9 @@ import {
   getResources,
   getRoles,
 } from "@/util/resources";
-import { projectsActions } from "@/lib/projects";
+import { projectsActions } from "@/lib/features/project/projectsSlice";
 import { TProjectDetailsProps } from "@/util/projects";
-import { resourcesActions } from "@/lib/resources";
+import { resourcesActions } from "@/lib/features/resources/resourcesSlice";
 
 interface DetailsFormParams {
   setIsEditing?: React.Dispatch<React.SetStateAction<boolean>>;

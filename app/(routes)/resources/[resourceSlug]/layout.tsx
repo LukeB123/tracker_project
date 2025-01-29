@@ -3,7 +3,7 @@
 import NavButton from "@/app/_components/ui/buttons/nav-button";
 import Icon from "@/app/_components/ui/icons";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { resourcesActions } from "@/lib/resources";
+import { resourcesActions } from "@/lib/features/resources/resourcesSlice";
 import { getResource, getResourceFromSlug } from "@/util/resources";
 import { useEffect, useState } from "react";
 

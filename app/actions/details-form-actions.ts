@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { TNotificationState } from "@/lib/ui";
+import { TNotificationState } from "@/lib/features/ui/uiSlice";
 
 import {
   addProject,
@@ -29,7 +29,6 @@ import {
   updateProjectResourcesProjectTitle,
   updateProjectResourcesResourceName,
 } from "@/util/time-entries";
-import { validEmail } from "./auth";
 
 interface TFormState {
   context: "project" | "resource";
@@ -41,6 +40,11 @@ interface TFormState {
 
 function isInvalidText(text: string): boolean {
   return !text || text.trim() === "";
+}
+
+function validEmail(email: string) {
+  const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return pattern.test(email);
 }
 
 export async function detailsFormAction(

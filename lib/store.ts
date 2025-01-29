@@ -1,8 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
-import uiReducer from "./ui";
-import projectsReducer from "./projects";
-import resourcesReducer from "./resources";
-import formStatusReducer from "./formStatus";
+import uiReducer from "./features/ui/uiSlice";
+import projectsReducer from "./features/project/projectsSlice";
+import resourcesReducer from "./features/resources/resourcesSlice";
+import formStatusReducer from "./features/formStatus/formStatusSlice";
 
 export const makeStore = () => {
   return configureStore({

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { TNotificationState } from "@/lib/ui";
+import { TNotificationState } from "@/lib/features/ui/uiSlice";
 import {
   approveAbsenceRequest,
   cancelAbsenceRequest,

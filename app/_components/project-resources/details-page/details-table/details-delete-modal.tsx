@@ -9,7 +9,7 @@ import Button from "@/app/_components/ui/buttons/button";
 import Icon from "@/app/_components/ui/icons";
 
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { uiActions } from "@/lib/ui";
+import { uiActions } from "@/lib/features/ui/uiSlice";
 
 import { deleteProjectResourceAction } from "@/app/actions/details-form-actions";
 

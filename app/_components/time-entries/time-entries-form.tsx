@@ -13,7 +13,7 @@ import {
 } from "@/util/time-entries";
 import { projectTimeEntriesAction } from "@/app/actions/time-entries-action";
 
-import { uiActions } from "@/lib/ui";
+import { uiActions } from "@/lib/features/ui/uiSlice";
 import { useAppDispatch } from "@/lib/hooks";
 import { TWeekProps } from "@/util/date";
 

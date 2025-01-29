@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useFormState } from "react-dom";
 
-import { uiActions } from "@/lib/ui";
+import { uiActions } from "@/lib/features/ui/uiSlice";
 import { useAppDispatch } from "@/lib/hooks";
 import AbsenceFormButtons from "@/app/_components/absence/absence-form-buttons";
 import { absenceRequestAction } from "@/app/actions/absence-request-action";

@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useFormState } from "react-dom";
 
-import { uiActions } from "@/lib/ui";
+import { uiActions } from "@/lib/features/ui/uiSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import BaselineFormButtons from "@/app/_components/baseline/baseline-form-buttons";
 import { baselineEntriesAction } from "@/app/actions/baseline-entries-action";

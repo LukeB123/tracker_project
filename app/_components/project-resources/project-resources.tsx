@@ -12,8 +12,8 @@ import { TProjectDetailsProps } from "@/util/projects";
 import { TResourceProps } from "@/util/resources";
 
 import { useAppDispatch } from "@/lib/hooks";
-import { projectsActions } from "@/lib/projects";
-import { resourcesActions } from "@/lib/resources";
+import { projectsActions } from "@/lib/features/project/projectsSlice";
+import { resourcesActions } from "@/lib/features/resources/resourcesSlice";
 
 interface ProjectResourcesParams {
   projects?: TProjectDetailsProps[];

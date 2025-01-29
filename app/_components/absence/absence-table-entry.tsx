@@ -9,7 +9,7 @@ import {
 } from "@/app/actions/absence-request-action";
 import { useEffect } from "react";
 import { useAppDispatch } from "@/lib/hooks";
-import { uiActions } from "@/lib/ui";
+import { uiActions } from "@/lib/features/ui/uiSlice";
 import AbsenceEntryButton from "@/app/_components/absence/absence-entry-button";
 
 interface AbsenceTableEntryProps {

@@ -7,7 +7,7 @@ import Button from "@/app/_components/ui/buttons/button";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import Icon from "@/app/_components/ui/icons";
 import { useEffect } from "react";
-import { formSatusActions } from "@/lib/formStatus";
+import { formSatusActions } from "@/lib/features/formStatus/formStatusSlice";
 
 interface ProjectDetailsFormButtonsParmas {
   context: "project" | "resource";
