@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import ProjectTimeEntriesTableCellPopover from "@/app/_components/time-entries/time-entries-table-call-popover";
-import Icon from "@/app/_components/icons/icons";
+import Icon from "@/app/_components/ui/icons";
 
 import {
   TNewProjectResourcesProps,
@@ -69,7 +69,8 @@ export default function TimeEntriesTableCell({
     );
   }
 
-  let className = "text-right px-2 py-1 w-full rounded-md h-full font-semibold";
+  let className =
+    "text-center px-2 pl-6 py-1 w-full rounded-md h-full font-semibold";
 
   let textColor = "";
 

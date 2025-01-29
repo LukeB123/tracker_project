@@ -1,4 +1,4 @@
-import Icon from "@/app/_components/icons/icons";
+import Icon from "@/app/_components/ui/icons";
 import BaselineInput from "@/app/_components/baseline/baseline";
 import { getWeeks } from "@/util/date";
 import { getResources, getRoles } from "@/util/resources";
@@ -35,7 +35,7 @@ function LoadingProjectResources() {
   );
 }
 
-export default function ProjectTimeEntries() {
+export default function BaselinePage() {
   return (
     <Suspense fallback={<LoadingProjectResources />}>
       <FetchedResources />

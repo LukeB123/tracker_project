@@ -12,7 +12,7 @@ import DetailsFormButtons from "@/app/_components/project-resources/details-page
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { uiActions } from "@/lib/ui";
 
-import { detailsFormAction } from "@/util/details-form-actions";
+import { detailsFormAction } from "@/app/actions/details-form-actions";
 import {
   TResourceProps,
   TRole,
@@ -260,6 +260,13 @@ export default function DetailsForm({
         )}
         {context === "resource" && (
           <div className="flex flex-col w-1/3 min-w-128 gap-2">
+            <DetailsFormRow
+              label="Email"
+              name="email"
+              type="email"
+              form="detailsInput"
+              value={resource?.email}
+            />
             <DetailsFormRow
               label="Team"
               name="team"

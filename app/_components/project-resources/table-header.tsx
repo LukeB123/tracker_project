@@ -1,4 +1,4 @@
-import SearchBar from "@/app/_components/search-bar";
+import SearchBar from "@/app/_components/ui/search-bar";
 
 interface TableHeaderParams {
   search?: string;

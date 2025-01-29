@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import TableHeader from "@/app/_components/project-resources/table-header";
 import ProjectResourceLink from "@/app/_components/project-resources/link";
-import AddEntryButton from "@/app/_components/buttons/add-entry-button";
+import AddEntryButton from "@/app/_components/ui/buttons/add-entry-button";
 
 import { TProjectDetailsProps } from "@/util/projects";
 import { TResourceProps } from "@/util/resources";

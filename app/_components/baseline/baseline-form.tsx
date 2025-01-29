@@ -6,7 +6,7 @@ import { useFormState } from "react-dom";
 import { uiActions } from "@/lib/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import BaselineFormButtons from "@/app/_components/baseline/baseline-form-buttons";
-import { baselineEntriesAction } from "@/util/baseline-entries-action";
+import { baselineEntriesAction } from "@/app/actions/baseline-entries-action";
 import { TWeekProps } from "@/util/date";
 
 interface BaselineFormProps {

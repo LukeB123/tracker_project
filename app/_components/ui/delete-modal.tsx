@@ -1,7 +1,7 @@
 "use client";
 
-import Modal from "@/app/_components/modal";
-import Button from "@/app/_components/buttons/button";
+import Modal from "@/app/_components/ui/modal";
+import Button from "@/app/_components/ui/buttons/button";
 
 interface DeleteModalProps {
   label?: string;

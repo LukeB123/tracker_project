@@ -1,5 +1,5 @@
-import Icon from "@/app/_components/icons/icons";
-import DeleteModal from "@/app/_components/delete-modal";
+import Icon from "@/app/_components/ui/icons";
+import DeleteModal from "@/app/_components/ui/delete-modal";
 import { useState } from "react";
 
 interface DeleteIconButtonProps {

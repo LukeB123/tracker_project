@@ -1,8 +1,8 @@
 "use client";
 
 import { useFormStatus } from "react-dom";
-import Button from "@/app/_components/buttons/button";
-import Icon from "@/app/_components/icons/icons";
+import Button from "@/app/_components/ui/buttons/button";
+import Icon from "@/app/_components/ui/icons";
 
 interface DetailsFormButtonsParmas {
   disabled?: boolean;

@@ -1,7 +1,7 @@
 "use client";
 
-import NavButton from "@/app/_components/buttons/nav-button";
-import Icon from "@/app/_components/icons/icons";
+import NavButton from "@/app/_components/ui/buttons/nav-button";
+import Icon from "@/app/_components/ui/icons";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { resourcesActions } from "@/lib/resources";
 import { getResource, getResourceFromSlug } from "@/util/resources";

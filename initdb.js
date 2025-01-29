@@ -12,6 +12,7 @@ const resources = [
   {
     name: "Nick Fury",
     slug: "nick-fury",
+    email: "nick.fury@email.com",
     grade: "7",
     role_id: 1,
     role: "Delivery Lead",
@@ -23,6 +24,7 @@ const resources = [
   {
     name: "Iron Man",
     slug: "iron-man",
+    email: "iron.man@email.com",
     grade: "6",
     role_id: 2,
     role: "Project Manager",
@@ -34,6 +36,7 @@ const resources = [
   {
     name: "Captain America",
     slug: "captain-america",
+    email: "captain.america@email.com",
     grade: "5",
     role_id: 2,
     role: "Project Manager",
@@ -45,6 +48,7 @@ const resources = [
   {
     name: "Black Widow",
     slug: "black-widow",
+    email: "black.widow@email.com",
     grade: "4",
     role_id: 4,
     role: "Analyst",
@@ -56,6 +60,7 @@ const resources = [
   {
     name: "Spider Man",
     slug: "spider-man",
+    email: "spider.man@email.com",
     grade: "3",
     role_id: 3,
     role: "Developer",
@@ -67,6 +72,7 @@ const resources = [
   {
     name: "Captain Marvel",
     slug: "captain-marvel",
+    email: "captain.marvel@email.com",
     grade: "6",
     role_id: 1,
     role: "Delivery Lead",
@@ -78,6 +84,7 @@ const resources = [
   {
     name: "Thor",
     slug: "thor",
+    email: "thor@email.com",
     grade: "6",
     role_id: 2,
     role: "Project Manager",
@@ -89,6 +96,7 @@ const resources = [
   {
     name: "Loki",
     slug: "loki",
+    email: "loki@email.com",
     grade: "6",
     role_id: 4,
     role: "Analyst",
@@ -100,6 +108,7 @@ const resources = [
   {
     name: "Hulk",
     slug: "hulk",
+    email: "hulk@email.com",
     grade: "6",
     role_id: 2,
     role: "Project Manager",
@@ -111,6 +120,7 @@ const resources = [
   {
     name: "Hawkeye",
     slug: "hawkeye",
+    email: "hawkeye@email.com",
     grade: "3",
     role_id: 4,
     role: "Analyst",
@@ -122,6 +132,7 @@ const resources = [
   {
     name: "Black Panter",
     slug: "black-panter",
+    email: "black.panter@email.com",
     grade: "5",
     role_id: 3,
     role: "Developer",
@@ -133,6 +144,7 @@ const resources = [
   {
     name: "Ant Man",
     slug: "ant-man",
+    email: "ant.man@email.com",
     grade: "3",
     role_id: 3,
     role: "Developer",
@@ -144,6 +156,7 @@ const resources = [
   {
     name: "Wasp",
     slug: "wasp",
+    email: "wasp@email.com",
     grade: "3",
     role_id: 3,
     role: "Developer",
@@ -155,6 +168,7 @@ const resources = [
   {
     name: "Scarlet Witch",
     slug: "scarlet-witch",
+    email: "scarlet.witch@email.com",
     grade: "6",
     role_id: 2,
     role: "Project Manager",
@@ -166,6 +180,7 @@ const resources = [
   {
     name: "Vision",
     slug: "vision",
+    email: "vision@email.com",
     grade: "7",
     role_id: 1,
     role: "Delivery Lead",
@@ -177,6 +192,7 @@ const resources = [
   {
     name: "Dr Strange",
     slug: "dr-strange",
+    email: "dr.strange@email.com",
     grade: "6",
     role_id: 1,
     role: "Delivery Lead",
@@ -590,6 +606,7 @@ db.prepare(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE,
         slug TEXT NOT NULL UNIQUE,
+        email TEXT NOT NULL UNIQUE,
         grade TEXT NOT NULL,
         role_id NUMBER NOT NULL,
         role TEXT NOT NULL,
@@ -641,6 +658,22 @@ db.prepare(
     )`
 ).run();
 
+db.prepare(
+  `
+    CREATE TABLE IF NOT EXISTS absence (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        resource_id INTEGER NOT NULL,
+        resource_name TEXT NOT NULL,
+        approver_id INTEGER NOT NULL,
+        approver_name TEXT NOT NULL,
+        absence_type TEXT NOT NULL,
+        absence_duration TEXT NOT NULL,
+        start_of_absence TEXT NOT NULL,
+        end_of_absence TEXT NOT NULL,
+        status TEXT NOT NULL
+    )`
+).run();
+
 async function initData() {
   const trackersInsert = db.prepare(`
         INSERT INTO projects VALUES (
@@ -671,6 +704,7 @@ async function initData() {
       null,
       @name,
       @slug,
+      @email,
       @grade,
       @role_id,
       @role,

@@ -1,11 +1,11 @@
 "use client";
 
-import NavLink from "@/app/_components/top-nav/nav-link";
+import NavLink from "@/app/_components/ui/top-nav/nav-link";
 import Image from "next/image";
 import Link from "next/link";
 
 import { useAppSelector } from "@/lib/hooks";
-import Notification from "@/app/_components/top-nav/notification";
+import Notification from "@/app/_components/ui/top-nav/notification";
 
 const links = [
   {
@@ -20,12 +20,12 @@ const links = [
     href: "/resources",
     hidden: false,
   },
-  // {
-  //   id: 3,
-  //   label: "ABSENCE",
-  //   href: "/absence",
-  //   hidden: false,
-  // },
+  {
+    id: 3,
+    label: "ABSENCE",
+    href: "/absence",
+    hidden: false,
+  },
   // {
   //   id: 4,
   //   label: "SKILLS",

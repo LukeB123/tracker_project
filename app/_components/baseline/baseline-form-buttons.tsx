@@ -2,10 +2,10 @@
 
 import { useFormStatus } from "react-dom";
 
-import Button from "@/app/_components/buttons/button";
+import Button from "@/app/_components/ui/buttons/button";
 
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import Icon from "@/app/_components/icons/icons";
+import Icon from "@/app/_components/ui/icons";
 import { useEffect } from "react";
 import { formSatusActions } from "@/lib/formStatus";
 
@@ -16,13 +16,21 @@ export default function BaselineFormButtons() {
 
   const project = useAppSelector((state) => state.projects.currentProject)!;
 
-  useEffect(() => {
-    dispatch(formSatusActions.setFormSatusIsPending(pending));
-  }, [pending]);
+  // useEffect(() => {
+  //   dispatch(formSatusActions.setFormSatusIsPending(pending));
+  // }, [pending]);
+
+  // useEffect(() => {
+  //   dispatch(formSatusActions.setFormSatusIsPending(false));
+  // }, []);
 
   useEffect(() => {
-    dispatch(formSatusActions.setFormSatusIsPending(false));
-  }, []);
+    dispatch(formSatusActions.setFormSatusIsPending(pending));
+
+    return () => {
+      dispatch(formSatusActions.setFormSatusIsPending(false));
+    };
+  }, [pending]);
 
   return (
     <>

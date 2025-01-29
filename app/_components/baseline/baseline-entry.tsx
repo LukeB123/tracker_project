@@ -1,8 +1,8 @@
-import Dropdown, { DropdownItem } from "@/app/_components/buttons/dropdown";
-import DeleteIconButton from "@/app/_components/buttons/delete-icon-button";
+import Dropdown, { DropdownItem } from "@/app/_components/ui/buttons/dropdown";
+import DeleteIconButton from "@/app/_components/ui/buttons/delete-icon-button";
 import React, { useEffect, useState } from "react";
 import { useAppSelector } from "@/lib/hooks";
-import Icon from "@/app/_components/icons/icons";
+import Icon from "@/app/_components/ui/icons";
 import { TRole } from "@/util/resources";
 
 interface BaselineEntryProps {

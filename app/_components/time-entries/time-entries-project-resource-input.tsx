@@ -1,6 +1,6 @@
-import Icon from "@/app/_components/icons/icons";
-import DeleteIconButton from "@/app/_components/buttons/delete-icon-button";
-import Dropdown from "@/app/_components/buttons/dropdown";
+import Icon from "@/app/_components/ui/icons";
+import DeleteIconButton from "@/app/_components/ui/buttons/delete-icon-button";
+import Dropdown from "@/app/_components/ui/buttons/dropdown";
 
 import { TResourceProps, TRole } from "@/util/resources";
 import { TProjectDetailsProps } from "@/util/projects";

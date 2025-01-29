@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 interface PrimaryButtonParams {
-  buttonStyle?: "primary" | "secondary";
+  buttonStyle?: "primary" | "secondary" | "positive" | "negative";
   disabled?: boolean;
   type?: "button" | "submit" | "reset";
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
@@ -64,6 +64,14 @@ export default function Button({
   if (buttonStyle === "secondary")
     className +=
       " border-2 border-blue-400 hover:border-blue-500 hover:bg-grey-100 disabled:bg-white disabled:border-blue-200 disabled:text-grey-500";
+
+  if (buttonStyle === "positive")
+    className +=
+      " bg-green-400 hover:bg-green-600 disabled:bg-grey-200 text-grey-50";
+
+  if (buttonStyle === "negative")
+    className +=
+      " bg-red-400 hover:bg-red-500 disabled:bg-grey-200 text-grey-50";
 
   if (!onClick) {
     let content = children;

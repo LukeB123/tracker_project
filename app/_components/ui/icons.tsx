@@ -13,7 +13,9 @@ interface IconProps {
     | "undo"
     | "upArrow"
     | "downArrow"
-    | "alert";
+    | "alert"
+    | "checkBoxTicked"
+    | "checkBoxNotTicked";
   color: string;
   height?: string;
   width?: string;
@@ -252,6 +254,77 @@ export default function Icon({ iconName, color, height, width }: IconProps) {
 	c-7.816-1.161-13.676-7.289-14.881-14.692l-10.601-65.597c-2.468-15.273,7.912-29.655,23.185-32.123
 	c15.273-2.468,29.655,7.912,32.123,23.185C183.284,110.192,183.268,113.161,182.875,115.9z"
           />
+        </svg>
+      );
+    case "checkBoxTicked":
+      return (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          xmlnsXlink="http://www.w3.org/1999/xlink"
+          height={height}
+          width={width}
+          viewBox="0 0 24.00 24.00"
+          version="1.1"
+          fill={color}
+          transform="matrix(1, 0, 0, 1, 0, 0)rotate(0)"
+        >
+          <g id="SVGRepo_bgCarrier" stroke-width="0" />
+
+          <g
+            id="SVGRepo_tracerCarrier"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke="#000000"
+            stroke-width="1.152"
+          />
+
+          <g id="SVGRepo_iconCarrier">
+            {/* <!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->*/}
+            <title>ic_fluent_checkbox_checked_24_filled</title>
+            <desc>Created with Sketch.</desc>{" "}
+            <g
+              id="🔍-Product-Icons"
+              stroke-width="0.00024000000000000003"
+              fill="none"
+              fill-rule="evenodd"
+            >
+              {" "}
+              <g
+                id="ic_fluent_checkbox_checked_24_filled"
+                fill={color}
+                fill-rule="nonzero"
+              >
+                {" "}
+                <path
+                  d="M18,3 C19.6568542,3 21,4.34314575 21,6 L21,18 C21,19.6568542 19.6568542,21 18,21 L6,21 C4.34314575,21 3,19.6568542 3,18 L3,6 C3,4.34314575 4.34314575,3 6,3 L18,3 Z M16.4696699,7.96966991 L10,14.4393398 L7.53033009,11.9696699 C7.23743687,11.6767767 6.76256313,11.6767767 6.46966991,11.9696699 C6.1767767,12.2625631 6.1767767,12.7374369 6.46966991,13.0303301 L9.46966991,16.0303301 C9.76256313,16.3232233 10.2374369,16.3232233 10.5303301,16.0303301 L17.5303301,9.03033009 C17.8232233,8.73743687 17.8232233,8.26256313 17.5303301,7.96966991 C17.2374369,7.6767767 16.7625631,7.6767767 16.4696699,7.96966991 Z"
+                  id="🎨-Color"
+                >
+                  {" "}
+                </path>{" "}
+              </g>{" "}
+            </g>{" "}
+          </g>
+        </svg>
+      );
+    case "checkBoxNotTicked":
+      return (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          height={height}
+          width={width}
+          viewBox="0 0 24 24"
+          fill="#ffffff"
+        >
+          <g id="Interface / Checkbox_Unchecked">
+            <path
+              id="Vector"
+              d="M4 7.2002V16.8002C4 17.9203 4 18.4801 4.21799 18.9079C4.40973 19.2842 4.71547 19.5905 5.0918 19.7822C5.5192 20 6.07899 20 7.19691 20H16.8031C17.921 20 18.48 20 18.9074 19.7822C19.2837 19.5905 19.5905 19.2842 19.7822 18.9079C20 18.4805 20 17.9215 20 16.8036V7.19691C20 6.07899 20 5.5192 19.7822 5.0918C19.5905 4.71547 19.2837 4.40973 18.9074 4.21799C18.4796 4 17.9203 4 16.8002 4H7.2002C6.08009 4 5.51962 4 5.0918 4.21799C4.71547 4.40973 4.40973 4.71547 4.21799 5.0918C4 5.51962 4 6.08009 4 7.2002Z"
+              stroke={color}
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </g>
         </svg>
       );
   }

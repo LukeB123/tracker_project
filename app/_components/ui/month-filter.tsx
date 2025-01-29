@@ -1,6 +1,6 @@
 "use client";
 
-import ArrowButton from "@/app/_components/buttons/arrow-button";
+import ArrowButton from "@/app/_components/ui/buttons/arrow-button";
 import { TWeekProps } from "@/util/date";
 
 interface MonthFilterProps {

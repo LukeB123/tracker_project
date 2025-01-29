@@ -9,6 +9,7 @@ export type TResourceProps = {
   id: number;
   name: string;
   slug: string;
+  email: string;
   grade: string;
   role_id: number;
   role: string;
@@ -21,6 +22,7 @@ export type TResourceProps = {
 export type TNewResourceProps = {
   name: string;
   slug: string;
+  email: string;
   grade: string;
   role_id: number;
   role: string;
@@ -56,6 +58,7 @@ export async function addResource(resource: TNewResourceProps) {
     name,
     slug,
     grade,
+    email,
     role_id,
     role,
     team,
@@ -66,6 +69,7 @@ export async function addResource(resource: TNewResourceProps) {
   VALUES (
     @name,
     @slug,
+    @email,
     @grade,
     @role_id,
     @role,
@@ -86,6 +90,7 @@ export async function updateResource(resource: TResourceProps) {
   SET
     name = @name,
     slug = @slug,
+    email = @email,
     grade = @grade,
     role_id = @role_id,
     role = @role,
@@ -131,6 +136,26 @@ export async function checkResourceSlugUniquness(
   } else {
     result = db
       .prepare("SELECT slug FROM resources WHERE slug = ? AND id <> ?")
+      .all(slug, id);
+  }
+
+  return result.length < 1;
+}
+export async function checkResourceEmailUniquness(
+  id: number | null,
+  slug: string
+) {
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  let result: any;
+
+  if (id === null) {
+    result = db
+      .prepare("SELECT email FROM resources WHERE email = ?")
+      .all(slug);
+  } else {
+    result = db
+      .prepare("SELECT email FROM resources WHERE email = ? AND id <> ?")
       .all(slug, id);
   }
 

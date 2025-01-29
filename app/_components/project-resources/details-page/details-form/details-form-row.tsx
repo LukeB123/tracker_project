@@ -1,10 +1,10 @@
-import Dropdown, { DropdownItem } from "@/app/_components/buttons/dropdown";
+import Dropdown, { DropdownItem } from "@/app/_components/ui/buttons/dropdown";
 import { useFormStatus } from "react-dom";
 
 interface DetailsFormRowParams {
   label: string;
   name: string;
-  type: "text" | "number" | "dropdown";
+  type: "text" | "number" | "email" | "dropdown";
   value: number | string | undefined;
   dropdownSelection?: DropdownItem[];
   searchableDropdown?: boolean;

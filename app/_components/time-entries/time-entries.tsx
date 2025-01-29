@@ -2,12 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import MonthFilter from "@/app/_components/month-filter/month-filter";
+import MonthFilter from "@/app/_components/ui/month-filter";
 import TimeEntriesTableHeader from "@/app/_components/time-entries/time-entries-table-header";
 import TimeEntriesTableRow from "@/app/_components/time-entries/time-entries-table-row";
-import AddEntryButton from "@/app/_components/buttons/add-entry-button";
+import AddEntryButton from "@/app/_components/ui/buttons/add-entry-button";
 import TimeEntriesForm from "@/app/_components/time-entries/time-entries-form";
-import Icon from "@/app/_components/icons/icons";
+import Icon from "@/app/_components/ui/icons";
 
 import {
   TNewProjectResourcesProps,
@@ -436,7 +436,7 @@ export default function TimeEntries({
                       >
                         <Icon
                           iconName={"alert"}
-                          color={"#fe677b"}
+                          color={"#fe344f"}
                           height="15px"
                           width="15px"
                         />
@@ -469,8 +469,11 @@ export default function TimeEntries({
                   let className =
                     "text-center font-semibold border-t-2 border-b-2 border-purple-700";
 
-                  if (week.total > week.max && context === "resource")
-                    className += " text-red-500";
+                  if (week.total > week.max && context === "resource") {
+                    className += " text-red-600 font-extrabold";
+                  } else {
+                    className += " font-semibold";
+                  }
                   return (
                     <td
                       key={week.week}
@@ -482,6 +485,7 @@ export default function TimeEntries({
                     </td>
                   );
                 })}
+                <td>TOTAL TOTAL</td>
               </tr>
             )}
           </tfoot>

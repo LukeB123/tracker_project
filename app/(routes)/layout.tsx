@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import "@/app/globals.css";
 
 import StoreProvider from "@/app/StoreProvider";
-import TopNav from "@/app/_components/top-nav/top-nav";
+import TopNav from "@/app/_components/ui/top-nav/top-nav";
 
 // const inter = Inter({ subsets: ["latin"] });
 

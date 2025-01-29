@@ -3,7 +3,7 @@
 import { useAppDispatch } from "@/lib/hooks";
 import { TNotificationState, uiActions } from "@/lib/ui";
 import { useEffect } from "react";
-import Icon from "@/app/_components/icons/icons";
+import Icon from "@/app/_components/ui/icons";
 
 interface NotificationParams {
   notification: TNotificationState;

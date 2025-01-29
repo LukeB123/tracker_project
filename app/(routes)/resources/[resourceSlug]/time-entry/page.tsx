@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import TimeEntries from "@/app/_components/time-entries/time-entries";
-import Icon from "@/app/_components/icons/icons";
+import Icon from "@/app/_components/ui/icons";
 
 import {
   TProjectResourcesProps,

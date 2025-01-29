@@ -1,4 +1,4 @@
-import NextBreadcrumb from "@/app/_components/bread-crumbs.tsx/breadcrumbs";
+import NextBreadcrumb from "@/app/_components/ui/breadcrumbs";
 
 export default function ProjectsLayout({
   children,

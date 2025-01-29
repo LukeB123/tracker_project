@@ -11,7 +11,7 @@ import {
   TProjectResourcesProps,
   TTimeEntriesProps,
 } from "@/util/time-entries";
-import { projectTimeEntriesAction } from "@/util/time-entries-action";
+import { projectTimeEntriesAction } from "@/app/actions/time-entries-action";
 
 import { uiActions } from "@/lib/ui";
 import { useAppDispatch } from "@/lib/hooks";

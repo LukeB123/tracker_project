@@ -1,4 +1,4 @@
-import Icon from "@/app/_components/icons/icons";
+import Icon from "@/app/_components/ui/icons";
 
 interface AddEntryButtonProps {
   isDisabled?: boolean;

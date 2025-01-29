@@ -1,6 +1,6 @@
 "use client";
 
-import Icon from "@/app/_components/icons/icons";
+import Icon from "@/app/_components/ui/icons";
 import { TWeekProps } from "@/util/date";
 
 interface TimeEntriesTableHeaderProps {
@@ -83,7 +83,7 @@ export default function TimeEntriesTableHeader({
               );
             }}
           >
-            {rowTotalType === "monthly" ? "Monthly " : ""}Total
+            {rowTotalType === "monthly" ? "Monthly " : "All-Time "}Total
           </button>
         </th>
       )}

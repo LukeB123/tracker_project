@@ -83,6 +83,7 @@ export default function DetailsTable({
           <DetailsTableHeader title={resource.name} />
           <div className="flex justify-center">
             <div className="flex flex-col w-1/3 min-w-128 gap-2">
+              <DetailsTableRow label="Email" value={resource.email} />
               <DetailsTableRow label="Team" value={resource.team} />
               <DetailsTableRow label="Role" value={resource.role} />
               <DetailsTableRow label="Grade" value={resource.grade} />

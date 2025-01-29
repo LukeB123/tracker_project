@@ -1,6 +1,6 @@
 "use client";
 
-import Button from "@/app/_components/buttons/button";
+import Button from "@/app/_components/ui/buttons/button";
 
 interface ProjectDetailsTableButtonsParmas {
   setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;

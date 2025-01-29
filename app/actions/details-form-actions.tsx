@@ -20,6 +20,7 @@ import {
   checkResourceSlugUniquness,
   TNewResourceProps,
   TResourceProps,
+  checkResourceEmailUniquness,
 } from "@/util/resources";
 
 import {
@@ -28,6 +29,7 @@ import {
   updateProjectResourcesProjectTitle,
   updateProjectResourcesResourceName,
 } from "@/util/time-entries";
+import { validEmail } from "./auth";
 
 interface TFormState {
   context: "project" | "resource";
@@ -43,7 +45,7 @@ function isInvalidText(text: string): boolean {
 
 export async function detailsFormAction(
   prevState: TFormState,
-  formData: any
+  formData: FormData
 ): Promise<TFormState> {
   if (prevState.context === "project") {
     const currentProject = prevState.project;
@@ -56,23 +58,24 @@ export async function detailsFormAction(
 
     // Collect form inputs
     const formInputValues: TNewProjectDetailsProps = {
-      slug: formData.get("title").trim().toLowerCase().replaceAll(" ", "-"),
-      title: formData.get("title").trim(),
-      delivery_manager: formData.get("delivery_manager"),
-      delivery_manager_id: +formData.get("delivery_manager_id"),
-      project_manager: formData.get("project_manager"),
-      project_manager_id: +formData.get("project_manager_id"),
-      scrum_master: formData.get("scrum_master"),
-      scrum_master_id: +formData.get("scrum_master_id"),
-      delivery_stream: formData.get("delivery_stream"),
-      value_stream: formData.get("value_stream").trim(),
-      project_type: formData.get("project_type"),
+      slug: (formData.get("title") as string)
+        .trim()
+        .toLowerCase()
+        .replaceAll(" ", "-"),
+      title: (formData.get("title") as string).trim(),
+      delivery_manager: formData.get("delivery_manager") as string,
+      delivery_manager_id: +(formData.get("delivery_manager_id") as string),
+      project_manager: formData.get("project_manager") as string,
+      project_manager_id: +(formData.get("project_manager_id") as string),
+      scrum_master: formData.get("scrum_master") as string,
+      scrum_master_id: +(formData.get("scrum_master_id") as string),
+      delivery_stream: formData.get("delivery_stream") as string,
+      value_stream: (formData.get("value_stream") as string).trim(),
+      project_type: formData.get("project_type") as string,
       last_updated: "",
-      line_of_business: formData.get("line_of_business"),
-      task: formData.get("task").trim(),
+      line_of_business: formData.get("line_of_business") as string,
+      task: (formData.get("task") as string).trim(),
     };
-
-    console.log(formInputValues);
 
     // Check if there are any empty inputs
     if (
@@ -210,23 +213,28 @@ export async function detailsFormAction(
 
     // Collect form inputs
     const formInputValues: TNewResourceProps = {
-      slug: formData.get("title").trim().toLowerCase().replaceAll(" ", "-"),
-      name: formData.get("title").trim(),
-      team: formData.get("team"),
-      role: formData.get("role"),
-      role_id: +formData.get("role_id"),
-      grade: formData.get("grade"),
+      slug: (formData.get("title") as string)
+        .trim()
+        .toLowerCase()
+        .replaceAll(" ", "-"),
+      name: (formData.get("title") as string).trim(),
+      email: (formData.get("email") as string).trim(),
+      team: formData.get("team") as string,
+      role: formData.get("role") as string,
+      role_id: +(formData.get("role_id") as string),
+      grade: formData.get("grade") as string,
       is_delivery_manager:
-        formData.get("is_delivery_manager") === "TRUE" ? 1 : 0,
-      is_project_manager: formData.get("is_project_manager") === "TRUE" ? 1 : 0,
-      is_scrum_master: formData.get("is_scrum_master") === "TRUE" ? 1 : 0,
+        (formData.get("is_delivery_manager") as string) === "TRUE" ? 1 : 0,
+      is_project_manager:
+        (formData.get("is_project_manager") as string) === "TRUE" ? 1 : 0,
+      is_scrum_master:
+        (formData.get("is_scrum_master") as string) === "TRUE" ? 1 : 0,
     };
-
-    console.log(formInputValues);
 
     // Check if there are any empty inputs
     if (
       isInvalidText(formInputValues.name) ||
+      isInvalidText(formInputValues.email) ||
       isInvalidText(formInputValues.team) ||
       formInputValues.role_id === 0 ||
       isInvalidText(formInputValues.grade)
@@ -239,10 +247,21 @@ export async function detailsFormAction(
       };
     }
 
+    // Check if email is valid
+    if (!validEmail(formInputValues.email)) {
+      formNotification.message = "Please Enter a Valid Email Address.";
+
+      return {
+        ...prevState,
+        notification: formNotification,
+      };
+    }
+
     // Check if there are any changes to the resource detail
     if (
       currentResource &&
       formInputValues.name === currentResource.name &&
+      formInputValues.email === currentResource.email &&
       formInputValues.team === currentResource.team &&
       formInputValues.role_id === currentResource.role_id &&
       formInputValues.grade === currentResource.grade &&
@@ -262,13 +281,28 @@ export async function detailsFormAction(
     }
 
     // Check that the resource name dosen't already exist
-    const isUnique = await checkResourceSlugUniquness(
+    const isUniqueName = await checkResourceSlugUniquness(
       currentResource && "id" in currentResource ? currentResource.id : null,
       formInputValues.slug
     );
 
-    if (!isUnique) {
+    if (!isUniqueName) {
       formNotification.message = "Resource Already Exists.";
+
+      return {
+        ...prevState,
+        notification: formNotification,
+      };
+    }
+
+    // Check that the resource email dosen't already exist
+    const isUniqueEmail = await checkResourceEmailUniquness(
+      currentResource && "id" in currentResource ? currentResource.id : null,
+      formInputValues.email
+    );
+
+    if (!isUniqueEmail) {
+      formNotification.message = "Email Already Exists.";
 
       return {
         ...prevState,
@@ -370,8 +404,6 @@ export async function deleteProjectResourceAction(
         redirect: "/projects/",
       };
     } catch (error) {
-      console.log(error);
-
       return {
         notification: {
           status: "error",
@@ -400,8 +432,6 @@ export async function deleteProjectResourceAction(
         redirect: "/resources/",
       };
     } catch (error) {
-      console.log(error);
-
       return {
         notification: {
           status: "error",

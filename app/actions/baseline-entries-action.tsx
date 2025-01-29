@@ -29,7 +29,7 @@ interface TFormState {
 
 export async function baselineEntriesAction(
   prevState: TFormState,
-  formData: any
+  formData: FormData
 ): Promise<TFormState> {
   const entryIds = [...prevState.numberOfEntries];
 
@@ -47,16 +47,26 @@ export async function baselineEntriesAction(
   try {
     // Model the data for each row in the form
     entryIds.forEach((entryId) => {
-      const resourceId = +formData.get("resource_" + entryId + "_id");
-      const resourceName: string = formData.get("resource_" + entryId);
-      const roleID = +formData.get("role_" + entryId + "_id");
-      const roleName: string = formData.get("role_" + entryId);
-      const rateGrade: string = formData.get("rate_grade_" + entryId);
-      const initialWeek: string = formData.get("week_commencing_" + entryId);
-      const daysPerWeekString = formData.get("work_days_" + entryId);
-      const daysPerWeek = +formData.get("work_days_" + entryId);
-      const numberOfWeeks = +formData.get("number_of_weeks_" + entryId);
-      const uniqueId =
+      const resourceId = +(formData.get(
+        "resource_" + entryId + "_id"
+      ) as string);
+      const resourceName: string = formData.get(
+        "resource_" + entryId
+      ) as string;
+      const roleID = +(formData.get("role_" + entryId + "_id") as string);
+      const roleName: string = formData.get("role_" + entryId) as string;
+      const rateGrade: string = formData.get("rate_grade_" + entryId) as string;
+      const initialWeek: string = formData.get(
+        "week_commencing_" + entryId
+      ) as string;
+      const daysPerWeekString: string = formData.get(
+        "work_days_" + entryId
+      ) as string;
+      const daysPerWeek = +(formData.get("work_days_" + entryId) as string);
+      const numberOfWeeks = +(formData.get(
+        "number_of_weeks_" + entryId
+      ) as string);
+      const uniqueId: string =
         prevState.project.id +
         "_" +
         resourceId.toString() +

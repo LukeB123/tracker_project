@@ -35,7 +35,7 @@ interface TFormState {
 
 export async function projectTimeEntriesAction(
   prevState: TFormState,
-  formData: any
+  formData: FormData
 ): Promise<TFormState> {
   const newProjectResourceUniqueIds: string[] = [];
 
@@ -55,7 +55,9 @@ export async function projectTimeEntriesAction(
   try {
     prevState.projectResources.forEach((projectResource) => {
       const isDeleted =
-        +formData.get(projectResource.unique_identifier + "_delete") === 1;
+        +(formData.get(
+          projectResource.unique_identifier + "_delete"
+        ) as string) === 1;
 
       const newUniqueId =
         projectResource.project_id +
@@ -133,7 +135,7 @@ export async function projectTimeEntriesAction(
       return {
         ...prevState,
         notification: {
-          status: "netural",
+          status: "neutral",
           title: "Project Time Entry",
           message: "Please Fill Out All Resources",
         },
@@ -142,7 +144,7 @@ export async function projectTimeEntriesAction(
       return {
         ...prevState,
         notification: {
-          status: "netural",
+          status: "neutral",
           title: "Project Time Entry",
           message: "Duplicate Resource And Grade Combination",
         },
@@ -165,10 +167,10 @@ export async function projectTimeEntriesAction(
     const isNewTimeEntry = !("id" in timeEntry);
 
     const isDeleted =
-      +formData.get(
+      +(formData.get(
         timeEntry.unique_identifier.split("_").slice(0, -1).join("_") +
           "_delete"
-      ) === 1;
+      ) as string) === 1;
 
     if (!isNewTimeEntry) {
       const initialTimeEntry = prevState.initialTimeEntries.find(
