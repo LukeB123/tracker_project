@@ -3,6 +3,7 @@ import "server-only";
 import {
   TResourceProps,
   TNewResourceProps,
+  TRole,
 } from "@/server/actions/data-fetches";
 
 // import sql from "better-sqlite3";
@@ -30,8 +31,8 @@ export async function addResource(resource: TNewResourceProps) {
   INSERT INTO resources (
     name,
     slug,
-    grade,
     email,
+    grade,
     role_id,
     role,
     team,

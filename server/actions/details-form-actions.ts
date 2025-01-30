@@ -9,6 +9,7 @@ import {
   updateProject,
   deleteProject,
   checkProjectSlugUniquness,
+  getProject,
 } from "@/server/util/projects";
 
 import {
@@ -17,6 +18,7 @@ import {
   deleteResource,
   checkResourceSlugUniquness,
   checkResourceEmailUniquness,
+  getResourceFromSlug,
 } from "@/server/util/resources";
 
 import {
@@ -147,6 +149,7 @@ export async function detailsFormAction(
         // NEW PROJECT INSERT
 
         await addProject(formInputValues);
+        const newProject = await getProject(formInputValues.slug);
         revalidatePath("/projects/");
 
         formNotification.status = "success";
@@ -155,7 +158,7 @@ export async function detailsFormAction(
 
         return {
           ...prevState,
-          project: formInputValues,
+          project: newProject,
           notification: formNotification,
           redirect: `/projects/${formInputValues.slug}/`,
         };
@@ -321,6 +324,7 @@ export async function detailsFormAction(
         // NEW RESOUIRCE INSERT
 
         await addResource(formInputValues);
+        const newResource = await getResourceFromSlug(formInputValues.slug);
         revalidatePath("/resources/");
 
         formNotification.status = "success";
@@ -329,7 +333,7 @@ export async function detailsFormAction(
 
         return {
           ...prevState,
-          resource: formInputValues,
+          resource: newResource,
           notification: formNotification,
           redirect: `/resources/${formInputValues.slug}/`,
         };
