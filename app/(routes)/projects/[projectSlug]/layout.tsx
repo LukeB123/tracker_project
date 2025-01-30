@@ -1,11 +1,14 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
+import { getProjectFromServer } from "@/server/actions/data-fetches";
+
+import { useAppDispatch, useAppSelector } from "@/app/lib/hooks";
+import { projectsActions } from "@/app/lib/features/project/projectsSlice";
+
 import NavButton from "@/app/_components/ui/buttons/nav-button";
 import Icon from "@/app/_components/ui/icons";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { projectsActions } from "@/lib/features/project/projectsSlice";
-import { getProject } from "@/util/projects";
-import { useEffect, useState } from "react";
 
 interface ProjectDetailsPageParams {
   params: { projectSlug: string };
@@ -26,7 +29,7 @@ export default function ProjectsLayout({
     async function fetchProject() {
       if (!project) {
         try {
-          const responce = await getProject(params.projectSlug);
+          const responce = await getProjectFromServer(params.projectSlug);
 
           dispatch(projectsActions.setCurrentProject(responce));
           setError(false);

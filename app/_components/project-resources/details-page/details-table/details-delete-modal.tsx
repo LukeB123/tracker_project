@@ -8,10 +8,10 @@ import Modal from "@/app/_components/ui/modal";
 import Button from "@/app/_components/ui/buttons/button";
 import Icon from "@/app/_components/ui/icons";
 
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { uiActions } from "@/lib/features/ui/uiSlice";
+import { useAppDispatch, useAppSelector } from "@/app/lib/hooks";
+import { uiActions } from "@/app/lib/features/ui/uiSlice";
 
-import { deleteProjectResourceAction } from "@/app/actions/details-form-actions";
+import { deleteProjectResourceAction } from "@/server/actions/details-form-actions";
 
 interface TProjectDetailsDeleteModalProps {
   id: number;

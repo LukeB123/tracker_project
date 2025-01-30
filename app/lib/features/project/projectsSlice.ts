@@ -1,6 +1,10 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
-import { TProjectDetailsProps, getProject, getProjects } from "@/util/projects";
+import {
+  TProjectDetailsProps,
+  getProject,
+  getProjects,
+} from "@/server/util/projects";
 
 interface ProjcetsState {
   allProjects: TProjectDetailsProps[];

@@ -3,11 +3,11 @@ import { Suspense } from "react";
 import ProjectResources from "@/app/_components/project-resources/project-resources";
 import Loading from "@/app/_components/project-resources/loading";
 
-import { getResources } from "@/util/resources";
+import { getResourcesFromServer } from "@/server/actions/data-fetches";
 
 async function FetchedResources() {
   try {
-    const resources = await getResources();
+    const resources = await getResourcesFromServer();
 
     return <ProjectResources resources={resources} context="resource" />;
   } catch (error) {

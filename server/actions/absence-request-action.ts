@@ -2,14 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 
-import { TNotificationState } from "@/lib/features/ui/uiSlice";
+import { TNotificationState } from "@/app/lib/features/ui/uiSlice";
 import {
   approveAbsenceRequest,
   cancelAbsenceRequest,
   declineAbsenceRequest,
-  TNewAbsenceRequestProps,
-} from "@/util/absence";
-import { addAbsenceRequest } from "@/util/absence";
+} from "@/server/util/absence";
+import { addAbsenceRequest } from "@/server/util/absence";
+import { TNewAbsenceRequestProps } from "@/server/actions/data-fetches";
 
 interface TFormState {
   numberOfEntries: number[];

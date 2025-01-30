@@ -10,12 +10,12 @@ import {
   TNewTimeEntriesProps,
   TProjectResourcesProps,
   TTimeEntriesProps,
-} from "@/util/time-entries";
-import { projectTimeEntriesAction } from "@/app/actions/time-entries-action";
+} from "@/server/util/time-entries";
+import { projectTimeEntriesAction } from "@/server/actions/time-entries-action";
 
-import { uiActions } from "@/lib/features/ui/uiSlice";
-import { useAppDispatch } from "@/lib/hooks";
-import { TWeekProps } from "@/util/date";
+import { uiActions } from "@/app/lib/features/ui/uiSlice";
+import { useAppDispatch } from "@/app/lib/hooks";
+import { TWeekProps } from "@/server/util/date";
 
 interface ProjectTimeEntriesProps {
   context: "project" | "resource";

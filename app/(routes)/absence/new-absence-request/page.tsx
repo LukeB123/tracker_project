@@ -1,11 +1,13 @@
-import Icon from "@/app/_components/ui/icons";
-import { getResources } from "@/util/resources";
 import { Suspense } from "react";
+
+import { getResourcesFromServer } from "@/server/actions/data-fetches";
+
 import AbsenceForm from "@/app/_components/absence/absence-form";
+import Icon from "@/app/_components/ui/icons";
 
 async function FetchedResources() {
   try {
-    const resources = await getResources();
+    const resources = await getResourcesFromServer();
 
     return <AbsenceForm resources={resources} />;
   } catch (error) {

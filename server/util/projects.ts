@@ -1,44 +1,13 @@
-"use server";
+import "server-only";
+import {
+  TNewProjectDetailsProps,
+  TProjectDetailsProps,
+} from "@/server/actions/data-fetches";
 
 // import sql from "better-sqlite3";
 const sql = require("better-sqlite3");
 
 const db = sql("trackers.db");
-
-export type TProjectDetailsProps = {
-  id: number;
-  slug: string;
-  title: string;
-  delivery_manager: string;
-  delivery_manager_id: number;
-  project_manager: string;
-  project_manager_id: number;
-  delivery_stream: string;
-  value_stream: string;
-  scrum_master: string;
-  scrum_master_id: number;
-  project_type: string;
-  last_updated: string;
-  line_of_business: string;
-  task: string;
-};
-
-export type TNewProjectDetailsProps = {
-  slug: string;
-  title: string;
-  delivery_manager: string;
-  delivery_manager_id: number;
-  project_manager: string;
-  project_manager_id: number;
-  delivery_stream: string;
-  value_stream: string;
-  scrum_master: string;
-  scrum_master_id: number;
-  project_type: string;
-  last_updated: string;
-  line_of_business: string;
-  task: string;
-};
 
 export async function getProjects(): Promise<TProjectDetailsProps[]> {
   await new Promise((resolve) => setTimeout(resolve, 2000));

@@ -1,13 +1,13 @@
 import { Suspense } from "react";
 
+import { getProjectsFromServer } from "@/server/actions/data-fetches";
+
 import ProjectResources from "@/app/_components/project-resources/project-resources";
 import Loading from "@/app/_components/project-resources/loading";
 
-import { getProjects } from "@/util/projects";
-
 async function FetchedProjects() {
   try {
-    const projects = await getProjects();
+    const projects = await getProjectsFromServer();
 
     // return <Projects projects={projects} />;
     return <ProjectResources projects={projects} context="project" />;

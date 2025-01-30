@@ -1,4 +1,3 @@
-import { TAbsenceRequestProps } from "@/util/absence";
 import Icon from "@/app/_components/ui/icons";
 import Button from "@/app/_components/ui/buttons/button";
 import { useFormState } from "react-dom";
@@ -6,11 +5,12 @@ import {
   acceptAbsenceRequestAction,
   cancelAbsenceRequestAction,
   declineAbsenceRequestAction,
-} from "@/app/actions/absence-request-action";
+} from "@/server/actions/absence-request-action";
 import { useEffect } from "react";
-import { useAppDispatch } from "@/lib/hooks";
-import { uiActions } from "@/lib/features/ui/uiSlice";
+import { useAppDispatch } from "@/app/lib/hooks";
+import { uiActions } from "@/app/lib/features/ui/uiSlice";
 import AbsenceEntryButton from "@/app/_components/absence/absence-entry-button";
+import { TAbsenceRequestProps } from "@/server/actions/data-fetches";
 
 interface AbsenceTableEntryProps {
   request: TAbsenceRequestProps;

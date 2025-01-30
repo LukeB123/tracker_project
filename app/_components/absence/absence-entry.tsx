@@ -1,7 +1,7 @@
 import Dropdown, { DropdownItem } from "@/app/_components/ui/buttons/dropdown";
 import DeleteIconButton from "@/app/_components/ui/buttons/delete-icon-button";
 import React, { useEffect, useState } from "react";
-import { useAppSelector } from "@/lib/hooks";
+import { useAppSelector } from "@/app/lib/hooks";
 
 interface BaselineEntryProps {
   resources: DropdownItem[];

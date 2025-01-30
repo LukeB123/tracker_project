@@ -2,33 +2,35 @@
 
 import { revalidatePath } from "next/cache";
 
-import { TNotificationState } from "@/lib/features/ui/uiSlice";
+import { TNotificationState } from "@/app/lib/features/ui/uiSlice";
 
 import {
   addProject,
   updateProject,
   deleteProject,
   checkProjectSlugUniquness,
-  TProjectDetailsProps,
-  TNewProjectDetailsProps,
-} from "@/util/projects";
+} from "@/server/util/projects";
 
 import {
   addResource,
   updateResource,
   deleteResource,
   checkResourceSlugUniquness,
-  TNewResourceProps,
-  TResourceProps,
   checkResourceEmailUniquness,
-} from "@/util/resources";
+} from "@/server/util/resources";
 
 import {
   deleteProjectResourcesByProjectId,
   deleteProjectResourcesByResourceId,
   updateProjectResourcesProjectTitle,
   updateProjectResourcesResourceName,
-} from "@/util/time-entries";
+} from "@/server/util/time-entries";
+import {
+  TNewProjectDetailsProps,
+  TNewResourceProps,
+  TProjectDetailsProps,
+  TResourceProps,
+} from "@/server/actions/data-fetches";
 
 interface TFormState {
   context: "project" | "resource";

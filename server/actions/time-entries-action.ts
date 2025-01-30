@@ -2,12 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 
-import { TNotificationState } from "@/lib/features/ui/uiSlice";
+import { TNotificationState } from "@/app/lib/features/ui/uiSlice";
 import {
-  TNewProjectResourcesProps,
-  TNewTimeEntriesProps,
-  TProjectResourcesProps,
-  TTimeEntriesProps,
   addProjectResources,
   addTimeEntries,
   updateTimeEntries,
@@ -16,12 +12,15 @@ import {
   deleteTimeEnties,
   getProjectResourceByUniqueIds,
   getResourcesTimeEntries,
-} from "@/util/time-entries";
+} from "@/server/util/time-entries";
+import { updateProjectsLastUpdated } from "@/server/util/projects";
 import {
-  TProjectDetailsProps,
-  updateProjectsLastUpdated,
-} from "@/util/projects";
-import { TWeekProps } from "@/util/date";
+  TNewProjectResourcesProps,
+  TNewTimeEntriesProps,
+  TProjectResourcesProps,
+  TTimeEntriesProps,
+  TWeekProps,
+} from "@/server/actions/data-fetches";
 
 interface TFormState {
   context: "project" | "resource";

@@ -1,11 +1,11 @@
 "use client";
-import { TResourceProps } from "@/util/resources";
 import { useState } from "react";
 import AddEntryButton from "@/app/_components/ui/buttons/add-entry-button";
-import { useAppSelector } from "@/lib/hooks";
+import { useAppSelector } from "@/app/lib/hooks";
 import AbsenceEntry from "@/app/_components/absence/absence-entry";
 import AbsenceFormAction from "@/app/_components/absence/absence-form-action";
 import { redirect } from "next/navigation";
+import { TResourceProps } from "@/server/actions/data-fetches";
 
 interface AbsenceFormProps {
   resources: TResourceProps[];

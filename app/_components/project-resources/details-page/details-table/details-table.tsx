@@ -7,7 +7,7 @@ import DetailsTableHeader from "@/app/_components/project-resources/details-page
 import DetailsTableRow from "@/app/_components/project-resources/details-page/details-table/details-table-row";
 import DetailsTableButtons from "@/app/_components/project-resources/details-page/details-table/details-table-buttons";
 
-import { useAppSelector } from "@/lib/hooks";
+import { useAppSelector } from "@/app/lib/hooks";
 
 interface ProjectDetailsTableParams {
   setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;

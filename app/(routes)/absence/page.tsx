@@ -1,15 +1,14 @@
-import Icon from "@/app/_components/ui/icons";
-import { getResources } from "@/util/resources";
 import { Suspense } from "react";
-import AbsenceForm from "@/app/_components/absence/absence-form";
-import { getAbsenceRequests } from "@/util/absence";
-import Link from "next/link";
-import NavButton from "@/app/_components/ui/buttons/nav-button";
+
+import { getAbsenceRequestsFromServer } from "@/server/actions/data-fetches";
+
 import AbsenceTable from "@/app/_components/absence/absence-table";
+import NavButton from "@/app/_components/ui/buttons/nav-button";
+import Icon from "@/app/_components/ui/icons";
 
 async function FetchedResources() {
   try {
-    const absenceRequests = await getAbsenceRequests();
+    const absenceRequests = await getAbsenceRequestsFromServer();
 
     return <AbsenceTable absenceRequests={absenceRequests} />;
   } catch (error) {

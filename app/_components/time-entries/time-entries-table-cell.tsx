@@ -8,9 +8,9 @@ import {
   TNewTimeEntriesProps,
   TProjectResourcesProps,
   TTimeEntriesProps,
-} from "@/util/time-entries";
-import { TWeekProps } from "@/util/date";
-import { useAppSelector } from "@/lib/hooks";
+} from "@/server/util/time-entries";
+import { TWeekProps } from "@/server/util/date";
+import { useAppSelector } from "@/app/lib/hooks";
 
 interface TimeEntriesTableCellProps {
   context: "project" | "resource";

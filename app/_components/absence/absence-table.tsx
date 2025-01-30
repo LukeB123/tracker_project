@@ -1,9 +1,9 @@
 "use client";
 
-import { TAbsenceRequestProps } from "@/util/absence";
 import { useEffect, useState } from "react";
 import AbsenceTableEntry from "@/app/_components/absence/absence-table-entry";
-import Icon from "../ui/icons";
+import Icon from "@/app/_components/ui/icons";
+import { TAbsenceRequestProps } from "@/server/actions/data-fetches";
 
 interface AbsenceTableProps {
   absenceRequests: TAbsenceRequestProps[];

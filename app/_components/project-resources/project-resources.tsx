@@ -8,12 +8,13 @@ import TableHeader from "@/app/_components/project-resources/table-header";
 import ProjectResourceLink from "@/app/_components/project-resources/link";
 import AddEntryButton from "@/app/_components/ui/buttons/add-entry-button";
 
-import { TProjectDetailsProps } from "@/util/projects";
-import { TResourceProps } from "@/util/resources";
-
-import { useAppDispatch } from "@/lib/hooks";
-import { projectsActions } from "@/lib/features/project/projectsSlice";
-import { resourcesActions } from "@/lib/features/resources/resourcesSlice";
+import { useAppDispatch } from "@/app/lib/hooks";
+import { projectsActions } from "@/app/lib/features/project/projectsSlice";
+import { resourcesActions } from "@/app/lib/features/resources/resourcesSlice";
+import {
+  TProjectDetailsProps,
+  TResourceProps,
+} from "@/server/actions/data-fetches";
 
 interface ProjectResourcesParams {
   projects?: TProjectDetailsProps[];

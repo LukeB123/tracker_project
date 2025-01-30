@@ -1,12 +1,14 @@
 "use client";
 
-import NavButton from "@/app/_components/ui/buttons/nav-button";
-import Icon from "@/app/_components/ui/icons";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { resourcesActions } from "@/lib/features/resources/resourcesSlice";
-import { getResource, getResourceFromSlug } from "@/util/resources";
 import { useEffect, useState } from "react";
 
+import { getResourceFromSlugFromServer } from "@/server/actions/data-fetches";
+
+import NavButton from "@/app/_components/ui/buttons/nav-button";
+import Icon from "@/app/_components/ui/icons";
+
+import { useAppDispatch, useAppSelector } from "@/app/lib/hooks";
+import { resourcesActions } from "@/app/lib/features/resources/resourcesSlice";
 interface ResourceDetailsPageParams {
   params: { resourceSlug: string };
   children: React.ReactNode;
@@ -26,7 +28,9 @@ export default function ProjectsLayout({
     async function fetchResource() {
       if (!resource) {
         try {
-          const responce = await getResourceFromSlug(params.resourceSlug);
+          const responce = await getResourceFromSlugFromServer(
+            params.resourceSlug
+          );
 
           dispatch(resourcesActions.setCurrentResource(responce));
           setError(false);

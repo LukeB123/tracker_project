@@ -1,41 +1,14 @@
-"use server";
+import "server-only";
+
+import {
+  TResourceProps,
+  TNewResourceProps,
+} from "@/server/actions/data-fetches";
 
 // import sql from "better-sqlite3";
 const sql = require("better-sqlite3");
 
 const db = sql("trackers.db");
-
-export type TResourceProps = {
-  id: number;
-  name: string;
-  slug: string;
-  email: string;
-  grade: string;
-  role_id: number;
-  role: string;
-  team: string;
-  is_delivery_manager: 0 | 1;
-  is_project_manager: 0 | 1;
-  is_scrum_master: 0 | 1;
-};
-
-export type TNewResourceProps = {
-  name: string;
-  slug: string;
-  email: string;
-  grade: string;
-  role_id: number;
-  role: string;
-  team: string;
-  is_delivery_manager: 0 | 1;
-  is_project_manager: 0 | 1;
-  is_scrum_master: 0 | 1;
-};
-
-export type TRole = {
-  id: number;
-  role: string;
-};
 
 export async function getResources(): Promise<TResourceProps[]> {
   await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -141,6 +114,7 @@ export async function checkResourceSlugUniquness(
 
   return result.length < 1;
 }
+
 export async function checkResourceEmailUniquness(
   id: number | null,
   slug: string

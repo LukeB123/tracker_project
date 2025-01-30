@@ -1,16 +1,20 @@
-import Icon from "@/app/_components/ui/icons";
-import BaselineInput from "@/app/_components/baseline/baseline";
-import { getWeeks } from "@/util/date";
-import { getResources, getRoles } from "@/util/resources";
 import { Suspense } from "react";
 
+import {
+  getResourcesFromServer,
+  getRolesFromServer,
+  getWeeksFromServer,
+} from "@/server/actions/data-fetches";
+
+import BaselineInput from "@/app/_components/baseline/baseline";
+import Icon from "@/app/_components/ui/icons";
 async function FetchedResources() {
   try {
-    const resources = await getResources();
+    const resources = await getResourcesFromServer();
 
-    const weeks = await getWeeks();
+    const weeks = await getWeeksFromServer();
 
-    const roles = await getRoles();
+    const roles = await getRolesFromServer();
 
     return <BaselineInput resources={resources} roles={roles} weeks={weeks} />;
   } catch (error) {

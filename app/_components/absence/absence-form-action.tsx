@@ -3,10 +3,10 @@
 import { useEffect } from "react";
 import { useFormState } from "react-dom";
 
-import { uiActions } from "@/lib/features/ui/uiSlice";
-import { useAppDispatch } from "@/lib/hooks";
+import { uiActions } from "@/app/lib/features/ui/uiSlice";
+import { useAppDispatch } from "@/app/lib/hooks";
 import AbsenceFormButtons from "@/app/_components/absence/absence-form-buttons";
-import { absenceRequestAction } from "@/app/actions/absence-request-action";
+import { absenceRequestAction } from "@/server/actions/absence-request-action";
 
 interface AbsenceFormActionProps {
   numberOfEntries: number[];

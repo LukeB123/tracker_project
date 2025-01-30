@@ -1,61 +1,15 @@
-"use server";
+import "server-only";
+import {
+  TNewProjectResourcesProps,
+  TNewTimeEntriesProps,
+  TProjectResourcesProps,
+  TTimeEntriesProps,
+} from "@/server/actions/data-fetches";
 
 // import sql from "better-sqlite3";
 const sql = require("better-sqlite3");
 
 const db = sql("trackers.db");
-
-export type TProjectResourcesProps = {
-  id: number;
-  project_id: number;
-  project_slug: string;
-  project_title: string;
-  resource_id: number;
-  resource_name: string;
-  resource_slug: string;
-  role_id: number;
-  role: string;
-  rate_grade: string;
-  unique_identifier: string;
-};
-
-export type TNewProjectResourcesProps = {
-  project_id: number | undefined;
-  project_slug: string;
-  project_title: string;
-  resource_id: number | undefined;
-  resource_name: string;
-  resource_slug: string;
-  role_id: number | undefined;
-  role: string;
-  rate_grade: string;
-  unique_identifier: string;
-};
-
-export type TTimeEntriesProps = {
-  id: number;
-  project_id: number;
-  project_slug: string;
-  project_title: string;
-  resource_id: number;
-  role_id: number;
-  rate_grade: string;
-  week_commencing: string;
-  work_days: number;
-  unique_identifier: string;
-};
-
-export type TNewTimeEntriesProps = {
-  project_id: number;
-  project_slug: string;
-  project_title: string;
-  resource_id: number;
-  role_id: number;
-  rate_grade: string;
-  week_commencing: string;
-  work_days: number;
-  unique_identifier: string;
-};
 
 export async function getProjectResourcesByProjectId(
   projectId: number

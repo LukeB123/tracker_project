@@ -9,22 +9,20 @@ import AddEntryButton from "@/app/_components/ui/buttons/add-entry-button";
 import TimeEntriesForm from "@/app/_components/time-entries/time-entries-form";
 import Icon from "@/app/_components/ui/icons";
 
+import { useAppSelector } from "@/app/lib/hooks";
 import {
+  getProjectsFromServer,
+  getResourcesFromServer,
+  getRolesFromServer,
   TNewProjectResourcesProps,
   TNewTimeEntriesProps,
+  TProjectDetailsProps,
   TProjectResourcesProps,
-  TTimeEntriesProps,
-} from "@/util/time-entries";
-import { TWeekProps } from "@/util/date";
-import {
   TResourceProps,
   TRole,
-  getResources,
-  getRoles,
-} from "@/util/resources";
-import { TProjectDetailsProps, getProjects } from "@/util/projects";
-
-import { useAppSelector } from "@/lib/hooks";
+  TTimeEntriesProps,
+  TWeekProps,
+} from "@/server/actions/data-fetches";
 
 interface TimeEntriesProps {
   context: "project" | "resource";
@@ -250,10 +248,10 @@ export default function TimeEntries({
         setIsError(false);
 
         try {
-          const roles = await getRoles();
+          const roles = await getRolesFromServer();
 
           if (context === "project") {
-            const response = await getResources();
+            const response = await getResourcesFromServer();
 
             setProjectResourceSelection({
               projects: [],
@@ -262,7 +260,7 @@ export default function TimeEntries({
             });
           }
           if (context === "resource") {
-            const response = await getProjects();
+            const response = await getProjectsFromServer();
 
             setProjectResourceSelection({
               projects: response,

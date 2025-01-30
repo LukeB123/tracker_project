@@ -1,34 +1,13 @@
-"use server";
+import "server-only";
+import {
+  TAbsenceRequestProps,
+  TNewAbsenceRequestProps,
+} from "@/server/actions/data-fetches";
 
 // import sql from "better-sqlite3";
 const sql = require("better-sqlite3");
 
 const db = sql("trackers.db");
-
-export type TAbsenceRequestProps = {
-  id: number;
-  resource_id: number;
-  resource_name: string;
-  approver_id: number;
-  approver_name: string;
-  absence_type: string;
-  absence_duration: string;
-  start_of_absence: string;
-  end_of_absence: string;
-  status: "Pending" | "Approved" | "Declined" | "Cancelled";
-};
-
-export type TNewAbsenceRequestProps = {
-  resource_id: number;
-  resource_name: string;
-  approver_id: number;
-  approver_name: string;
-  absence_type: string;
-  absence_duration: string;
-  start_of_absence: string;
-  end_of_absence: string;
-  status: "Pending" | "Approved" | "Declined" | "Cancelled";
-};
 
 export async function getAbsenceRequests(): Promise<TAbsenceRequestProps[]> {
   await new Promise((resolve) => setTimeout(resolve, 2000));

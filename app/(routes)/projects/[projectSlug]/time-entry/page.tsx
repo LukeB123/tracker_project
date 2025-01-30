@@ -1,15 +1,16 @@
 import { Suspense } from "react";
 
-import TimeEntries from "@/app/_components/time-entries/time-entries";
-import Icon from "@/app/_components/ui/icons";
-
 import {
+  getProjectResourcesByProjectSlugFromServer,
+  getResourcesTimeEntriesFromServer,
+  getWeeksFromServer,
   TProjectResourcesProps,
   TTimeEntriesProps,
-  getProjectResourcesByProjectSlug,
-  getResourcesTimeEntries,
-} from "@/util/time-entries";
-import { TWeekProps, getWeeks } from "@/util/date";
+  TWeekProps,
+} from "@/server/actions/data-fetches";
+
+import TimeEntries from "@/app/_components/time-entries/time-entries";
+import Icon from "@/app/_components/ui/icons";
 
 interface ParamsProp {
   params: { projectSlug: string };
@@ -31,7 +32,7 @@ async function FetchedTimeEntries({
 
   try {
     if (resourceIds.length > 0) {
-      initialTimeEntries = await getResourcesTimeEntries(
+      initialTimeEntries = await getResourcesTimeEntriesFromServer(
         resourceIds,
         weeks.map((week) => week.week_commencing)
       );
@@ -57,11 +58,10 @@ async function FetchedTimeEntries({
 
 async function FetchedProjectResources({ params }: ParamsProp) {
   try {
-    const initialProjectResources = await getProjectResourcesByProjectSlug(
-      params.projectSlug
-    );
+    const initialProjectResources =
+      await getProjectResourcesByProjectSlugFromServer(params.projectSlug);
 
-    const weeks = await getWeeks();
+    const weeks = await getWeeksFromServer();
 
     return (
       <Suspense

@@ -9,8 +9,8 @@ import {
   getProjectResourcesByResource,
   getProjectResourcesByResourceSlug,
   getResourcesTimeEntries,
-} from "@/util/time-entries";
-import { TWeekProps, getWeeks } from "@/util/date";
+} from "@/server/util/time-entries";
+import { TWeekProps, getWeeks } from "@/server/util/date";
 
 interface ParamsProp {
   params: { resourceSlug: string };

@@ -1,7 +1,7 @@
 "use client";
 
-import { useAppDispatch } from "@/lib/hooks";
-import { TNotificationState, uiActions } from "@/lib/features/ui/uiSlice";
+import { useAppDispatch } from "@/app/lib/hooks";
+import { TNotificationState, uiActions } from "@/app/lib/features/ui/uiSlice";
 import { useEffect } from "react";
 import Icon from "@/app/_components/ui/icons";
 

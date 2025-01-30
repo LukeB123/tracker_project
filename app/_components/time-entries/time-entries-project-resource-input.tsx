@@ -2,16 +2,16 @@ import Icon from "@/app/_components/ui/icons";
 import DeleteIconButton from "@/app/_components/ui/buttons/delete-icon-button";
 import Dropdown from "@/app/_components/ui/buttons/dropdown";
 
-import { TResourceProps, TRole } from "@/util/resources";
-import { TProjectDetailsProps } from "@/util/projects";
-import { TWeekProps } from "@/util/date";
+import { TResourceProps, TRole } from "@/server/util/resources";
+import { TProjectDetailsProps } from "@/server/util/projects";
+import { TWeekProps } from "@/server/util/date";
 import {
   TNewProjectResourcesProps,
   TNewTimeEntriesProps,
   TProjectResourcesProps,
   TTimeEntriesProps,
-} from "@/util/time-entries";
-import { useAppSelector } from "@/lib/hooks";
+} from "@/server/util/time-entries";
+import { useAppSelector } from "@/app/lib/hooks";
 import Link from "next/link";
 
 interface TimeEntriesProjectResourceInputProps {

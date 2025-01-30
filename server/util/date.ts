@@ -1,18 +1,10 @@
-"use server";
+import "server-only";
+import { TWeekProps } from "@/server/actions/data-fetches";
 
 // import sql from "better-sqlite3";
 const sql = require("better-sqlite3");
 
 const db = sql("trackers.db");
-
-export type TWeekProps = {
-  week_commencing: string;
-  weekIndex: 1 | 2 | 3 | 4 | 5;
-  monthYearString: string;
-  monthIndex: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
-  year: number;
-  total_working_days: 0 | 1 | 2 | 3 | 4 | 5;
-};
 
 export async function getWeeks(): Promise<TWeekProps[]> {
   await new Promise((resolve) => setTimeout(resolve, 2000));

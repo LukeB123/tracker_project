@@ -9,19 +9,19 @@ import DetailsFormHeader from "@/app/_components/project-resources/details-page/
 import DetailsFormRow from "@/app/_components/project-resources/details-page/details-form/details-form-row";
 import DetailsFormButtons from "@/app/_components/project-resources/details-page/details-form/details-form-buttons";
 
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { uiActions } from "@/lib/features/ui/uiSlice";
+import { useAppDispatch, useAppSelector } from "@/app/lib/hooks";
+import { uiActions } from "@/app/lib/features/ui/uiSlice";
 
-import { detailsFormAction } from "@/app/actions/details-form-actions";
+import { detailsFormAction } from "@/server/actions/details-form-actions";
+import { projectsActions } from "@/app/lib/features/project/projectsSlice";
+import { resourcesActions } from "@/app/lib/features/resources/resourcesSlice";
 import {
+  getResourcesFromServer,
+  getRolesFromServer,
+  TProjectDetailsProps,
   TResourceProps,
   TRole,
-  getResources,
-  getRoles,
-} from "@/util/resources";
-import { projectsActions } from "@/lib/features/project/projectsSlice";
-import { TProjectDetailsProps } from "@/util/projects";
-import { resourcesActions } from "@/lib/features/resources/resourcesSlice";
+} from "@/server/actions/data-fetches";
 
 interface DetailsFormParams {
   setIsEditing?: React.Dispatch<React.SetStateAction<boolean>>;
@@ -101,11 +101,11 @@ export default function DetailsForm({
       setError(false);
       try {
         if (context === "project") {
-          const fetchedResources = await getResources();
+          const fetchedResources = await getResourcesFromServer();
 
           setResources(fetchedResources);
         } else if (context === "resource") {
-          const fetchedRoles = await getRoles();
+          const fetchedRoles = await getRolesFromServer();
 
           setRoles(fetchedRoles);
         }

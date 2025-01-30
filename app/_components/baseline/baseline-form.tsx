@@ -3,11 +3,11 @@
 import { useEffect } from "react";
 import { useFormState } from "react-dom";
 
-import { uiActions } from "@/lib/features/ui/uiSlice";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { uiActions } from "@/app/lib/features/ui/uiSlice";
+import { useAppDispatch, useAppSelector } from "@/app/lib/hooks";
 import BaselineFormButtons from "@/app/_components/baseline/baseline-form-buttons";
-import { baselineEntriesAction } from "@/app/actions/baseline-entries-action";
-import { TWeekProps } from "@/util/date";
+import { baselineEntriesAction } from "@/server/actions/baseline-entries-action";
+import { TWeekProps } from "@/server/actions/data-fetches";
 
 interface BaselineFormProps {
   numberOfEntries: number[];

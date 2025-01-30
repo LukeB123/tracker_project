@@ -1,11 +1,14 @@
 "use client";
-import { TWeekProps } from "@/util/date";
-import { TResourceProps, TRole } from "@/util/resources";
 import { useState } from "react";
 import BaselineEntry from "@/app/_components/baseline/baseline-entry";
 import AddEntryButton from "@/app/_components/ui/buttons/add-entry-button";
 import BaselineForm from "@/app/_components/baseline/baseline-form";
-import { useAppSelector } from "@/lib/hooks";
+import { useAppSelector } from "@/app/lib/hooks";
+import {
+  TResourceProps,
+  TRole,
+  TWeekProps,
+} from "@/server/actions/data-fetches";
 
 interface BaselineInputProps {
   resources: TResourceProps[];

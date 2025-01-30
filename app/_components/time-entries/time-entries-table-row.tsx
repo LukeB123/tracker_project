@@ -10,11 +10,11 @@ import {
   TNewTimeEntriesProps,
   TProjectResourcesProps,
   TTimeEntriesProps,
-} from "@/util/time-entries";
-import { TResourceProps, TRole } from "@/util/resources";
-import { TProjectDetailsProps } from "@/util/projects";
-import { TWeekProps } from "@/util/date";
-import { useAppSelector } from "@/lib/hooks";
+} from "@/server/util/time-entries";
+import { TResourceProps, TRole } from "@/server/util/resources";
+import { TProjectDetailsProps } from "@/server/util/projects";
+import { TWeekProps } from "@/server/util/date";
+import { useAppSelector } from "@/app/lib/hooks";
 
 interface TimeEntriesTableRowProps {
   context: "project" | "resource";
