@@ -35,7 +35,6 @@ export async function baselineEntriesAction(
 
   const modelledDataProjectResources: TNewProjectResourcesProps[] = [];
   const modelledDataTimeEntries: TNewTimeEntriesProps[] = [];
-  const modelledTimeEntryUniqueIds: string[] = [];
 
   const newProjectResources: TNewProjectResourcesProps[] = [];
 
@@ -62,7 +61,7 @@ export async function baselineEntriesAction(
       const daysPerWeekString: string = formData.get(
         "work_days_" + entryId
       ) as string;
-      const daysPerWeek = +(formData.get("work_days_" + entryId) as string);
+      const daysPerWeek = +daysPerWeekString;
       const numberOfWeeks = +(formData.get(
         "number_of_weeks_" + entryId
       ) as string);
@@ -132,16 +131,18 @@ export async function baselineEntriesAction(
             unique_identifier: timeEntryUniqueId,
           };
 
-          if (!modelledTimeEntryUniqueIds.includes(timeEntryUniqueId)) {
-            modelledTimeEntryUniqueIds.push(timeEntryUniqueId);
-
-            modelledDataTimeEntries.push(weekTimeEntry);
+          if (
+            !modelledDataTimeEntries
+              .map((timeEntry) => timeEntry.unique_identifier)
+              .includes(timeEntryUniqueId)
+          ) {
+            modelledDataTimeEntries.push({ ...weekTimeEntry });
           } else {
             const timeEntryIndex = modelledDataTimeEntries.findIndex(
               (timeEntry) => timeEntry.unique_identifier === timeEntryUniqueId
             );
 
-            modelledDataTimeEntries[timeEntryIndex] = weekTimeEntry;
+            modelledDataTimeEntries[timeEntryIndex].work_days = daysPerWeek;
           }
         });
       }
@@ -200,16 +201,19 @@ export async function baselineEntriesAction(
         .includes(timeEntry.unique_identifier);
 
       if (isNewTimeEntry && timeEntry.work_days > 0) {
-        newTimeEntries.push(timeEntry);
+        newTimeEntries.push({ ...timeEntry });
       } else if (!isNewTimeEntry) {
-        const existingId = existingTimeEntries.find(
+        const existingEntry = existingTimeEntries.find(
           (entry) => entry.unique_identifier === timeEntry.unique_identifier
-        )!.id;
+        )!;
 
         if (timeEntry.work_days > 0) {
-          updatedTimeEntries.push({ id: existingId, ...timeEntry });
+          updatedTimeEntries.push({
+            ...existingEntry,
+            work_days: timeEntry.work_days,
+          });
         } else {
-          deletedTimeEntryIds.push(existingId);
+          deletedTimeEntryIds.push(existingEntry.id);
         }
       }
     });
