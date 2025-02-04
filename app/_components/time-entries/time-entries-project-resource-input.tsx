@@ -447,7 +447,7 @@ export default function TimeEntriesProjectResourceInput({
               setIsDelete={setIsDelete}
               setChangesMade={setChangesMade}
               isDisabled={formStatusIsPending}
-              showModal={false}
+              useModal={false}
             />
             <input
               name={projectResource.unique_identifier + "_delete"}

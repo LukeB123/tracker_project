@@ -62,7 +62,11 @@ export default function BaselineEntry({
       <td>
         {entryIndex > 0 && (
           <div className="absolute -left-5 flex items-center h-full">
-            <DeleteIconButton isDelete={isDelete} setIsDelete={setIsDelete} />
+            <DeleteIconButton
+              isDelete={isDelete}
+              setIsDelete={setIsDelete}
+              isDisabled={formStatusIsPending}
+            />
           </div>
         )}
         <Dropdown

@@ -5,6 +5,8 @@ import AbsenceTableEntry from "@/app/_components/absence/absence-table-entry";
 import Icon from "@/app/_components/ui/icons";
 import { TAbsenceRequestProps } from "@/server/actions/data-fetches";
 
+let todayDate = new Date().toISOString().slice(0, 10);
+
 interface AbsenceTableProps {
   absenceRequests: TAbsenceRequestProps[];
 }
@@ -15,6 +17,8 @@ export default function AbsenceTable({ absenceRequests }: AbsenceTableProps) {
   const [statusFilter, setStatusFilter] = useState<
     ("Pending" | "Approved" | "Declined" | "Cancelled")[]
   >(["Pending", "Approved"]);
+
+  console.log(todayDate);
 
   const filteredAbsenceRequests = absenceRequests.filter((request) =>
     statusFilter.includes(request.status)
@@ -242,6 +246,7 @@ export default function AbsenceTable({ absenceRequests }: AbsenceTableProps) {
                       .map((filteredRequest) => filteredRequest.id)
                       .includes(request.id)
                   }
+                  todayDate={todayDate}
                 />
               ))}
             </ul>

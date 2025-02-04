@@ -19,6 +19,7 @@ interface AbsenceTableEntryProps {
   pendingId: number | undefined;
   setPendingId: React.Dispatch<React.SetStateAction<number | undefined>>;
   hidden: boolean;
+  todayDate: string;
 }
 
 export default function AbsenceTableEntry({
@@ -28,6 +29,7 @@ export default function AbsenceTableEntry({
   pendingId,
   setPendingId,
   hidden,
+  todayDate,
 }: AbsenceTableEntryProps) {
   const dispatch = useAppDispatch();
 
@@ -159,28 +161,49 @@ export default function AbsenceTableEntry({
                     />
                   </form>
                 </div>
+                {request.start_of_absence >= todayDate && (
+                  <>
+                    <p className="italic">
+                      TODO: Only see below if this is your request
+                    </p>
+                    <div className="my-4 flex justify-center gap-8">
+                      <form
+                        id={"cancel_absence_request_" + request.id}
+                        action={cancelFormAction}
+                      >
+                        <AbsenceEntryButton
+                          type="Cancel"
+                          id={request.id}
+                          pendingId={pendingId}
+                          setPendingId={setPendingId}
+                        />
+                      </form>
+                    </div>
+                  </>
+                )}
               </>
             )}
-            {request.status === "Approved" && (
-              <>
-                <p className="italic">
-                  TODO: Only see below if this is your request
-                </p>
-                <div className="my-4 flex justify-center gap-8">
-                  <form
-                    id={"cancel_absence_request_" + request.id}
-                    action={cancelFormAction}
-                  >
-                    <AbsenceEntryButton
-                      type="Cancel"
-                      id={request.id}
-                      pendingId={pendingId}
-                      setPendingId={setPendingId}
-                    />
-                  </form>
-                </div>
-              </>
-            )}
+            {request.status === "Approved" &&
+              request.start_of_absence >= todayDate && (
+                <>
+                  <p className="italic">
+                    TODO: Only see below if this is your request
+                  </p>
+                  <div className="my-4 flex justify-center gap-8">
+                    <form
+                      id={"cancel_absence_request_" + request.id}
+                      action={cancelFormAction}
+                    >
+                      <AbsenceEntryButton
+                        type="Cancel"
+                        id={request.id}
+                        pendingId={pendingId}
+                        setPendingId={setPendingId}
+                      />
+                    </form>
+                  </div>
+                </>
+              )}
           </div>
         )}
       </div>

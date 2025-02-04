@@ -8,7 +8,7 @@ interface DeleteIconButtonProps {
   setIsDelete: React.Dispatch<React.SetStateAction<boolean>>;
   setChangesMade?: React.Dispatch<React.SetStateAction<boolean>>;
   isDisabled?: boolean;
-  showModal?: boolean;
+  useModal?: boolean;
 }
 
 export default function DeleteIconButton({
@@ -17,7 +17,7 @@ export default function DeleteIconButton({
   setIsDelete,
   setChangesMade,
   isDisabled = false,
-  showModal = true,
+  useModal = true,
 }: DeleteIconButtonProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -25,7 +25,7 @@ export default function DeleteIconButton({
     if (isDelete) {
       setIsDelete(false);
       setChangesMade && setChangesMade(true);
-    } else if (showModal) {
+    } else if (useModal) {
       setShowDeleteModal(true);
     } else {
       setIsDelete(true);
