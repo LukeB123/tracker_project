@@ -6,14 +6,16 @@ import TimeEntriesProjectResourceInput from "@/app/_components/time-entries/time
 import TimeEntriesTableCell from "@/app/_components/time-entries/time-entries-table-cell";
 
 import {
+  TWeekProps,
+  TResourceProps,
+  TRole,
+  TProjectDetailsProps,
   TNewProjectResourcesProps,
   TNewTimeEntriesProps,
   TProjectResourcesProps,
   TTimeEntriesProps,
-} from "@/server/util/time-entries";
-import { TResourceProps, TRole } from "@/server/util/resources";
-import { TProjectDetailsProps } from "@/server/util/projects";
-import { TWeekProps } from "@/server/util/date";
+} from "@/server/actions/data-fetches";
+
 import { useAppSelector } from "@/app/lib/hooks";
 
 interface TimeEntriesTableRowProps {

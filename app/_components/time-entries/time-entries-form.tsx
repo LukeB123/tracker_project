@@ -5,17 +5,17 @@ import { useFormState } from "react-dom";
 
 import TimeEntriesButtons from "@/app/_components/time-entries/time-entries-buttons";
 
+import { projectTimeEntriesAction } from "@/server/actions/time-entries-action";
+
+import { uiActions } from "@/app/lib/features/ui/uiSlice";
+import { useAppDispatch } from "@/app/lib/hooks";
 import {
   TNewProjectResourcesProps,
   TNewTimeEntriesProps,
   TProjectResourcesProps,
   TTimeEntriesProps,
-} from "@/server/util/time-entries";
-import { projectTimeEntriesAction } from "@/server/actions/time-entries-action";
-
-import { uiActions } from "@/app/lib/features/ui/uiSlice";
-import { useAppDispatch } from "@/app/lib/hooks";
-import { TWeekProps } from "@/server/util/date";
+  TWeekProps,
+} from "@/server/actions/data-fetches";
 
 interface ProjectTimeEntriesProps {
   context: "project" | "resource";

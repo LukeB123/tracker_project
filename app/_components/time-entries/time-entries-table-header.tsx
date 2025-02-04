@@ -1,7 +1,7 @@
 "use client";
 
 import Icon from "@/app/_components/ui/icons";
-import { TWeekProps } from "@/server/util/date";
+import { TWeekProps } from "@/server/actions/data-fetches";
 
 interface TimeEntriesTableHeaderProps {
   title: string;

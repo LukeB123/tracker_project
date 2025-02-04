@@ -4,12 +4,13 @@ import ProjectTimeEntriesTableCellPopover from "@/app/_components/time-entries/t
 import Icon from "@/app/_components/ui/icons";
 
 import {
+  TWeekProps,
   TNewProjectResourcesProps,
   TNewTimeEntriesProps,
   TProjectResourcesProps,
   TTimeEntriesProps,
-} from "@/server/util/time-entries";
-import { TWeekProps } from "@/server/util/date";
+} from "@/server/actions/data-fetches";
+
 import { useAppSelector } from "@/app/lib/hooks";
 
 interface TimeEntriesTableCellProps {

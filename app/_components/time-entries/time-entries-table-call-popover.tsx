@@ -1,8 +1,8 @@
 import { useAppSelector } from "@/app/lib/hooks";
 import {
-  TNewTimeEntriesProps,
   TTimeEntriesProps,
-} from "@/server/util/time-entries";
+  TNewTimeEntriesProps,
+} from "@/server/actions/data-fetches";
 import Link from "next/link";
 
 interface ProjectTimeEntriesTableCellPopoverProps {
