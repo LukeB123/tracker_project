@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
+
 import Dropdown, { DropdownItem } from "@/app/_components/ui/buttons/dropdown";
 import DeleteIconButton from "@/app/_components/ui/buttons/delete-icon-button";
-import React, { useEffect, useState } from "react";
+
 import { useAppSelector } from "@/app/lib/hooks";
 
 interface BaselineEntryProps {
@@ -87,7 +89,7 @@ export default function AbsenceEntry({
             { id: 6, name: "TOIL" },
             { id: 7, name: "Other" },
           ]}
-          style="bg-purple-200 rounded-md"
+          style="bg-blue-100 rounded-md"
           disabled={formStatusIsPending}
         />
       </td>
@@ -99,7 +101,7 @@ export default function AbsenceEntry({
             { id: 1, name: "Half Day" },
             { id: 2, name: "Full Day" },
           ]}
-          style="bg-purple-200 rounded-md"
+          style="bg-blue-100 rounded-md"
           disabled={formStatusIsPending}
         />
       </td>

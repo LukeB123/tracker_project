@@ -6,7 +6,7 @@ import {
   getWeeksFromServer,
 } from "@/server/actions/data-fetches";
 
-import BaselineInput from "@/app/_components/baseline/baseline";
+import BaselineInput from "@/app/_components/baseline/baseline-form";
 import Icon from "@/app/_components/ui/icons";
 async function FetchedResources() {
   try {

@@ -10,7 +10,6 @@ import { projectTimeEntriesAction } from "@/server/actions/time-entries-action";
 import { uiActions } from "@/app/lib/features/ui/uiSlice";
 import { useAppDispatch } from "@/app/lib/hooks";
 import {
-  TNewProjectResourcesProps,
   TNewTimeEntriesProps,
   TProjectResourcesProps,
   TTimeEntriesProps,
@@ -19,7 +18,7 @@ import {
 
 interface ProjectTimeEntriesProps {
   context: "project" | "resource";
-  projectResources: (TProjectResourcesProps | TNewProjectResourcesProps)[];
+  projectResources: TProjectResourcesProps[];
   initialProjectResourcesData: React.MutableRefObject<TProjectResourcesProps[]>;
   timeEntries: (TTimeEntriesProps | TNewTimeEntriesProps)[];
   initialTimeEntriesData: React.MutableRefObject<TTimeEntriesProps[]>;

@@ -1,21 +1,18 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { TNotificationState } from "@/app/lib/features/ui/uiSlice";
 import {
-  addProjectResources,
   addTimeEntries,
   updateTimeEntries,
-  updateProjectResources,
-  deleteProjectResources,
   deleteTimeEnties,
-  getProjectResourceByUniqueIds,
   getResourcesTimeEntries,
+  createProjectResourceUnqiueId,
+  createTimeEntryUnqiueId,
+  getProjectResourcesByProjects,
+  getProjectResourcesByResources,
 } from "@/server/util/time-entries";
 import { updateProjectsLastUpdated } from "@/server/util/projects";
 import {
-  TNewProjectResourcesProps,
   TNewTimeEntriesProps,
   TProjectResourcesProps,
   TTimeEntriesProps,
@@ -24,7 +21,7 @@ import {
 
 interface TFormState {
   context: "project" | "resource";
-  projectResources: (TProjectResourcesProps | TNewProjectResourcesProps)[];
+  projectResources: TProjectResourcesProps[];
   initialProjectResources: TProjectResourcesProps[];
   timeEntries: (TTimeEntriesProps | TNewTimeEntriesProps)[];
   initialTimeEntries: TTimeEntriesProps[];
@@ -36,21 +33,16 @@ export async function projectTimeEntriesAction(
   prevState: TFormState,
   formData: FormData
 ): Promise<TFormState> {
-  const newProjectResourceUniqueIds: string[] = [];
+  const modelledProjectResourceUniqueIds: string[] = [];
 
-  const newProjectResources: TNewProjectResourcesProps[] = [];
   const newTimeEntries: TNewTimeEntriesProps[] = [];
 
-  const updatedProjectResources: TProjectResourcesProps[] = [];
   const updatedTimeEntries: TTimeEntriesProps[] = [];
 
-  const deletedProjectResourceIds: number[] = [];
-  const deletedTimeEntryIds: number[] = [];
+  const deletedTimeEntrys: TTimeEntriesProps[] = [];
 
-  const projectIds: number[] = [];
-
-  const resourceIds: number[] = [];
-
+  // Check that all projectResource data is filled out
+  // Check that there arnet any duplicate projectResources
   try {
     prevState.projectResources.forEach((projectResource) => {
       const isDeleted =
@@ -58,79 +50,32 @@ export async function projectTimeEntriesAction(
           projectResource.unique_identifier + "_delete"
         ) as string) === 1;
 
-      const newUniqueId =
-        projectResource.project_id +
-        "_" +
-        projectResource.resource_id +
-        "_" +
-        projectResource.role_id +
-        "_" +
-        projectResource.rate_grade;
+      if (
+        !isDeleted &&
+        (projectResource.project_id === 0 ||
+          projectResource.resource_id === 0 ||
+          projectResource.role_id === 0 ||
+          projectResource.rate_grade === "")
+      ) {
+        throw new Error("empty_project_resource");
+      }
 
-      if (!isDeleted) newProjectResourceUniqueIds.push(newUniqueId);
+      const newUniqueId = createProjectResourceUnqiueId(projectResource);
+
+      if (!isDeleted) modelledProjectResourceUniqueIds.push(newUniqueId);
 
       if (
-        newProjectResourceUniqueIds.filter((entry) => entry === newUniqueId)
-          .length > 1
+        modelledProjectResourceUniqueIds.filter(
+          (entry) => entry === newUniqueId
+        ).length > 1
       ) {
         throw new Error();
       }
 
-      if (
-        !isDeleted &&
-        projectResource.resource_id &&
-        !resourceIds.includes(projectResource.resource_id)
-      )
-        resourceIds.push(projectResource.resource_id);
-
-      if (
-        projectResource.project_id &&
-        !projectIds.includes(projectResource.project_id)
-      )
-        projectIds.push(projectResource.project_id);
-
-      const isNewProjectResource = !("id" in projectResource);
-
-      if (!isNewProjectResource) {
-        const initialProjectResource = prevState.initialProjectResources.find(
-          (initialProjectResource) =>
-            initialProjectResource.id === projectResource.id
-        )!;
-
-        if (isDeleted) {
-          deletedProjectResourceIds.push(projectResource.id);
-        } else {
-          if (initialProjectResource.unique_identifier !== newUniqueId) {
-            const updatedProjectResourceEntry: TProjectResourcesProps = {
-              ...projectResource,
-              unique_identifier: newUniqueId,
-            };
-
-            updatedProjectResources.push(updatedProjectResourceEntry);
-          }
-        }
-      } else if (
-        !isDeleted &&
-        projectResource.project_id !== undefined &&
-        projectResource.resource_id !== undefined &&
-        projectResource.role_id !== undefined &&
-        projectResource.rate_grade !== ""
-      ) {
-        const newProjectResourceEntry: TNewProjectResourcesProps = {
-          ...projectResource,
-          unique_identifier: newUniqueId,
-        };
-
-        newProjectResources.push(newProjectResourceEntry);
-      } else if (!isDeleted) {
-        throw new Error("empty_resource");
-      } else {
-        // New Entries Marked as Deleted
-        return;
-      }
+      return;
     });
   } catch (error: any) {
-    if ("message" in error && error.message === "empty_resource") {
+    if ("message" in error && error.message === "empty_project_resource") {
       return {
         ...prevState,
         notification: {
@@ -152,16 +97,7 @@ export async function projectTimeEntriesAction(
   }
 
   prevState.timeEntries.forEach((timeEntry) => {
-    const newUniqueId =
-      timeEntry.project_id +
-      "_" +
-      timeEntry.resource_id +
-      "_" +
-      timeEntry.role_id +
-      "_" +
-      timeEntry.rate_grade +
-      "_" +
-      timeEntry.week_commencing;
+    const newUniqueId = createTimeEntryUnqiueId(timeEntry);
 
     const isNewTimeEntry = !("id" in timeEntry);
 
@@ -171,6 +107,7 @@ export async function projectTimeEntriesAction(
           "_delete"
       ) as string) === 1;
 
+    // Update or Delete Existing Entry
     if (!isNewTimeEntry) {
       const initialTimeEntry = prevState.initialTimeEntries.find(
         (initialTimeEntry) => initialTimeEntry.id === timeEntry.id
@@ -181,7 +118,7 @@ export async function projectTimeEntriesAction(
         initialTimeEntry.unique_identifier !== newUniqueId;
 
       if (isDeleted || timeEntry.work_days === 0) {
-        deletedTimeEntryIds.push(timeEntry.id);
+        deletedTimeEntrys.push(timeEntry);
       } else if (isUpdatedTimeEntry) {
         const updateTimeEntry: TTimeEntriesProps = {
           ...timeEntry,
@@ -190,11 +127,13 @@ export async function projectTimeEntriesAction(
 
         updatedTimeEntries.push(updateTimeEntry);
       }
+      // New Entry
     } else if (
       !isDeleted &&
       timeEntry.work_days > 0 &&
-      timeEntry.project_id !== undefined &&
-      timeEntry.resource_id !== undefined &&
+      timeEntry.project_id !== 0 &&
+      timeEntry.resource_id !== 0 &&
+      timeEntry.role_id !== 0 &&
       timeEntry.rate_grade !== ""
     ) {
       const newTimeEntry: TNewTimeEntriesProps = {
@@ -206,71 +145,79 @@ export async function projectTimeEntriesAction(
     }
   });
 
-  // console.log("newProjectResources", newProjectResources);
-  // console.log("updatedProjectResources", updatedProjectResources);
-  // console.log("newTimeEntries", newTimeEntries);
-  // console.log("updatedTimeEntries", updatedTimeEntries);
-  // console.log("deletedProjectResourceIds", deletedProjectResourceIds);
-  // console.log("deletedTimeEntryIds", deletedTimeEntryIds);
-  // console.log("newProjectResourceUniqueIds", newProjectResourceUniqueIds);
-  // console.log("projectIds", projectIds);
-  // console.log("resourceIds", resourceIds);
-
   try {
-    if (newProjectResources.length > 0)
-      await addProjectResources(newProjectResources);
-
-    if (updatedProjectResources.length > 0)
-      await updateProjectResources(updatedProjectResources);
-
     if (newTimeEntries.length > 0) await addTimeEntries(newTimeEntries);
 
     if (updatedTimeEntries.length > 0) {
       await updateTimeEntries(updatedTimeEntries);
-      // await deleteZeroedTimeEntries();
     }
 
-    if (deletedProjectResourceIds.length > 0)
-      await deleteProjectResources(deletedProjectResourceIds);
-
-    if (deletedTimeEntryIds.length > 0)
-      await deleteTimeEnties(deletedTimeEntryIds);
+    if (deletedTimeEntrys.length > 0)
+      await deleteTimeEnties(
+        deletedTimeEntrys.map((timeEntry) => timeEntry.id)
+      );
 
     if (
-      newProjectResources.length +
-        updatedProjectResources.length +
-        newTimeEntries.length +
+      newTimeEntries.length +
         updatedTimeEntries.length +
-        deletedProjectResourceIds.length +
-        deletedTimeEntryIds.length >
+        deletedTimeEntrys.length >
       0
     ) {
       // UPDATE PROJECT UPDATED TIMES
+      const projectIds: number[] = [];
+      const resourceIds: number[] = [];
+
+      newTimeEntries.forEach((timeEntry) => {
+        if (!projectIds.includes(timeEntry.project_id))
+          projectIds.push(timeEntry.project_id);
+
+        if (!resourceIds.includes(timeEntry.resource_id))
+          resourceIds.push(timeEntry.resource_id);
+      });
+
+      updatedTimeEntries.forEach((timeEntry) => {
+        if (!projectIds.includes(timeEntry.project_id))
+          projectIds.push(timeEntry.project_id);
+
+        if (!resourceIds.includes(timeEntry.resource_id))
+          resourceIds.push(timeEntry.resource_id);
+      });
+
+      deletedTimeEntrys.forEach((timeEntry) => {
+        if (!projectIds.includes(timeEntry.project_id))
+          projectIds.push(timeEntry.project_id);
+
+        if (!resourceIds.includes(timeEntry.resource_id))
+          resourceIds.push(timeEntry.resource_id);
+      });
+
       await updateProjectsLastUpdated(projectIds);
 
-      const updatedNewProjectResources = await getProjectResourceByUniqueIds(
-        newProjectResourceUniqueIds
-      );
+      let updatedInitialProjectResources: TProjectResourcesProps[] = [];
 
-      let updatedNewTimeEntries: TTimeEntriesProps[] = [];
+      if (prevState.context === "project")
+        updatedInitialProjectResources = await getProjectResourcesByProjects(
+          projectIds
+        );
+
+      if (prevState.context === "resource")
+        updatedInitialProjectResources = await getProjectResourcesByResources(
+          resourceIds
+        );
+
+      let updatedInitialTimeEntries: TTimeEntriesProps[] = [];
 
       if (resourceIds.length > 0) {
-        updatedNewTimeEntries = await getResourcesTimeEntries(
+        updatedInitialTimeEntries = await getResourcesTimeEntries(
           resourceIds,
           prevState.weeks.map((week) => week.week_commencing)
         );
       }
 
-      // if (prevState.currentProject && prevState.context === "project") {
-      //   revalidatePath(
-      //     "/projects/" + prevState.currentProject.slug + "/time-entry"
-      //   );
-      // }
-
       return {
         ...prevState,
-        initialProjectResources: updatedNewProjectResources,
-        initialTimeEntries: updatedNewTimeEntries,
+        initialProjectResources: updatedInitialProjectResources,
+        initialTimeEntries: updatedInitialTimeEntries,
         notification: {
           status: "success",
           title: "Project Time Entry",

@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import { getResourcesFromServer } from "@/server/actions/data-fetches";
 
-import AbsenceForm from "@/app/_components/absence/absence-form";
+import AbsenceForm from "@/app/_components/absence/new-entry-form/absence-form";
 import Icon from "@/app/_components/ui/icons";
 
 async function FetchedResources() {

@@ -1,22 +1,18 @@
 "use client";
 
 import Icon from "@/app/_components/ui/icons";
-import { TWeekProps } from "@/server/actions/data-fetches";
+import { TTableWeeksProps } from "@/app/_components/time-entries/time-entries";
 
 interface TimeEntriesTableHeaderProps {
   title: string;
-  weeks: TWeekProps[];
-  visibleWeeks: string[];
-  activeWeeks: string[];
+  tableWeeks: TTableWeeksProps[];
   rowTotalType: "monthly" | "allTime" | undefined;
   setRowTotalType: React.Dispatch<React.SetStateAction<"monthly" | "allTime">>;
 }
 
 export default function TimeEntriesTableHeader({
   title,
-  weeks,
-  visibleWeeks,
-  activeWeeks,
+  tableWeeks,
   rowTotalType,
   setRowTotalType,
 }: TimeEntriesTableHeaderProps) {
@@ -31,13 +27,13 @@ export default function TimeEntriesTableHeader({
       <th className="bg-purple-700 text-grey-50 font-semibold rounded-tr-md py-1 px-2">
         Grade
       </th>
-      {weeks.map((week) => {
+      {tableWeeks.map((week) => {
         let className = "w-40 min-w-24 font-semibold p-1";
 
-        if (!visibleWeeks.includes(week.week_commencing)) {
+        if (!week.visible) {
           className += " hidden";
         } else {
-          if (activeWeeks.includes(week.week_commencing)) {
+          if (week.active) {
             className += " text-purple-700";
           } else {
             className += " text-grey-300";
@@ -47,34 +43,33 @@ export default function TimeEntriesTableHeader({
         return (
           <th key={week.week_commencing} className={className}>
             <div className="flex justify-center items-center lg:gap-1">
-              {week.total_working_days < 5 &&
-                activeWeeks.includes(week.week_commencing) && (
-                  <div className="group relative text-left">
-                    <div className="cursor-pointer">
-                      <Icon
-                        iconName="info"
-                        color="#66bfff"
-                        height="15px"
-                        width="15px"
-                      />
-                    </div>
-                    <div className="hidden group-hover:block absolute -left-2 -top-14 z-20 bg-purple-100 rounded-md border-2 border-purple-300 py-1 px-2 w-max h-fit lg:text-sm shadow-md">
-                      <h2 className="pb-1">Contains Public Holiday(s)</h2>
-                      <p className="lg:font-normal">
-                        Total working days:{" "}
-                        <span className="font-semibold">
-                          {week.total_working_days}
-                        </span>
-                      </p>
-                    </div>
+              {week.total_working_days < 5 && week.active && (
+                <div className="group relative text-left">
+                  <div className="cursor-pointer">
+                    <Icon
+                      iconName="info"
+                      color="#66bfff"
+                      height="15px"
+                      width="15px"
+                    />
                   </div>
-                )}
+                  <div className="hidden group-hover:block absolute -left-2 -top-14 z-20 bg-purple-100 rounded-md border-2 border-purple-300 py-1 px-2 w-max h-fit lg:text-sm shadow-md">
+                    <h2 className="pb-1">Contains Public Holiday(s)</h2>
+                    <p className="lg:font-normal">
+                      Total working days:{" "}
+                      <span className="font-semibold">
+                        {week.total_working_days}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              )}
               <p>{week.week_commencing}</p>
             </div>
           </th>
         );
       })}
-      {rowTotalType && (
+      {/* {rowTotalType && (
         <th className="font-semibold border-l-2 px-1 border-purple-700 text-center">
           <button
             onClick={() => {
@@ -86,7 +81,7 @@ export default function TimeEntriesTableHeader({
             {rowTotalType === "monthly" ? "Monthly " : "All-Time "}Total
           </button>
         </th>
-      )}
+      )} */}
     </tr>
   );
 }

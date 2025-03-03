@@ -1,5 +1,6 @@
-import Icon from "@/app/_components/ui/icons";
 import React from "react";
+
+import Icon from "@/app/_components/ui/icons";
 
 interface SearchBarParams {
   label?: string;

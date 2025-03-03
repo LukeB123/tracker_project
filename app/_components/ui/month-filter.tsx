@@ -1,7 +1,8 @@
 "use client";
 
-import ArrowButton from "@/app/_components/ui/buttons/arrow-button";
 import { TWeekProps } from "@/server/actions/data-fetches";
+
+import ArrowButton from "@/app/_components/ui/buttons/arrow-button";
 
 interface MonthFilterProps {
   weeks: TWeekProps[];
@@ -22,17 +23,17 @@ export default function MonthFilter({
   const currentMonth = weeks.filter(
     (week) =>
       week.year === yearMonthIndex.year &&
-      week.monthIndex === yearMonthIndex.monthIndex
+      week.month_index === yearMonthIndex.monthIndex
   )[0];
 
   const leftDisable =
     isDisabled ||
     (currentMonth.year === weeks[0].year &&
-      currentMonth.monthIndex === weeks[0].monthIndex);
+      currentMonth.month_index === weeks[0].month_index);
   const rightDisable =
     isDisabled ||
     (currentMonth.year === weeks.slice(-1)[0].year &&
-      currentMonth.monthIndex === weeks.slice(-1)[0].monthIndex);
+      currentMonth.month_index === weeks.slice(-1)[0].month_index);
 
   return (
     <div className="pt-10 flex justify-between w-1/3 h-24 items-center relative start-1/3">
@@ -44,7 +45,7 @@ export default function MonthFilter({
         />
       </div>
       <p className="basis-3/4 text-center text-xl">
-        {currentMonth.monthYearString}
+        {currentMonth.month_year_string}
       </p>
       <div className="basis-1/8 h-full">
         <ArrowButton

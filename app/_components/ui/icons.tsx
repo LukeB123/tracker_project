@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 interface IconProps {
   iconName:
     | "cross"
@@ -268,14 +266,14 @@ export default function Icon({ iconName, color, height, width }: IconProps) {
           fill={color}
           transform="matrix(1, 0, 0, 1, 0, 0)rotate(0)"
         >
-          <g id="SVGRepo_bgCarrier" stroke-width="0" />
+          <g id="SVGRepo_bgCarrier" strokeWidth="0" />
 
           <g
             id="SVGRepo_tracerCarrier"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            strokeLinecap="round"
+            strokeLinejoin="round"
             stroke="#000000"
-            stroke-width="1.152"
+            strokeWidth="1.152"
           />
 
           <g id="SVGRepo_iconCarrier">
@@ -284,15 +282,15 @@ export default function Icon({ iconName, color, height, width }: IconProps) {
             <desc>Created with Sketch.</desc>{" "}
             <g
               id="🔍-Product-Icons"
-              stroke-width="0.00024000000000000003"
+              strokeWidth="0.00024000000000000003"
               fill="none"
-              fill-rule="evenodd"
+              fillRule="evenodd"
             >
               {" "}
               <g
                 id="ic_fluent_checkbox_checked_24_filled"
                 fill={color}
-                fill-rule="nonzero"
+                fillRule="nonzero"
               >
                 {" "}
                 <path
@@ -320,9 +318,9 @@ export default function Icon({ iconName, color, height, width }: IconProps) {
               id="Vector"
               d="M4 7.2002V16.8002C4 17.9203 4 18.4801 4.21799 18.9079C4.40973 19.2842 4.71547 19.5905 5.0918 19.7822C5.5192 20 6.07899 20 7.19691 20H16.8031C17.921 20 18.48 20 18.9074 19.7822C19.2837 19.5905 19.5905 19.2842 19.7822 18.9079C20 18.4805 20 17.9215 20 16.8036V7.19691C20 6.07899 20 5.5192 19.7822 5.0918C19.5905 4.71547 19.2837 4.40973 18.9074 4.21799C18.4796 4 17.9203 4 16.8002 4H7.2002C6.08009 4 5.51962 4 5.0918 4.21799C4.71547 4.40973 4.40973 4.71547 4.21799 5.0918C4 5.51962 4 6.08009 4 7.2002Z"
               stroke={color}
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </g>
         </svg>

@@ -2,11 +2,9 @@ import Icon from "@/app/_components/ui/icons";
 import DeleteIconButton from "@/app/_components/ui/buttons/delete-icon-button";
 import Dropdown from "@/app/_components/ui/buttons/dropdown";
 import {
-  TNewProjectResourcesProps,
   TNewTimeEntriesProps,
   TProjectResourcesProps,
   TTimeEntriesProps,
-  TWeekProps,
   TProjectDetailsProps,
   TResourceProps,
   TRole,
@@ -14,19 +12,20 @@ import {
 
 import { useAppSelector } from "@/app/lib/hooks";
 import Link from "next/link";
+import { TTableWeeksProps } from "@/app/_components/time-entries/time-entries";
 
 interface TimeEntriesProjectResourceInputProps {
   context: "project" | "resource";
-  projectResource: TProjectResourcesProps | TNewProjectResourcesProps;
-  projectResources: (TProjectResourcesProps | TNewProjectResourcesProps)[];
+  projectResource: TProjectResourcesProps;
+  projectResources: TProjectResourcesProps[];
   setProjectResources: React.Dispatch<
-    React.SetStateAction<(TProjectResourcesProps | TNewProjectResourcesProps)[]>
+    React.SetStateAction<TProjectResourcesProps[]>
   >;
   initialProjectResourcesData: React.MutableRefObject<TProjectResourcesProps[]>;
   setTimeEntries: React.Dispatch<
     React.SetStateAction<(TTimeEntriesProps | TNewTimeEntriesProps)[]>
   >;
-  resourceOverAllocationWeeks: TWeekProps[];
+  resourceOverAllocationWeeks: TTableWeeksProps[];
   projectResourceSelection:
     | {
         projects: TProjectDetailsProps[];
@@ -93,15 +92,11 @@ export default function TimeEntriesProjectResourceInput({
     (state) => state.formStatus.formStatusIsPending
   );
 
-  const roles = projectResourceSelection
+  const rolesSelection = projectResourceSelection
     ? projectResourceSelection.roles.map((role) => {
         return { id: role.id, name: role.role };
       })
     : [];
-
-  const projectResourceRole = projectResource.role_id
-    ? projectResource.role
-    : undefined;
 
   const showOverAllocationAlert =
     resourceOverAllocationWeeks.length > 0 && !isDelete;
@@ -109,9 +104,9 @@ export default function TimeEntriesProjectResourceInput({
   const showDuplicateAlert =
     projectResources.filter(
       (entry) =>
-        entry.project_id !== undefined &&
-        entry.resource_id !== undefined &&
+        projectResource.project_id !== 0 &&
         entry.project_id === projectResource.project_id &&
+        projectResource.resource_id !== 0 &&
         entry.resource_id === projectResource.resource_id &&
         entry.role === projectResource.role &&
         entry.rate_grade === projectResource.rate_grade
@@ -121,8 +116,8 @@ export default function TimeEntriesProjectResourceInput({
     resourceOverAllocationWeeks
       .map((week) => {
         return {
-          monthYearString: week.monthYearString,
-          monthIndex: week.monthIndex,
+          monthYearString: week.month_year_string,
+          monthIndex: week.month_index,
           year: week.year,
         };
       })
@@ -157,7 +152,7 @@ export default function TimeEntriesProjectResourceInput({
     gradeTextColor = " text-grey-50";
 
     if (resourceOverAllocationWeeks.length > 0) {
-      textColor += " text-red-600";
+      textColor += " text-red-400";
     }
   }
 
@@ -171,28 +166,26 @@ export default function TimeEntriesProjectResourceInput({
     (entry) => entry.unique_identifier === projectResource.unique_identifier
   );
 
-  const isExistingEntry = "id" in projectResource;
+  const isExistingEntry =
+    projectResource.unique_identifier.slice(0, 3) !== "new";
 
-  let isEdited = false;
-
-  if (isExistingEntry) {
-    const newUniqueId =
+  let isEdited =
+    isExistingEntry &&
+    projectResource.unique_identifier !==
       projectResource.project_id +
-      "_" +
-      projectResource.resource_id +
-      "_" +
-      projectResource.role_id +
-      "_" +
-      projectResource.rate_grade;
-
-    isEdited = projectResource.unique_identifier !== newUniqueId;
-  }
+        "_" +
+        projectResource.resource_id +
+        "_" +
+        projectResource.role_id +
+        "_" +
+        projectResource.rate_grade;
 
   function handleResetProjectResource() {
     if (isExistingEntry) {
       const initialProjectResource = {
         ...initialProjectResourcesData.current.find(
-          (entry) => entry.id === projectResource.id
+          (entry) =>
+            entry.unique_identifier === projectResource.unique_identifier
         )!,
       };
 
@@ -219,7 +212,10 @@ export default function TimeEntriesProjectResourceInput({
                 project_slug: initialProjectResource.project_slug,
                 project_title: initialProjectResource.project_title,
                 resource_id: initialProjectResource.resource_id,
+                resource_name: initialProjectResource.resource_name,
+                resource_slug: initialProjectResource.resource_slug,
                 role_id: initialProjectResource.role_id,
+                role: initialProjectResource.role,
                 rate_grade: initialProjectResource.rate_grade,
               };
             } else {
@@ -233,8 +229,6 @@ export default function TimeEntriesProjectResourceInput({
   }
 
   function handleProjectResourceLabelChange(id: number) {
-    // const newValue = options.find((entry) => entry.id === id);
-
     if (context === "project") {
       const selectedResource = projectResourceSelection?.resources.find(
         (resource) => resource.id === id
@@ -267,7 +261,10 @@ export default function TimeEntriesProjectResourceInput({
                 return {
                   ...entry,
                   resource_id: selectedResource.id,
+                  resource_name: selectedResource.name,
+                  resource_slug: selectedResource.slug,
                   role_id: selectedResource.role_id,
+                  role: selectedResource.role,
                   rate_grade: selectedResource.grade,
                 };
               } else {
@@ -326,7 +323,7 @@ export default function TimeEntriesProjectResourceInput({
   }
 
   function handleRoleChange(roleId: number) {
-    const newRole = roles.find((role) => role.id === roleId);
+    const newRole = rolesSelection.find((role) => role.id === roleId);
 
     if (newRole) {
       setProjectResources((prevState) => {
@@ -351,6 +348,7 @@ export default function TimeEntriesProjectResourceInput({
               return {
                 ...entry,
                 role_id: newRole.id,
+                role: newRole.name,
               };
             } else {
               return { ...entry };
@@ -547,9 +545,9 @@ export default function TimeEntriesProjectResourceInput({
         <div className="flex items-center relative">
           <Dropdown
             id={projectResource.unique_identifier + "_role"}
-            data={roles}
-            title={projectResourceRole}
-            parentSelectedItem={roles.find(
+            data={rolesSelection}
+            title={projectResource.role}
+            parentSelectedItem={rolesSelection.find(
               (role) => role.id === projectResource.role_id
             )}
             style={

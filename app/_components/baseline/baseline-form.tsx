@@ -1,50 +1,117 @@
 "use client";
+import { useState } from "react";
 
-import { useEffect } from "react";
-import { useFormState } from "react-dom";
+import {
+  TResourceProps,
+  TRole,
+  TWeekProps,
+} from "@/server/actions/data-fetches";
 
-import { uiActions } from "@/app/lib/features/ui/uiSlice";
-import { useAppDispatch, useAppSelector } from "@/app/lib/hooks";
-import BaselineFormButtons from "@/app/_components/baseline/baseline-form-buttons";
-import { baselineEntriesAction } from "@/server/actions/baseline-entries-action";
-import { TWeekProps } from "@/server/actions/data-fetches";
+import BasicFormHeader from "@/app/_components/ui/basic-form/basic-form-header";
+import BaselineEntry from "@/app/_components/baseline/baseline-entry";
+import BaselineForm from "@/app/_components/baseline/baseline-form-action";
 
-interface BaselineFormProps {
-  numberOfEntries: number[];
-  handleSuccess: () => void;
+import { useAppSelector } from "@/app/lib/hooks";
+
+interface BaselineInputProps {
+  resources: TResourceProps[];
   weeks: TWeekProps[];
+  roles: TRole[];
 }
 
-export default function BaselineForm({
-  numberOfEntries,
-  handleSuccess,
+const grades = [
+  { id: 1, name: "1" },
+  { id: 2, name: "2" },
+  { id: 3, name: "3" },
+  { id: 4, name: "4" },
+  { id: 5, name: "5" },
+  { id: 6, name: "6" },
+  { id: 7, name: "7" },
+];
+
+export default function BaselineInput({
+  resources,
   weeks,
-}: BaselineFormProps) {
-  const dispatch = useAppDispatch();
+  roles,
+}: BaselineInputProps) {
+  const [numberOfEntries, setNumberOfEntries] = useState([0]);
+  const [tableBodyKey, setTableBodyKey] = useState(0);
 
-  const project = useAppSelector((state) => state.projects.currentProject)!;
+  const formStatusIsPending = useAppSelector(
+    (state) => state.formStatus.formStatusIsPending
+  )!;
 
-  const [formState, formAction] = useFormState(baselineEntriesAction, {
-    project,
-    weeks,
-    numberOfEntries,
-    notification: null,
+  const primaryFields = [
+    { name: "Resource", length: 40 },
+    { name: "Role", length: 40 },
+    { name: "Grade", length: 28 },
+  ];
+
+  const secondaryFields = [
+    { name: "Initial Week", length: 40 },
+    { name: "Days Per Week", length: 40 },
+    { name: "No. Of Weeks", length: 40 },
+  ];
+
+  const resourceOptions = resources.map((resource) => {
+    return {
+      id: resource.id,
+      name: resource.name,
+    };
   });
 
-  // Handle formAction response
-  useEffect(() => {
-    if (formState.notification) {
-      dispatch(uiActions.showNotification(formState.notification));
+  const weekOptions = weeks.map((week) => {
+    let monthIndexString = week.month_index.toString();
+    if (week.month_index < 10) monthIndexString = "0" + monthIndexString;
+    return {
+      id: +(
+        week.year.toString() +
+        monthIndexString +
+        week.week_index.toString()
+      ),
+      name: week.week_commencing,
+    };
+  });
 
-      if (formState.notification.status === "success") {
-        handleSuccess();
-      }
-    }
-  }, [formState]);
+  function handleSuccess() {
+    setNumberOfEntries([0]);
+    setTableBodyKey((prevState) => prevState + 1);
+  }
 
   return (
-    <form id="baseline_entries_form" action={formAction}>
-      <BaselineFormButtons />
-    </form>
+    <>
+      <BasicFormHeader
+        title="Quick Time Entry Input Form"
+        primaryFields={primaryFields}
+        secondaryFields={secondaryFields}
+        addEntryButton={true}
+        onAdd={() => {
+          setNumberOfEntries((prevValue) => {
+            return [...prevValue, prevValue[prevValue.length - 1] + 1];
+          });
+        }}
+        onAddDisabled={formStatusIsPending}
+      >
+        <tbody key={tableBodyKey}>
+          {numberOfEntries.map((entry) => (
+            <BaselineEntry
+              key={entry}
+              resources={resourceOptions}
+              roles={roles}
+              weeks={[{ id: 0, name: "" }, ...weekOptions]}
+              grades={grades}
+              setNumberOfEntries={setNumberOfEntries}
+              entryIndex={entry}
+            />
+          ))}
+        </tbody>
+      </BasicFormHeader>
+      <BaselineForm
+        key={numberOfEntries.length}
+        numberOfEntries={numberOfEntries}
+        handleSuccess={handleSuccess}
+        weeks={weeks}
+      />
+    </>
   );
 }

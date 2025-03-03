@@ -1,19 +1,14 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { TNotificationState } from "@/app/lib/features/ui/uiSlice";
 import {
-  addProjectResources,
   addTimeEntries,
   updateTimeEntries,
   deleteTimeEnties,
-  getProjectResourcesByProjectId,
   getProjectTimeEntries,
 } from "@/server/util/time-entries";
 import { updateProjectsLastUpdated } from "@/server/util/projects";
 import {
-  TNewProjectResourcesProps,
   TNewTimeEntriesProps,
   TProjectDetailsProps,
   TTimeEntriesProps,
@@ -33,14 +28,10 @@ export async function baselineEntriesAction(
 ): Promise<TFormState> {
   const entryIds = [...prevState.numberOfEntries];
 
-  const modelledDataProjectResources: TNewProjectResourcesProps[] = [];
   const modelledDataTimeEntries: TNewTimeEntriesProps[] = [];
-
-  const newProjectResources: TNewProjectResourcesProps[] = [];
 
   const newTimeEntries: TNewTimeEntriesProps[] = [];
   const updatedTimeEntries: TTimeEntriesProps[] = [];
-
   const deletedTimeEntryIds: number[] = [];
 
   try {
@@ -49,22 +40,31 @@ export async function baselineEntriesAction(
       const resourceId = +(formData.get(
         "resource_" + entryId + "_id"
       ) as string);
+
       const resourceName: string = formData.get(
         "resource_" + entryId
       ) as string;
+
       const roleID = +(formData.get("role_" + entryId + "_id") as string);
+
       const roleName: string = formData.get("role_" + entryId) as string;
+
       const rateGrade: string = formData.get("rate_grade_" + entryId) as string;
+
       const initialWeek: string = formData.get(
         "week_commencing_" + entryId
       ) as string;
+
       const daysPerWeekString: string = formData.get(
         "work_days_" + entryId
       ) as string;
+
       const daysPerWeek = +daysPerWeekString;
+
       const numberOfWeeks = +(formData.get(
         "number_of_weeks_" + entryId
       ) as string);
+
       const uniqueId: string =
         prevState.project.id +
         "_" +
@@ -103,19 +103,6 @@ export async function baselineEntriesAction(
           );
         }
 
-        modelledDataProjectResources.push({
-          project_id: prevState.project.id,
-          project_slug: prevState.project.slug,
-          project_title: prevState.project.title,
-          resource_id: resourceId,
-          resource_name: resourceName,
-          resource_slug: resourceName.toLowerCase().replaceAll(" ", "-"),
-          role_id: roleID,
-          role: roleName,
-          rate_grade: rateGrade,
-          unique_identifier: uniqueId,
-        });
-
         entryWeeks.forEach((entryWeek) => {
           const timeEntryUniqueId = uniqueId + "_" + entryWeek.week_commencing;
 
@@ -124,7 +111,10 @@ export async function baselineEntriesAction(
             project_slug: prevState.project.slug,
             project_title: prevState.project.title,
             resource_id: resourceId,
+            resource_slug: resourceName.toLowerCase().replaceAll(" ", "-"),
+            resource_name: resourceName,
             role_id: roleID,
+            role: roleName,
             rate_grade: rateGrade,
             week_commencing: entryWeek.week_commencing,
             work_days: daysPerWeek,
@@ -174,39 +164,19 @@ export async function baselineEntriesAction(
   // Add new project resources to array
   // Split time entries into new, updated and deleted
   try {
-    const existingProjectResources = await getProjectResourcesByProjectId(
-      prevState.project.id
-    );
-
-    modelledDataProjectResources.forEach((entry) => {
-      const isNewProjectResource =
-        !existingProjectResources
-          .map((projectResource) => projectResource.unique_identifier)
-          .includes(entry.unique_identifier) &&
-        !newProjectResources
-          .map((newProjectResource) => newProjectResource.unique_identifier)
-          .includes(entry.unique_identifier);
-
-      if (isNewProjectResource) newProjectResources.push(entry);
-    });
-
     const existingTimeEntries = await getProjectTimeEntries(
       prevState.project.id,
       prevState.weeks.map((week) => week.week_commencing)
     );
 
     modelledDataTimeEntries.forEach((timeEntry) => {
-      const isNewTimeEntry = !existingTimeEntries
-        .map((entry) => entry.unique_identifier)
-        .includes(timeEntry.unique_identifier);
+      const existingEntry = existingTimeEntries.find(
+        (entry) => entry.unique_identifier === timeEntry.unique_identifier
+      );
 
-      if (isNewTimeEntry && timeEntry.work_days > 0) {
+      if (!existingEntry && timeEntry.work_days > 0) {
         newTimeEntries.push({ ...timeEntry });
-      } else if (!isNewTimeEntry) {
-        const existingEntry = existingTimeEntries.find(
-          (entry) => entry.unique_identifier === timeEntry.unique_identifier
-        )!;
-
+      } else if (existingEntry) {
         if (timeEntry.work_days > 0) {
           updatedTimeEntries.push({
             ...existingEntry,
@@ -229,9 +199,6 @@ export async function baselineEntriesAction(
   }
 
   try {
-    if (newProjectResources.length > 0)
-      await addProjectResources(newProjectResources);
-
     if (newTimeEntries.length > 0) await addTimeEntries(newTimeEntries);
 
     if (updatedTimeEntries.length > 0)
@@ -241,8 +208,7 @@ export async function baselineEntriesAction(
       await deleteTimeEnties(deletedTimeEntryIds);
 
     if (
-      newProjectResources.length +
-        newTimeEntries.length +
+      newTimeEntries.length +
         updatedTimeEntries.length +
         deletedTimeEntryIds.length >
       0

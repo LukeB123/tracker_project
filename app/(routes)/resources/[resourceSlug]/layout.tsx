@@ -71,21 +71,6 @@ export default function ProjectsLayout({
         <>
           <div className="fixed w-full flex justify-center gap-4 pt-2 pb-4	font-dxc z-20 bg-white ">
             <NavButton href="/time-entry" path={path} label="Resource Time" />
-            {/* <NavButton
-              href="/revenue-milestones"
-              path={path}
-              label="Revenue Milestones"
-            />
-            <NavButton
-              href="/hardware-software"
-              path={path}
-              label="Hardware & Software"
-            /> */}
-            {/* <NavButton
-              href="/baseline-requirements"
-              path={path}
-              label="Baseline Requirements"
-            /> */}
           </div>
           <div className="h-16" />
           {children}

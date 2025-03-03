@@ -7,9 +7,12 @@ import {
   approveAbsenceRequest,
   cancelAbsenceRequest,
   declineAbsenceRequest,
+  addAbsenceRequest,
 } from "@/server/util/absence";
-import { addAbsenceRequest } from "@/server/util/absence";
-import { TNewAbsenceRequestProps } from "@/server/actions/data-fetches";
+import {
+  TAbsenceRequestProps,
+  TNewAbsenceRequestProps,
+} from "@/server/actions/data-fetches";
 
 interface TFormState {
   numberOfEntries: number[];
@@ -130,9 +133,9 @@ export async function absenceRequestAction(
 }
 
 interface TResponseFormState {
-  id: number;
+  request: TAbsenceRequestProps;
   notification: TNotificationState | null;
-  newStatus: "Pending" | "Approved" | "Declined" | "Cancelled" | undefined;
+  // newStatus: "Pending" | "Approved" | "Declined" | "Cancelled" | undefined;
 }
 
 export async function declineAbsenceRequestAction(
@@ -140,7 +143,7 @@ export async function declineAbsenceRequestAction(
   formData: FormData
 ): Promise<TResponseFormState> {
   try {
-    await declineAbsenceRequest(prevState.id);
+    await declineAbsenceRequest(prevState.request.id);
 
     revalidatePath("/absence/");
 
@@ -151,7 +154,7 @@ export async function declineAbsenceRequestAction(
         title: "Absence Request",
         message: "Absence Requested Declined.",
       },
-      newStatus: "Declined",
+      // newStatus: "Declined",
     };
   } catch (error) {
     return {
@@ -170,7 +173,7 @@ export async function acceptAbsenceRequestAction(
   formData: FormData
 ): Promise<TResponseFormState> {
   try {
-    await approveAbsenceRequest(prevState.id);
+    await approveAbsenceRequest(prevState.request);
 
     revalidatePath("/absence/");
 
@@ -181,7 +184,7 @@ export async function acceptAbsenceRequestAction(
         title: "Absence Request",
         message: "Absence Requested Accepted.",
       },
-      newStatus: "Approved",
+      // newStatus: "Approved",
     };
   } catch (error) {
     return {
@@ -200,7 +203,7 @@ export async function cancelAbsenceRequestAction(
   formData: FormData
 ): Promise<TResponseFormState> {
   try {
-    await cancelAbsenceRequest(prevState.id);
+    await cancelAbsenceRequest(prevState.request.id);
 
     revalidatePath("/absence/");
 
@@ -211,7 +214,7 @@ export async function cancelAbsenceRequestAction(
         title: "Absence Request",
         message: "Absence Requested Cancelled.",
       },
-      newStatus: "Cancelled",
+      // newStatus: "Cancelled",
     };
   } catch (error) {
     return {

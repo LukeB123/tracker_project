@@ -1,12 +1,13 @@
 import { useRouter } from "next/navigation";
 
-import { useAppDispatch } from "@/app/lib/hooks";
-import { projectsActions } from "@/app/lib/features/project/projectsSlice";
-import { resourcesActions } from "@/app/lib/features/resources/resourcesSlice";
 import {
   TProjectDetailsProps,
   TResourceProps,
 } from "@/server/actions/data-fetches";
+
+import { useAppDispatch } from "@/app/lib/hooks";
+import { projectsActions } from "@/app/lib/features/project/projectsSlice";
+import { resourcesActions } from "@/app/lib/features/resources/resourcesSlice";
 
 interface ProjectLinkParams {
   project?: TProjectDetailsProps;

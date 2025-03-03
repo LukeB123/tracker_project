@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { getProjectFromServer } from "@/server/actions/data-fetches";
+import { getProjectFromSlugFromServer } from "@/server/actions/data-fetches";
 
 import { useAppDispatch, useAppSelector } from "@/app/lib/hooks";
 import { projectsActions } from "@/app/lib/features/project/projectsSlice";
@@ -29,7 +29,9 @@ export default function ProjectsLayout({
     async function fetchProject() {
       if (!project) {
         try {
-          const responce = await getProjectFromServer(params.projectSlug);
+          const responce = await getProjectFromSlugFromServer(
+            params.projectSlug
+          );
 
           dispatch(projectsActions.setCurrentProject(responce));
           setError(false);

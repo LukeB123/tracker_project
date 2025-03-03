@@ -4,37 +4,35 @@ import { useEffect, useState } from "react";
 
 import TimeEntriesProjectResourceInput from "@/app/_components/time-entries/time-entries-project-resource-input";
 import TimeEntriesTableCell from "@/app/_components/time-entries/time-entries-table-cell";
+import { TTableWeeksProps } from "@/app/_components/time-entries/time-entries";
 
 import {
-  TWeekProps,
   TResourceProps,
   TRole,
   TProjectDetailsProps,
-  TNewProjectResourcesProps,
   TNewTimeEntriesProps,
   TProjectResourcesProps,
   TTimeEntriesProps,
+  TAbsenceTimeEntriesProps,
 } from "@/server/actions/data-fetches";
 
 import { useAppSelector } from "@/app/lib/hooks";
 
 interface TimeEntriesTableRowProps {
   context: "project" | "resource";
-  projectResource: TProjectResourcesProps | TNewProjectResourcesProps;
-  projectResources: (TProjectResourcesProps | TNewProjectResourcesProps)[];
+  projectResource: TProjectResourcesProps;
+  projectResources: TProjectResourcesProps[];
   setProjectResources: React.Dispatch<
-    React.SetStateAction<(TProjectResourcesProps | TNewProjectResourcesProps)[]>
+    React.SetStateAction<TProjectResourcesProps[]>
   >;
-  initialTimeEntriesIsLoading: boolean;
   initialProjectResourcesData: React.MutableRefObject<TProjectResourcesProps[]>;
   timeEntries: (TTimeEntriesProps | TNewTimeEntriesProps)[];
   setTimeEntries: React.Dispatch<
     React.SetStateAction<(TTimeEntriesProps | TNewTimeEntriesProps)[]>
   >;
+  absenceTimeEntries: TAbsenceTimeEntriesProps[];
   isEditing: boolean;
-  weeks: TWeekProps[];
-  visibleWeeks: string[];
-  activeWeeks: string[];
+  tableWeeks: TTableWeeksProps[];
   projectResourceSelection:
     | {
         projects: TProjectDetailsProps[];
@@ -53,6 +51,7 @@ interface TimeEntriesTableRowProps {
     }>
   >;
   rowTotalType: "monthly" | "allTime";
+  initialTimeEntriesIsLoading: boolean;
 }
 
 export default function TimeEntriesTableRow({
@@ -60,14 +59,12 @@ export default function TimeEntriesTableRow({
   projectResource,
   projectResources,
   setProjectResources,
-  initialTimeEntriesIsLoading,
   initialProjectResourcesData,
   timeEntries,
   setTimeEntries,
+  absenceTimeEntries,
   isEditing,
-  weeks,
-  visibleWeeks,
-  activeWeeks,
+  tableWeeks,
   projectResourceSelection,
   isLoading,
   isError,
@@ -75,50 +72,49 @@ export default function TimeEntriesTableRow({
   setChangesMade,
   setYearMonthIndex,
   rowTotalType,
+  initialTimeEntriesIsLoading,
 }: TimeEntriesTableRowProps) {
-  const formStatusIsPending = useAppSelector(
-    (state) => state.formStatus.formStatusIsPending
-  );
   const [isDelete, setIsDelete] = useState(false);
 
-  const overAllocationWeeks: TWeekProps[] = [];
+  const overAllocationWeeks: TTableWeeksProps[] = [];
 
-  const resourceTimeEntries = timeEntries.filter(
-    (entry) => entry.resource_id === projectResource.resource_id
-  );
-
-  let rowTotal = 0;
-
-  weeks.forEach((week) => {
-    const totalTrackerDays = resourceTimeEntries
-      .filter((entry) => entry.week_commencing === week.week_commencing)
-      .map((entry) => entry.work_days)
-      .reduce((accumulator, currentValue) => {
-        return accumulator + currentValue;
+  tableWeeks.forEach((week) => {
+    const totalTrackerDays = timeEntries
+      .filter(
+        (entry) =>
+          entry.resource_id === projectResource.resource_id &&
+          entry.week_commencing === week.week_commencing
+      )
+      .reduce((accumulator, currentTimeEntry) => {
+        return accumulator + currentTimeEntry.work_days;
+      }, 0);
+    +absenceTimeEntries
+      .filter(
+        (entry) =>
+          entry.resource_id === projectResource.resource_id &&
+          entry.week_commencing === week.week_commencing
+      )
+      .reduce((accumulator, currentTimeEntry) => {
+        return accumulator + currentTimeEntry.work_days;
       }, 0);
 
     if (totalTrackerDays > week.total_working_days && context === "project")
       overAllocationWeeks.push(week);
-
-    let rowTimeEntry: number | undefined;
-
-    if (rowTotalType === "monthly") {
-      rowTimeEntry = timeEntries.find(
-        (entry) =>
-          entry.unique_identifier ===
-            projectResource.unique_identifier + "_" + week.week_commencing &&
-          activeWeeks.includes(week.week_commencing)
-      )?.work_days;
-    } else {
-      rowTimeEntry = timeEntries.find(
-        (entry) =>
-          entry.unique_identifier ===
-          projectResource.unique_identifier + "_" + week.week_commencing
-      )?.work_days;
-    }
-
-    if (rowTimeEntry) rowTotal += rowTimeEntry;
   });
+
+  // const rowTotal = resourceTimeEntries
+  //   .filter((entry) => "unique_identifier" in entry)
+  //   .filter((entry) => entry.project_id === projectResource.project_id)
+  //   .filter(
+  //     (entry) =>
+  //       rowTotalType === "allTime" ||
+  //       tableWeeks.find(
+  //         (week) => week.week_commencing === entry.week_commencing
+  //       )?.active
+  //   )
+  //   .reduce((accumulator, currentValue) => {
+  //     return accumulator + currentValue.work_days;
+  //   }, 0);
 
   useEffect(() => {
     if (!changesMade) {
@@ -154,54 +150,6 @@ export default function TimeEntriesTableRow({
         setChangesMade={setChangesMade}
         setYearMonthIndex={setYearMonthIndex}
       />
-      {!initialTimeEntriesIsLoading &&
-        projectResource.project_id &&
-        projectResource.resource_id &&
-        weeks.map((week) => {
-          const timeEntry = timeEntries.find(
-            (timeEntry) =>
-              timeEntry.unique_identifier ===
-              projectResource.unique_identifier + "_" + week.week_commencing
-          );
-
-          const allResourceTimeEntry = timeEntries.filter(
-            (timeEntry) =>
-              timeEntry.resource_id === projectResource.resource_id &&
-              timeEntry.week_commencing === week.week_commencing
-          );
-
-          return (
-            <td
-              key={
-                projectResource.unique_identifier + "_" + week.week_commencing
-              }
-              className={
-                !visibleWeeks.includes(week.week_commencing) ? "hidden" : ""
-              }
-            >
-              <TimeEntriesTableCell
-                context={context}
-                isEditing={isEditing}
-                isDelete={isDelete}
-                projectResource={projectResource}
-                week={week}
-                total_working_days={week.total_working_days}
-                timeEntry={timeEntry}
-                allResourceTimeEntry={allResourceTimeEntry}
-                setTimeEntries={setTimeEntries}
-                setChangesMade={setChangesMade}
-                activeWeek={activeWeeks.includes(week.week_commencing)}
-              />
-            </td>
-          );
-        })}
-      {!initialTimeEntriesIsLoading &&
-        projectResource.project_id &&
-        projectResource.resource_id && (
-          <td className="font-semibold border-l-2 px-1 border-purple-700 text-center">
-            {rowTotal}
-          </td>
-        )}
       {initialTimeEntriesIsLoading &&
         Array(5)
           .fill(0)
@@ -210,6 +158,61 @@ export default function TimeEntriesTableRow({
               <div className="rounded-md bg-grey-100 h-5 lg:h-8"></div>
             </td>
           ))}
+      {!initialTimeEntriesIsLoading &&
+        projectResource.project_id &&
+        projectResource.resource_id &&
+        tableWeeks.map((week) => {
+          const timeEntry = timeEntries
+            .filter((timeEntry) => "unique_identifier" in timeEntry)
+            .find(
+              (timeEntry) =>
+                timeEntry.unique_identifier ===
+                projectResource.unique_identifier + "_" + week.week_commencing
+            );
+
+          const allResourceTimeEntry = timeEntries.filter(
+            (timeEntry) =>
+              timeEntry.resource_id === projectResource.resource_id &&
+              timeEntry.week_commencing === week.week_commencing
+          );
+
+          const resourceAbsenceTimeEntry = absenceTimeEntries
+            .filter(
+              (timeEntry) =>
+                timeEntry.resource_id === projectResource.resource_id &&
+                timeEntry.week_commencing === week.week_commencing
+            )
+            .reduce((accumulator, currentTimeEntry) => {
+              return accumulator + currentTimeEntry.work_days;
+            }, 0);
+
+          return (
+            <td
+              key={
+                projectResource.unique_identifier + "_" + week.week_commencing
+              }
+              className={!week.visible ? "hidden" : ""}
+            >
+              <TimeEntriesTableCell
+                context={context}
+                isEditing={isEditing}
+                isDelete={isDelete}
+                projectResource={projectResource}
+                week={week}
+                timeEntry={timeEntry}
+                setTimeEntries={setTimeEntries}
+                allResourceTimeEntry={allResourceTimeEntry}
+                resourceAbsenceTimeEntry={resourceAbsenceTimeEntry}
+                setChangesMade={setChangesMade}
+              />
+            </td>
+          );
+        })}
+      {/* {projectResource.project_id && projectResource.resource_id && (
+        <td className="font-semibold border-l-2 px-1 border-purple-700 text-center">
+          {rowTotal}
+        </td>
+      )} */}
     </tr>
   );
 }

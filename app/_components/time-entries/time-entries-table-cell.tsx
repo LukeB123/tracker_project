@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 
 import ProjectTimeEntriesTableCellPopover from "@/app/_components/time-entries/time-entries-table-call-popover";
+import { TTableWeeksProps } from "@/app/_components/time-entries/time-entries";
 import Icon from "@/app/_components/ui/icons";
 
 import {
-  TWeekProps,
-  TNewProjectResourcesProps,
   TNewTimeEntriesProps,
   TProjectResourcesProps,
   TTimeEntriesProps,
@@ -17,16 +16,15 @@ interface TimeEntriesTableCellProps {
   context: "project" | "resource";
   isEditing: boolean;
   isDelete: boolean;
-  projectResource: TProjectResourcesProps | TNewProjectResourcesProps;
-  week: TWeekProps;
-  total_working_days: number;
+  projectResource: TProjectResourcesProps;
+  week: TTableWeeksProps;
   timeEntry: TTimeEntriesProps | TNewTimeEntriesProps | undefined;
   setTimeEntries: React.Dispatch<
     React.SetStateAction<(TTimeEntriesProps | TNewTimeEntriesProps)[]>
   >;
   allResourceTimeEntry: (TTimeEntriesProps | TNewTimeEntriesProps)[];
+  resourceAbsenceTimeEntry: number;
   setChangesMade: React.Dispatch<React.SetStateAction<boolean>>;
-  activeWeek: boolean;
 }
 
 export default function TimeEntriesTableCell({
@@ -35,16 +33,12 @@ export default function TimeEntriesTableCell({
   isDelete,
   projectResource,
   week,
-  total_working_days,
   timeEntry,
   setTimeEntries,
   allResourceTimeEntry,
+  resourceAbsenceTimeEntry,
   setChangesMade,
-  activeWeek,
 }: TimeEntriesTableCellProps) {
-  // const [inputValue, setInputValue] = useState(
-  //   initialTimeEntry ? initialTimeEntry.work_days : 0
-  // );
   const currentProject = useAppSelector(
     (state) => state.projects.currentProject
   );
@@ -62,15 +56,16 @@ export default function TimeEntriesTableCell({
     [];
 
   if (context === "project") {
-    currentProjectTimeEntries = allResourceTimeEntry?.filter(
+    currentProjectTimeEntries = allResourceTimeEntry.filter(
       (entry) => entry.project_id === currentProject?.id
     );
-    otherResourceTimeEntries = allResourceTimeEntry?.filter(
+
+    otherResourceTimeEntries = allResourceTimeEntry.filter(
       (entry) => entry.project_id !== currentProject?.id
     );
   }
 
-  let className =
+  let cellClass =
     "text-center px-2 pl-6 py-1 w-full rounded-md h-full font-semibold";
 
   let textColor = "";
@@ -81,23 +76,20 @@ export default function TimeEntriesTableCell({
 
   let isOverAllocated = false;
 
-  if (
-    allResourceTimeEntry &&
-    currentProjectTimeEntries &&
-    currentProjectTimeEntries.length > 0
-  ) {
-    const totalTimeEntries = allResourceTimeEntry.reduce(
-      (accumulator, project) => accumulator + project.work_days,
-      0
-    );
+  if (currentProjectTimeEntries.length > 0) {
+    const totalTimeEntries =
+      allResourceTimeEntry.reduce(
+        (accumulator, project) => accumulator + project.work_days,
+        0
+      ) + resourceAbsenceTimeEntry;
 
-    isOverAllocated = totalTimeEntries > total_working_days;
+    isOverAllocated = totalTimeEntries > week.total_working_days;
   }
 
   if (isDelete) {
     textColor = " text-grey-300";
     bgColor = " bg-grey-100";
-  } else if (isOverAllocated && activeWeek) {
+  } else if (isOverAllocated && week.active) {
     if (isEditing) {
       textColor = " text-red-800";
       bgColor = " bg-red-200";
@@ -107,7 +99,7 @@ export default function TimeEntriesTableCell({
       bgColor = " bg-red-300";
       iconColor = "#fe344f";
     }
-  } else if (activeWeek) {
+  } else if (week.active) {
     if (isEditing) {
       bgColor = " bg-blue-100";
       iconColor = "#99d5ff";
@@ -115,54 +107,59 @@ export default function TimeEntriesTableCell({
       bgColor = " bg-blue-200";
       iconColor = "#66bfff";
     }
-  } else if (!activeWeek) {
+  } else if (!week.active) {
     bgColor = " bg-grey-100";
     textColor = " text-grey-300";
   }
 
-  className += bgColor + textColor;
+  cellClass += bgColor + textColor;
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const newWorkingDaysValue = +event.target.value;
 
-    const newTimeEntry: TTimeEntriesProps | TNewTimeEntriesProps = {
-      project_id: projectResource.project_id!,
-      project_slug: projectResource.project_slug,
-      project_title: projectResource.project_title,
-      resource_id: projectResource.resource_id!,
-      role_id: projectResource.role_id!,
-      rate_grade: projectResource.rate_grade,
-      week_commencing: week.week_commencing,
-      work_days: newWorkingDaysValue,
-      unique_identifier:
-        projectResource.unique_identifier + "_" + week.week_commencing,
-    };
-
     setTimeEntries((prevState) => {
-      if (timeEntry) {
+      if (!timeEntry && newWorkingDaysValue > 0) {
+        const newTimeEntry: TNewTimeEntriesProps = {
+          project_id: projectResource.project_id,
+          project_slug: projectResource.project_slug,
+          project_title: projectResource.project_title,
+          resource_id: projectResource.resource_id,
+          resource_name: projectResource.resource_name,
+          resource_slug: projectResource.resource_slug,
+          role_id: projectResource.role_id,
+          role: projectResource.role,
+          rate_grade: projectResource.rate_grade,
+          week_commencing: week.week_commencing,
+          work_days: newWorkingDaysValue,
+          unique_identifier:
+            projectResource.unique_identifier + "_" + week.week_commencing,
+        };
+
+        return [...prevState, newTimeEntry];
+      }
+
+      if (timeEntry && newWorkingDaysValue > 0) {
         const timeEntryIndex = prevState.findIndex(
           (entry) => entry.unique_identifier === timeEntry.unique_identifier
         );
 
-        if ("id" in timeEntry) {
-          return [
-            ...prevState.slice(0, timeEntryIndex),
-            { ...newTimeEntry, id: timeEntry.id },
-            ...prevState.slice(timeEntryIndex + 1),
-          ];
-        }
-
-        if (newWorkingDaysValue > 0) {
-          return [
-            ...prevState.slice(0, timeEntryIndex),
-            newTimeEntry,
-            ...prevState.slice(timeEntryIndex + 1),
-          ];
-        }
+        return [
+          ...prevState.slice(0, timeEntryIndex),
+          { ...timeEntry, work_days: newWorkingDaysValue },
+          ...prevState.slice(timeEntryIndex + 1),
+        ];
       }
 
-      if (newWorkingDaysValue > 0) {
-        return [...prevState, newTimeEntry];
+      if (timeEntry && "id" in timeEntry && newWorkingDaysValue === 0) {
+        const timeEntryIndex = prevState.findIndex(
+          (entry) => entry.unique_identifier === timeEntry.unique_identifier
+        );
+
+        return [
+          ...prevState.slice(0, timeEntryIndex),
+          { ...timeEntry, work_days: 0 },
+          ...prevState.slice(timeEntryIndex + 1),
+        ];
       }
 
       return prevState.filter(
@@ -176,10 +173,11 @@ export default function TimeEntriesTableCell({
   }
 
   return (
-    <div className="relative">
-      {activeWeek &&
+    <div className={"relative"}>
+      {week.active &&
         !isDelete &&
-        ((otherResourceTimeEntries && otherResourceTimeEntries.length > 0) ||
+        (otherResourceTimeEntries.length > 0 ||
+          (resourceAbsenceTimeEntry > 0 && context === "project") ||
           isOverAllocated) && (
           <div className="group">
             <div className="absolute left-2 top-1 lg:top-2 z-10 cursor-pointer">
@@ -193,7 +191,8 @@ export default function TimeEntriesTableCell({
             <ProjectTimeEntriesTableCellPopover
               currentProjectTimeEntries={currentProjectTimeEntries}
               otherResourceTimeEntries={otherResourceTimeEntries}
-              total_working_days={total_working_days}
+              total_working_days={week.total_working_days}
+              resourceAbsenceTimeEntry={resourceAbsenceTimeEntry}
             />
           </div>
         )}
@@ -201,13 +200,13 @@ export default function TimeEntriesTableCell({
         type="number"
         step="0.5"
         min={0}
-        max={total_working_days}
+        max={week.total_working_days}
         name={projectResource.unique_identifier}
         value={inputValue}
         onChange={handleChange}
-        className={className}
+        className={cellClass}
         form="time_entries_form"
-        readOnly={!activeWeek || formStatusIsPending}
+        readOnly={!week.active || formStatusIsPending}
         disabled={!isEditing || isDelete}
       />
     </div>

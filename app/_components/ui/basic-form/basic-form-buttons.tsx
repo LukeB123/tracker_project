@@ -1,26 +1,18 @@
 "use client";
 
+import { useEffect } from "react";
 import { useFormStatus } from "react-dom";
 
 import Button from "@/app/_components/ui/buttons/button";
-
-import { useAppDispatch, useAppSelector } from "@/app/lib/hooks";
 import Icon from "@/app/_components/ui/icons";
-import { useEffect } from "react";
+
+import { useAppDispatch } from "@/app/lib/hooks";
 import { formSatusActions } from "@/app/lib/features/formStatus/formStatusSlice";
 
-export default function AbsenceFormButtons() {
+export default function BasicFormButtons({ hrefBack }: { hrefBack: string }) {
   const dispatch = useAppDispatch();
 
   const { pending } = useFormStatus();
-
-  // useEffect(() => {
-  //   dispatch(formSatusActions.setFormSatusIsPending(pending));
-  // }, [pending]);
-
-  // useEffect(() => {
-  //   dispatch(formSatusActions.setFormSatusIsPending(false));
-  // }, []);
 
   useEffect(() => {
     dispatch(formSatusActions.setFormSatusIsPending(pending));
@@ -35,7 +27,7 @@ export default function AbsenceFormButtons() {
       <Button
         buttonStyle="secondary"
         disabled={pending}
-        href={"/absence"}
+        href={hrefBack}
         width={"w-20"}
       >
         Back

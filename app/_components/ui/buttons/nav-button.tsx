@@ -1,7 +1,6 @@
 "use client";
 
-import { useRouter, usePathname } from "next/navigation";
-import Button from "@/app/_components/ui/buttons/button";
+import { useRouter } from "next/navigation";
 
 interface NavButtonParams {
   path: string;

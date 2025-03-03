@@ -1,28 +1,33 @@
-import Button from "@/app/_components/ui/buttons/button";
 import { useFormStatus } from "react-dom";
-import Icon from "@/app/_components/ui/icons";
 import { useEffect, useState } from "react";
-import AbsenceModal from "@/app/_components/absence/absence-modal";
+
+import AbsenceModal from "@/app/_components/absence/table/absence-modal";
+
+import { useAppDispatch, useAppSelector } from "@/app/lib/hooks";
+import { formSatusActions } from "@/app/lib/features/formStatus/formStatusSlice";
+
+import Icon from "@/app/_components/ui/icons";
+import Button from "@/app/_components/ui/buttons/button";
 
 interface AbsenceEntryButtonProps {
   type: "Approve" | "Decline" | "Cancel";
-  id: number;
-  pendingId: number | undefined;
-  setPendingId: React.Dispatch<React.SetStateAction<number | undefined>>;
 }
 
-export default function AbsenceEntryButton({
-  type,
-  id,
-  pendingId,
-  setPendingId,
-}: AbsenceEntryButtonProps) {
+export default function AbsenceEntryButton({ type }: AbsenceEntryButtonProps) {
   const [showModal, setShowModal] = useState(false);
+
   const { pending } = useFormStatus();
 
+  const formStatusIsPending = useAppSelector(
+    (state) => state.formStatus.formStatusIsPending
+  )!;
+
+  const dispatch = useAppDispatch();
+
   useEffect(() => {
+    dispatch(formSatusActions.setFormSatusIsPending(pending));
+
     if (pending) {
-      setPendingId(id);
       setShowModal(false);
     }
   }, [pending]);
@@ -41,8 +46,7 @@ export default function AbsenceEntryButton({
       />
       <Button
         buttonStyle={buttonType}
-        disabled={pendingId !== undefined}
-        // type="submit"
+        disabled={formStatusIsPending}
         onClick={() => setShowModal(true)}
         width={"w-28"}
       >

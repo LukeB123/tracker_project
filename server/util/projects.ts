@@ -2,7 +2,12 @@ import "server-only";
 import {
   TNewProjectDetailsProps,
   TProjectDetailsProps,
+  TResourceProps,
 } from "@/server/actions/data-fetches";
+import {
+  deleteTimeEntiesByProjectId,
+  updateTimeEntriesProjectTitle,
+} from "./time-entries";
 
 // import sql from "better-sqlite3";
 const sql = require("better-sqlite3");
@@ -15,22 +20,20 @@ export async function getProjects(): Promise<TProjectDetailsProps[]> {
   return db.prepare("SELECT * FROM projects ORDER BY last_updated DESC").all();
 }
 
-export async function getProject(slug: string): Promise<TProjectDetailsProps> {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-
-  return db.prepare("SELECT * FROM projects WHERE slug = ?").get(slug);
-}
-
 export async function getProjectId(slug: string): Promise<number> {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   return db.prepare("SELECT id FROM projects WHERE slug = ?").get(slug);
 }
 
-export async function getProjectSlug(id: number | null): Promise<string> {
+export async function getProjectSlug(
+  projectId: number | null
+): Promise<string> {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  const result = db.prepare("SELECT slug FROM projects WHERE id = ?").get(id);
+  const result = db
+    .prepare("SELECT slug FROM projects WHERE id = ?")
+    .get(projectId);
 
   if (result) {
     return result.slug;
@@ -39,10 +42,20 @@ export async function getProjectSlug(id: number | null): Promise<string> {
   return result;
 }
 
-export async function deleteProject(id: number) {
+export async function getProjectFromSlug(
+  projectSlug: string
+): Promise<TProjectDetailsProps> {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  db.prepare("DELETE FROM projects WHERE id = ?").run(id);
+  return db.prepare("SELECT * FROM projects WHERE slug = ?").get(projectSlug);
+}
+
+export async function deleteProject(projectId: number) {
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  db.prepare("DELETE FROM projects WHERE id = ?").run(projectId);
+
+  await deleteTimeEntiesByProjectId(projectId);
 }
 
 export async function addProject(project: TNewProjectDetailsProps) {
@@ -84,7 +97,10 @@ export async function addProject(project: TNewProjectDetailsProps) {
   ).run(project);
 }
 
-export async function updateProject(project: TProjectDetailsProps) {
+export async function updateProject(
+  project: TProjectDetailsProps,
+  titleChange: boolean = false
+) {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   await db
@@ -109,6 +125,44 @@ export async function updateProject(project: TProjectDetailsProps) {
   WHERE id = @id`
     )
     .run(project);
+
+  if (titleChange) {
+    await updateTimeEntriesProjectTitle(project);
+  }
+}
+
+export async function updateProjectResourceNames(resource: TResourceProps) {
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  await db
+    .prepare(
+      `
+  UPDATE projects
+  SET
+    delivery_manager = ?
+  WHERE delivery_manager_id = ?`
+    )
+    .run(resource.name, resource.id);
+
+  await db
+    .prepare(
+      `
+    UPDATE projects
+    SET
+      project_manager = ?
+    WHERE project_manager_id = ?`
+    )
+    .run(resource.name, resource.id);
+
+  await db
+    .prepare(
+      `
+      UPDATE projects
+      SET
+        scrum_master = ?
+      WHERE scrum_master_id = ?`
+    )
+    .run(resource.name, resource.id);
 }
 
 export async function updateProjectsLastUpdated(projectIds: number[]) {
@@ -128,19 +182,21 @@ export async function updateProjectsLastUpdated(projectIds: number[]) {
 }
 
 export async function checkProjectSlugUniquness(
-  id: number | null,
-  slug: string
+  projectId: number | null,
+  projectSlug: string
 ) {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   let result: any;
 
-  if (id === null) {
-    result = db.prepare("SELECT slug FROM projects WHERE slug = ?").all(slug);
+  if (projectId === null) {
+    result = db
+      .prepare("SELECT slug FROM projects WHERE slug = ?")
+      .all(projectSlug);
   } else {
     result = db
       .prepare("SELECT slug FROM projects WHERE slug = ? AND id <> ?")
-      .all(slug, id);
+      .all(projectSlug, projectId);
   }
 
   return result.length < 1;

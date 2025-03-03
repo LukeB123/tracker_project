@@ -7,14 +7,14 @@ import TimeEntriesTableHeader from "@/app/_components/time-entries/time-entries-
 import TimeEntriesTableRow from "@/app/_components/time-entries/time-entries-table-row";
 import AddEntryButton from "@/app/_components/ui/buttons/add-entry-button";
 import TimeEntriesForm from "@/app/_components/time-entries/time-entries-form";
-import Icon from "@/app/_components/ui/icons";
+import TimeEntriesTableTotals from "@/app/_components/time-entries/time-entries-table-totals";
 
 import { useAppSelector } from "@/app/lib/hooks";
 import {
   getProjectsFromServer,
   getResourcesFromServer,
   getRolesFromServer,
-  TNewProjectResourcesProps,
+  TAbsenceTimeEntriesProps,
   TNewTimeEntriesProps,
   TProjectDetailsProps,
   TProjectResourcesProps,
@@ -29,34 +29,34 @@ interface TimeEntriesProps {
   initialProjectResources: TProjectResourcesProps[];
   weeks: TWeekProps[];
   initialTimeEntries: TTimeEntriesProps[];
+  absenceTimeEntries: TAbsenceTimeEntriesProps[];
   initialTimeEntriesIsLoading: boolean;
 }
 
-type TResourceOverAllocationMonths = {
-  monthYearString: string;
-  monthIndex: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
-  year: number;
-};
+export interface TTableWeeksProps extends TWeekProps {
+  active: boolean;
+  visible: boolean;
+}
 
 export default function TimeEntries({
   context,
   initialProjectResources,
   weeks,
   initialTimeEntries,
+  absenceTimeEntries,
   initialTimeEntriesIsLoading,
 }: TimeEntriesProps) {
   const [projectResources, setProjectResources] = useState<
-    (TProjectResourcesProps | TNewProjectResourcesProps)[]
+    TProjectResourcesProps[]
   >(JSON.parse(JSON.stringify(initialProjectResources)));
 
   const [timeEntries, setTimeEntries] = useState<
     (TTimeEntriesProps | TNewTimeEntriesProps)[]
   >(JSON.parse(JSON.stringify(initialTimeEntries)));
 
-  const [formKey, setFormKey] = useState(0);
-
   const [isEditing, setIsEditing] = useState(false);
   const [changesMade, setChangesMade] = useState(false);
+
   const [projectResourceSelection, setProjectResourceSelection] = useState<
     | {
         projects: TProjectDetailsProps[];
@@ -72,6 +72,7 @@ export default function TimeEntries({
     setInitialYearMonthIndex
   );
 
+  // might remove
   const [rowTotalType, setRowTotalType] = useState<"monthly" | "allTime">(
     "monthly"
   );
@@ -88,12 +89,11 @@ export default function TimeEntries({
     (state) => state.formStatus.formStatusIsPending
   );
 
-  const initialProjectResourcesData: React.MutableRefObject<
-    TProjectResourcesProps[]
-  > = useRef(initialProjectResources);
+  const initialProjectResourcesData = useRef(initialProjectResources);
 
-  const initialTimeEntriesData: React.MutableRefObject<TTimeEntriesProps[]> =
-    useRef(initialTimeEntries);
+  const initialTimeEntriesData = useRef(initialTimeEntries);
+
+  const [formKey, setFormKey] = useState(0);
 
   function setInitialYearMonthIndex() {
     const todayDate = new Date();
@@ -106,14 +106,14 @@ export default function TimeEntries({
     const isCurrentProject =
       weeks.filter(
         (week) =>
-          week.monthIndex === initialYearMonthIndex.monthIndex &&
+          week.month_index === initialYearMonthIndex.monthIndex &&
           week.year === initialYearMonthIndex.year
       ).length > 0;
 
     if (!isCurrentProject)
       initialYearMonthIndex = {
         year: weeks[0].year,
-        monthIndex: weeks[0].monthIndex,
+        monthIndex: weeks[0].month_index,
       };
 
     return initialYearMonthIndex;
@@ -141,20 +141,20 @@ export default function TimeEntries({
     const projectResourceAdded =
       projectResources.length - initialProjectResourcesData.current.length;
 
-    let newProjectResource: TNewProjectResourcesProps;
+    let newProjectResource: TProjectResourcesProps;
 
     if (context === "project" && currentProject) {
       newProjectResource = {
         project_id: currentProject.id,
         project_slug: currentProject.slug,
         project_title: currentProject.title,
-        resource_id: undefined,
+        resource_id: 0,
         resource_name: "",
         resource_slug: "",
-        role_id: undefined,
+        role_id: 0,
         role: "",
         rate_grade: "",
-        unique_identifier: "newProjectResource_" + (projectResourceAdded + 1),
+        unique_identifier: "new_" + (projectResourceAdded + 1),
       };
 
       setProjectResources((prevState) => {
@@ -164,7 +164,7 @@ export default function TimeEntries({
 
     if (context === "resource" && currentResource) {
       newProjectResource = {
-        project_id: undefined,
+        project_id: 0,
         project_slug: "",
         project_title: "",
         resource_id: currentResource.id,
@@ -173,7 +173,7 @@ export default function TimeEntries({
         role_id: currentResource.role_id,
         role: currentResource.role,
         rate_grade: currentResource.grade,
-        unique_identifier: "newProjectResource_" + (projectResourceAdded + 1),
+        unique_identifier: "new_" + (projectResourceAdded + 1),
       };
 
       setProjectResources((prevState) => {
@@ -200,47 +200,53 @@ export default function TimeEntries({
     }
   }
 
-  const activeWeeks = weeks
-    .filter(
-      (week) =>
-        week.monthIndex === yearMonthIndex.monthIndex &&
-        week.year === yearMonthIndex.year
-    )
-    .map((week) => week.week_commencing);
+  const tableWeeks: TTableWeeksProps[] = weeks.map((week) => {
+    const active =
+      week.month_index === yearMonthIndex.monthIndex &&
+      week.year === yearMonthIndex.year;
 
-  const visibleWeeks = [...activeWeeks];
+    const tableWeek: TTableWeeksProps = {
+      ...week,
+      active,
+      visible: active,
+    };
 
-  if (
-    visibleWeeks.length < 5 &&
-    (yearMonthIndex.year < weeks.slice(-1)[0].year ||
-      yearMonthIndex.monthIndex < weeks.slice(-1)[0].monthIndex)
-  ) {
-    let nextMonthWeeks: TWeekProps[];
+    return tableWeek;
+  });
+
+  if (tableWeeks.filter((week) => week.visible).length !== 5) {
+    let nextMonthFirstWeek: TWeekProps | undefined;
 
     if (yearMonthIndex.monthIndex < 12) {
-      nextMonthWeeks = weeks.filter(
+      nextMonthFirstWeek = weeks.find(
         (week) =>
-          week.monthIndex === yearMonthIndex.monthIndex + 1 &&
-          week.year === yearMonthIndex.year
+          week.month_index === yearMonthIndex.monthIndex + 1 &&
+          week.year === yearMonthIndex.year &&
+          week.week_index === 1
       );
     } else {
-      nextMonthWeeks = weeks.filter(
-        (week) => week.monthIndex === 1 && week.year === yearMonthIndex.year + 1
+      nextMonthFirstWeek = weeks.find(
+        (week) =>
+          week.month_index === 1 &&
+          week.year === yearMonthIndex.year + 1 &&
+          week.week_index === 1
       );
     }
 
-    const nextWeek = nextMonthWeeks.find(
-      (week) => week.weekIndex === 1
-    )?.week_commencing;
-
-    if (nextWeek) visibleWeeks.push(nextWeek);
+    if (nextMonthFirstWeek) {
+      tableWeeks[
+        tableWeeks.findIndex(
+          (week) => week.week_commencing === nextMonthFirstWeek.week_commencing
+        )
+      ].visible = true;
+    }
   }
 
   useEffect(() => {
     setFormKey(Math.random());
   }, [projectResources, timeEntries]);
 
-  // Fetch all resources if a new resource is added ONCE for project context
+  // Fetch all resources if a new resource is added ONCE
   useEffect(() => {
     async function fetchSelection() {
       if (!projectResourceSelection && isEditing) {
@@ -277,64 +283,7 @@ export default function TimeEntries({
     }
 
     fetchSelection();
-  }, [context, isEditing]);
-
-  const weekTotals: { week: string; total: number; max: number }[] = [];
-
-  const overAllocationWeeks: TWeekProps[] = [];
-
-  {
-    weeks.map((week) => {
-      let totalTimeEntry = 0;
-
-      if (context === "project") {
-        totalTimeEntry = timeEntries
-          .filter(
-            (timeEntry) =>
-              timeEntry.week_commencing === week.week_commencing &&
-              timeEntry.project_id === currentProject?.id
-          )
-          .reduce(
-            (accumulator, currentEntry) => accumulator + currentEntry.work_days,
-            0
-          );
-      } else if (context === "resource") {
-        totalTimeEntry = timeEntries
-          .filter(
-            (timeEntry) => timeEntry.week_commencing === week.week_commencing
-          )
-          .reduce(
-            (accumulator, currentEntry) => accumulator + currentEntry.work_days,
-            0
-          );
-
-        if (totalTimeEntry > week.total_working_days)
-          overAllocationWeeks.push(week);
-      }
-
-      weekTotals.push({
-        week: week.week_commencing,
-        total: totalTimeEntry,
-        max: week.total_working_days,
-      });
-    });
-  }
-
-  const resourceOverAllocationMonths: TResourceOverAllocationMonths[] =
-    overAllocationWeeks
-      .map((week) => {
-        return {
-          monthYearString: week.monthYearString,
-          monthIndex: week.monthIndex,
-          year: week.year,
-        };
-      })
-      .filter(
-        (month, index, array) =>
-          array.findIndex(
-            (element) => element.monthIndex === month.monthIndex
-          ) === index
-      );
+  }, [isEditing]);
 
   return (
     <>
@@ -349,9 +298,7 @@ export default function TimeEntries({
           <thead>
             <TimeEntriesTableHeader
               title={context === "project" ? "Resource" : "Project"}
-              weeks={weeks}
-              visibleWeeks={visibleWeeks}
-              activeWeeks={activeWeeks}
+              tableWeeks={tableWeeks}
               rowTotalType={
                 projectResources.length > 0 ? rowTotalType : undefined
               }
@@ -370,7 +317,47 @@ export default function TimeEntries({
                 </td>
               </tr>
             )}
-            {projectResources.map((projectResource, index) => {
+            {context === "resource" && absenceTimeEntries.length > 0 && (
+              <tr>
+                <td
+                  colSpan={3}
+                  className="bg-purple-500 text-grey-50 font-semibold text-center rounded-md py-1 px-2"
+                >
+                  ABSENCE
+                </td>
+                {tableWeeks.map((week) => {
+                  const absenceTimeEntry = absenceTimeEntries.find(
+                    (timeEntry) =>
+                      timeEntry.week_commencing === week.week_commencing
+                  );
+
+                  let cellClass =
+                    "text-center px-2 py-1 rounded-md font-semibold";
+
+                  let textColor = "";
+
+                  let bgColor = "";
+
+                  if (week.active) {
+                    bgColor = " bg-blue-200";
+                  } else if (!week.active) {
+                    bgColor = " bg-grey-100";
+                    textColor = " text-grey-300";
+                  }
+
+                  cellClass += bgColor + textColor;
+
+                  if (!week.visible) cellClass += " hidden";
+
+                  return (
+                    <td key={week.week_commencing} className={cellClass}>
+                      {absenceTimeEntry?.work_days}
+                    </td>
+                  );
+                })}
+              </tr>
+            )}
+            {projectResources.map((projectResource) => {
               return (
                 <TimeEntriesTableRow
                   key={projectResource.unique_identifier}
@@ -379,13 +366,11 @@ export default function TimeEntries({
                   projectResources={projectResources}
                   setProjectResources={setProjectResources}
                   initialProjectResourcesData={initialProjectResourcesData}
-                  initialTimeEntriesIsLoading={initialTimeEntriesIsLoading}
                   timeEntries={timeEntries}
                   setTimeEntries={setTimeEntries}
+                  absenceTimeEntries={absenceTimeEntries}
                   isEditing={isEditing}
-                  weeks={weeks}
-                  visibleWeeks={visibleWeeks}
-                  activeWeeks={activeWeeks}
+                  tableWeeks={tableWeeks}
                   projectResourceSelection={projectResourceSelection}
                   isLoading={isLoading}
                   isError={isError}
@@ -393,6 +378,7 @@ export default function TimeEntries({
                   setChangesMade={setChangesMade}
                   setYearMonthIndex={setYearMonthIndex}
                   rowTotalType={rowTotalType}
+                  initialTimeEntriesIsLoading={initialTimeEntriesIsLoading}
                 />
               );
             })}
@@ -413,78 +399,14 @@ export default function TimeEntries({
               </tr>
             )}
             {!initialTimeEntriesIsLoading && projectResources.length > 0 && (
-              <tr>
-                <td
-                  colSpan={3}
-                  className="font-semibold border-t-2 border-b-2 border-purple-700"
-                >
-                  <div
-                    className={
-                      overAllocationWeeks.length > 0
-                        ? "relative flex items-center pl-6"
-                        : "relative flex items-center"
-                    }
-                  >
-                    Totals:
-                    {overAllocationWeeks.length > 0 && (
-                      <div
-                        className={
-                          "group absolute left-1 h-full w-max flex items-center"
-                        }
-                      >
-                        <Icon
-                          iconName={"alert"}
-                          color={"#fe344f"}
-                          height="15px"
-                          width="15px"
-                        />
-                        <div className="hidden group-hover:block absolute top-5 -left-1 z-10 bg-blue-100 rounded-md border-2 border-blue-300 py-1 px-2 w-max h-fit text-sm text-grey-900 shadow-md">
-                          <h2 className="pb-1">
-                            Resource Over Allocated in Month(s):
-                          </h2>
-                          <ul className="list-inside list-disc">
-                            {resourceOverAllocationMonths.map((month) => (
-                              <li key={month.monthYearString}>
-                                <button
-                                  onClick={() =>
-                                    setYearMonthIndex({
-                                      year: month.year,
-                                      monthIndex: month.monthIndex,
-                                    })
-                                  }
-                                >
-                                  {month.monthYearString}
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </td>
-                {weekTotals.map((week) => {
-                  let className =
-                    "text-center font-semibold border-t-2 border-b-2 border-purple-700";
-
-                  if (week.total > week.max && context === "resource") {
-                    className += " text-red-600 font-extrabold";
-                  } else {
-                    className += " font-semibold";
-                  }
-                  return (
-                    <td
-                      key={week.week}
-                      className={
-                        !visibleWeeks.includes(week.week) ? "hidden" : className
-                      }
-                    >
-                      {week.total}
-                    </td>
-                  );
-                })}
-                <td>TOTAL TOTAL</td>
-              </tr>
+              <TimeEntriesTableTotals
+                context={context}
+                timeEntries={timeEntries}
+                absenceTimeEntries={absenceTimeEntries}
+                tableWeeks={tableWeeks}
+                setYearMonthIndex={setYearMonthIndex}
+                rowTotalType={rowTotalType}
+              />
             )}
           </tfoot>
         </table>

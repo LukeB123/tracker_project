@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import { getAbsenceRequestsFromServer } from "@/server/actions/data-fetches";
 
-import AbsenceTable from "@/app/_components/absence/absence-table";
+import AbsenceTable from "@/app/_components/absence/table/absence-table";
 import NavButton from "@/app/_components/ui/buttons/nav-button";
 import Icon from "@/app/_components/ui/icons";
 

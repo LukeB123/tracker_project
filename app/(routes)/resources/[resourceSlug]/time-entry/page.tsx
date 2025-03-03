@@ -4,13 +4,15 @@ import TimeEntries from "@/app/_components/time-entries/time-entries";
 import Icon from "@/app/_components/ui/icons";
 
 import {
+  TWeekProps,
+  getWeeksFromServer,
   TProjectResourcesProps,
   TTimeEntriesProps,
-  getProjectResourcesByResource,
-  getProjectResourcesByResourceSlug,
-  getResourcesTimeEntries,
-} from "@/server/util/time-entries";
-import { TWeekProps, getWeeks } from "@/server/util/date";
+  getProjectResourcesByResourceSlugFromServer,
+  getResourcesTimeEntriesFromServer,
+  getResourcesAbsenceTimeEntriesFromServer,
+  TAbsenceTimeEntriesProps,
+} from "@/server/actions/data-fetches";
 
 interface ParamsProp {
   params: { resourceSlug: string };
@@ -30,9 +32,16 @@ async function FetchedTimeEntries({
 
   let initialTimeEntries: TTimeEntriesProps[] = [];
 
+  let absenceTimeEntries: TAbsenceTimeEntriesProps[] = [];
+
   try {
     if (resourceIds.length > 0) {
-      initialTimeEntries = await getResourcesTimeEntries(
+      initialTimeEntries = await getResourcesTimeEntriesFromServer(
+        resourceIds,
+        weeks.map((week) => week.week_commencing)
+      );
+
+      absenceTimeEntries = await getResourcesAbsenceTimeEntriesFromServer(
         resourceIds,
         weeks.map((week) => week.week_commencing)
       );
@@ -44,6 +53,7 @@ async function FetchedTimeEntries({
         initialProjectResources={initialProjectResources}
         weeks={weeks}
         initialTimeEntries={initialTimeEntries}
+        absenceTimeEntries={absenceTimeEntries}
         initialTimeEntriesIsLoading={false}
       />
     );
@@ -58,11 +68,10 @@ async function FetchedTimeEntries({
 
 async function FetchedProjectResources({ params }: ParamsProp) {
   try {
-    const initialProjectResources = await getProjectResourcesByResourceSlug(
-      params.resourceSlug
-    );
+    const initialProjectResources =
+      await getProjectResourcesByResourceSlugFromServer(params.resourceSlug);
 
-    const weeks = await getWeeks();
+    const weeks = await getWeeksFromServer();
 
     return (
       <Suspense
@@ -72,6 +81,7 @@ async function FetchedProjectResources({ params }: ParamsProp) {
             initialProjectResources={initialProjectResources}
             weeks={weeks}
             initialTimeEntries={[]}
+            absenceTimeEntries={[]}
             initialTimeEntriesIsLoading={true}
           />
         }

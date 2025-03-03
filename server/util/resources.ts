@@ -3,8 +3,16 @@ import "server-only";
 import {
   TResourceProps,
   TNewResourceProps,
-  TRole,
 } from "@/server/actions/data-fetches";
+import {
+  deleteResourceAbsenceRequests,
+  updateAbsenceResourceName,
+} from "./absence";
+import { updateProjectResourceNames } from "./projects";
+import {
+  deleteTimeEntiesByResourceId,
+  updateTimeEntriesResourceName,
+} from "./time-entries";
 
 // import sql from "better-sqlite3";
 const sql = require("better-sqlite3");
@@ -17,10 +25,18 @@ export async function getResources(): Promise<TResourceProps[]> {
   return db.prepare("SELECT * FROM resources ORDER BY name").all();
 }
 
-export async function getResource(id: number): Promise<TResourceProps> {
+export async function getResource(resourceId: number): Promise<TResourceProps> {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  return db.prepare("SELECT * FROM resources WHERE id = ?").get(id);
+  return db.prepare("SELECT * FROM resources WHERE id = ?").get(resourceId);
+}
+
+export async function getResourceFromSlug(
+  resourceSlug: string
+): Promise<TResourceProps> {
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  return db.prepare("SELECT * FROM resources WHERE slug = ?").get(resourceSlug);
 }
 
 export async function addResource(resource: TNewResourceProps) {
@@ -54,7 +70,19 @@ export async function addResource(resource: TNewResourceProps) {
   ).run(resource);
 }
 
-export async function updateResource(resource: TResourceProps) {
+export async function deleteResource(resourceId: number) {
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  db.prepare("DELETE FROM resources WHERE id = ?").run(resourceId);
+
+  await deleteTimeEntiesByResourceId(resourceId);
+  await deleteResourceAbsenceRequests(resourceId);
+}
+
+export async function updateResource(
+  resource: TResourceProps,
+  nameChange: boolean = false
+) {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   await db
@@ -75,63 +103,51 @@ export async function updateResource(resource: TResourceProps) {
   WHERE id = @id`
     )
     .run(resource);
-}
 
-export async function getResourceFromSlug(
-  slug: string
-): Promise<TResourceProps> {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-
-  return db.prepare("SELECT * FROM resources WHERE slug = ?").get(slug);
-}
-
-export async function getRoles(): Promise<TRole[]> {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-
-  return db.prepare("SELECT * FROM roles ORDER BY role").all();
-}
-
-export async function deleteResource(id: number) {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-
-  db.prepare("DELETE FROM resources WHERE id = ?").run(id);
+  if (nameChange) {
+    updateAbsenceResourceName(resource);
+    updateProjectResourceNames(resource);
+    updateTimeEntriesResourceName(resource);
+  }
 }
 
 export async function checkResourceSlugUniquness(
-  id: number | null,
-  slug: string
+  resourceId: number | null,
+  resourceSlug: string
 ) {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   let result: any;
 
-  if (id === null) {
-    result = db.prepare("SELECT slug FROM resources WHERE slug = ?").all(slug);
+  if (resourceId === null) {
+    result = db
+      .prepare("SELECT slug FROM resources WHERE slug = ?")
+      .all(resourceSlug);
   } else {
     result = db
       .prepare("SELECT slug FROM resources WHERE slug = ? AND id <> ?")
-      .all(slug, id);
+      .all(resourceSlug, resourceId);
   }
 
   return result.length < 1;
 }
 
 export async function checkResourceEmailUniquness(
-  id: number | null,
-  slug: string
+  resourceId: number | null,
+  resourceSlug: string
 ) {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   let result: any;
 
-  if (id === null) {
+  if (resourceId === null) {
     result = db
       .prepare("SELECT email FROM resources WHERE email = ?")
-      .all(slug);
+      .all(resourceSlug);
   } else {
     result = db
       .prepare("SELECT email FROM resources WHERE email = ? AND id <> ?")
-      .all(slug, id);
+      .all(resourceSlug, resourceId);
   }
 
   return result.length < 1;

@@ -14,10 +14,6 @@ export default function AbsenceModal({
   setShowModal,
   type,
 }: DeleteModalProps) {
-  async function handleClick() {
-    setShowModal(false);
-  }
-
   return (
     <Modal
       open={showModal}

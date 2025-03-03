@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect } from "react";
+
+import Icon from "@/app/_components/ui/icons";
+
 import { useAppDispatch } from "@/app/lib/hooks";
 import { TNotificationState, uiActions } from "@/app/lib/features/ui/uiSlice";
-import { useEffect } from "react";
-import Icon from "@/app/_components/ui/icons";
 
 interface NotificationParams {
   notification: TNotificationState;

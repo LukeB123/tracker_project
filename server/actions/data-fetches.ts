@@ -1,23 +1,24 @@
 "use server";
 
-import { getAbsenceRequests } from "@/server/util/absence";
-import { getWeeks } from "@/server/util/date";
-import { getProject, getProjects } from "@/server/util/projects";
 import {
-  getResources,
-  getRoles,
-  getResourceFromSlug,
-} from "@/server/util/resources";
+  getAbsenceRequests,
+  getAbsenceTimeEntries,
+} from "@/server/util/absence";
+import { getWeeks } from "@/server/util/date";
+import { getProjectFromSlug, getProjects } from "@/server/util/projects";
+import { getResources, getResourceFromSlug } from "@/server/util/resources";
+import { getRoles } from "@/server/util/roles";
 import {
   getProjectResourcesByProjectSlug,
   getResourcesTimeEntries,
+  getProjectResourcesByResourceSlug,
 } from "@/server/util/time-entries";
 
 export type TWeekProps = {
   week_commencing: string;
-  weekIndex: 1 | 2 | 3 | 4 | 5;
-  monthYearString: string;
-  monthIndex: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+  week_index: 1 | 2 | 3 | 4 | 5;
+  month_year_string: string;
+  month_index: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   year: number;
   total_working_days: 0 | 1 | 2 | 3 | 4 | 5;
 };
@@ -61,7 +62,7 @@ export type TAbsenceRequestProps = {
   approver_id: number;
   approver_name: string;
   absence_type: string;
-  absence_duration: string;
+  absence_duration: "Full Day" | "Half Day";
   start_of_absence: string;
   end_of_absence: string;
   status: "Pending" | "Approved" | "Declined" | "Cancelled";
@@ -77,6 +78,25 @@ export type TNewAbsenceRequestProps = {
   start_of_absence: string;
   end_of_absence: string;
   status: "Pending" | "Approved" | "Declined" | "Cancelled";
+};
+
+export type TAbsenceTimeEntriesProps = {
+  id: number;
+  request_id: number;
+  resource_id: number;
+  resource_name: string;
+  resource_slug: string;
+  week_commencing: string;
+  work_days: number;
+};
+
+export type TNewAbsenceTimeEntriesProps = {
+  request_id: number;
+  resource_id: number;
+  resource_name: string;
+  resource_slug: string;
+  week_commencing: string;
+  work_days: number;
 };
 
 export type TProjectDetailsProps = {
@@ -115,7 +135,7 @@ export type TNewProjectDetailsProps = {
 };
 
 export type TProjectResourcesProps = {
-  id: number;
+  // id: number;
   project_id: number;
   project_slug: string;
   project_title: string;
@@ -123,19 +143,6 @@ export type TProjectResourcesProps = {
   resource_name: string;
   resource_slug: string;
   role_id: number;
-  role: string;
-  rate_grade: string;
-  unique_identifier: string;
-};
-
-export type TNewProjectResourcesProps = {
-  project_id: number | undefined;
-  project_slug: string;
-  project_title: string;
-  resource_id: number | undefined;
-  resource_name: string;
-  resource_slug: string;
-  role_id: number | undefined;
   role: string;
   rate_grade: string;
   unique_identifier: string;
@@ -147,7 +154,10 @@ export type TTimeEntriesProps = {
   project_slug: string;
   project_title: string;
   resource_id: number;
+  resource_name: string;
+  resource_slug: string;
   role_id: number;
+  role: string;
   rate_grade: string;
   week_commencing: string;
   work_days: number;
@@ -159,7 +169,10 @@ export type TNewTimeEntriesProps = {
   project_slug: string;
   project_title: string;
   resource_id: number;
+  resource_name: string;
+  resource_slug: string;
   role_id: number;
+  role: string;
   rate_grade: string;
   week_commencing: string;
   work_days: number;
@@ -170,20 +183,27 @@ export async function getAbsenceRequestsFromServer() {
   return await getAbsenceRequests();
 }
 
+export async function getResourcesAbsenceTimeEntriesFromServer(
+  resourceIds: number[],
+  weeks: string[]
+) {
+  return await getAbsenceTimeEntries(resourceIds, weeks);
+}
+
 export async function getProjectsFromServer() {
   return await getProjects();
 }
 
-export async function getProjectFromServer(slug: string) {
-  return await getProject(slug);
+export async function getProjectFromSlugFromServer(projectSlug: string) {
+  return await getProjectFromSlug(projectSlug);
 }
 
 export async function getResourcesFromServer() {
   return await getResources();
 }
 
-export async function getResourceFromSlugFromServer(slug: string) {
-  return await getResourceFromSlug(slug);
+export async function getResourceFromSlugFromServer(resourceSlug: string) {
+  return await getResourceFromSlug(resourceSlug);
 }
 
 export async function getRolesFromServer() {
@@ -200,9 +220,27 @@ export async function getProjectResourcesByProjectSlugFromServer(
   return await getProjectResourcesByProjectSlug(projectSlug);
 }
 
+export async function getProjectResourcesByResourceSlugFromServer(
+  resourceSlug: string
+) {
+  return await getProjectResourcesByResourceSlug(resourceSlug);
+}
+
 export async function getResourcesTimeEntriesFromServer(
   resourceIds: number[],
   weeks: string[]
 ) {
   return await getResourcesTimeEntries(resourceIds, weeks);
+}
+
+export async function getGrades() {
+  return [
+    { id: 1, name: "1" },
+    { id: 2, name: "2" },
+    { id: 3, name: "3" },
+    { id: 4, name: "4" },
+    { id: 5, name: "5" },
+    { id: 6, name: "6" },
+    { id: 7, name: "7" },
+  ];
 }

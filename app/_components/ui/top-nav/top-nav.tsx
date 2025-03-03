@@ -1,11 +1,12 @@
 "use client";
 
-import NavLink from "@/app/_components/ui/top-nav/nav-link";
 import Image from "next/image";
 import Link from "next/link";
 
-import { useAppSelector } from "@/app/lib/hooks";
 import Notification from "@/app/_components/ui/top-nav/notification";
+import NavLink from "@/app/_components/ui/top-nav/nav-link";
+
+import { useAppSelector } from "@/app/lib/hooks";
 
 const links = [
   {

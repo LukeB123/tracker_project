@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-import { TResourceProps } from "@/server/util/resources";
+import { TResourceProps } from "@/server/actions/data-fetches";
 
 interface ProjcetsState {
   allResources: TResourceProps[];

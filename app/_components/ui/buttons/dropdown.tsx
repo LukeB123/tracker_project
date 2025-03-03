@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Icon from "@/app/_components/ui/icons";
-import useOutsideClick from "@/app/_hooks/useOutsideClick";
 import Image from "next/image";
+
+import Icon from "@/app/_components/ui/icons";
 import SearchBar from "@/app/_components/ui/search-bar";
+
+import useOutsideClick from "@/app/_hooks/useOutsideClick";
 
 export interface DropdownItem {
   id: number;

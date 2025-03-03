@@ -2,8 +2,10 @@ import { Suspense } from "react";
 
 import {
   getProjectResourcesByProjectSlugFromServer,
+  getResourcesAbsenceTimeEntriesFromServer,
   getResourcesTimeEntriesFromServer,
   getWeeksFromServer,
+  TAbsenceTimeEntriesProps,
   TProjectResourcesProps,
   TTimeEntriesProps,
   TWeekProps,
@@ -30,9 +32,16 @@ async function FetchedTimeEntries({
 
   let initialTimeEntries: TTimeEntriesProps[] = [];
 
+  let absenceTimeEntries: TAbsenceTimeEntriesProps[] = [];
+
   try {
     if (resourceIds.length > 0) {
       initialTimeEntries = await getResourcesTimeEntriesFromServer(
+        resourceIds,
+        weeks.map((week) => week.week_commencing)
+      );
+
+      absenceTimeEntries = await getResourcesAbsenceTimeEntriesFromServer(
         resourceIds,
         weeks.map((week) => week.week_commencing)
       );
@@ -44,6 +53,7 @@ async function FetchedTimeEntries({
         initialProjectResources={initialProjectResources}
         weeks={weeks}
         initialTimeEntries={initialTimeEntries}
+        absenceTimeEntries={absenceTimeEntries}
         initialTimeEntriesIsLoading={false}
       />
     );
@@ -71,6 +81,7 @@ async function FetchedProjectResources({ params }: ParamsProp) {
             initialProjectResources={initialProjectResources}
             weeks={weeks}
             initialTimeEntries={[]}
+            absenceTimeEntries={[]}
             initialTimeEntriesIsLoading={true}
           />
         }

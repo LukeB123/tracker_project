@@ -43,12 +43,12 @@ export default function TimeEntriesButtons({
   if (context === "resource") href = "/projects/" + resource?.id;
 
   useEffect(() => {
-    dispatch(formSatusActions.setFormSatusIsPending(pending));
-  }, [pending]);
-
-  useEffect(() => {
     dispatch(formSatusActions.setFormSatusIsPending(false));
   }, []);
+
+  useEffect(() => {
+    dispatch(formSatusActions.setFormSatusIsPending(pending));
+  }, [pending]);
 
   return (
     <>

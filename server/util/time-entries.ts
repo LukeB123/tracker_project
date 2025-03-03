@@ -1,8 +1,9 @@
 import "server-only";
 import {
-  TNewProjectResourcesProps,
   TNewTimeEntriesProps,
+  TProjectDetailsProps,
   TProjectResourcesProps,
+  TResourceProps,
   TTimeEntriesProps,
 } from "@/server/actions/data-fetches";
 
@@ -11,16 +12,37 @@ const sql = require("better-sqlite3");
 
 const db = sql("trackers.db");
 
-export async function getProjectResourcesByProjectId(
-  projectId: number
-): Promise<TProjectResourcesProps[]> {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+export function createProjectResourceUnqiueId(
+  projectResourceData: Omit<TProjectResourcesProps, "unique_identifier">
+) {
+  return (
+    projectResourceData.project_id +
+    "_" +
+    projectResourceData.resource_id +
+    "_" +
+    projectResourceData.role_id +
+    "_" +
+    projectResourceData.rate_grade
+  );
+}
 
-  return db
-    .prepare(
-      "SELECT * FROM project_resources WHERE project_id = ? ORDER BY resource_name, role, rate_grade"
-    )
-    .all(projectId);
+export function createTimeEntryUnqiueId(
+  timeEntryData:
+    | Omit<TTimeEntriesProps, "unique_identifier">
+    | TTimeEntriesProps
+    | TNewTimeEntriesProps
+) {
+  return (
+    timeEntryData.project_id +
+    "_" +
+    timeEntryData.resource_id +
+    "_" +
+    timeEntryData.role_id +
+    "_" +
+    timeEntryData.rate_grade +
+    "_" +
+    timeEntryData.week_commencing
+  );
 }
 
 export async function getProjectResourcesByProjectSlug(
@@ -28,23 +50,100 @@ export async function getProjectResourcesByProjectSlug(
 ): Promise<TProjectResourcesProps[]> {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  return db
+  let responce: Omit<TProjectResourcesProps, "unique_identifier">[] = db
     .prepare(
-      "SELECT * FROM project_resources WHERE project_slug = ? ORDER BY resource_name, role, rate_grade"
+      `SELECT DISTINCT
+        project_id,
+        project_slug,
+        project_title,
+        resource_id,
+        resource_name,
+        resource_slug,
+        role_id,
+        role,
+        rate_grade
+      FROM time_entries
+      WHERE project_slug = ? 
+      ORDER BY resource_name, role, rate_grade`
     )
     .all(projectSlug);
+
+  const modfiedResponce: TProjectResourcesProps[] = responce.map((entry) => {
+    return {
+      ...entry,
+      unique_identifier: createProjectResourceUnqiueId(entry),
+    };
+  });
+
+  return modfiedResponce;
 }
 
-export async function getProjectResourcesByResource(
-  resourceId: number
+export async function getProjectResourcesByProjects(
+  projectIds: number[]
 ): Promise<TProjectResourcesProps[]> {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  return db
+  let responce: Omit<TProjectResourcesProps, "unique_identifier">[] = db
     .prepare(
-      "SELECT * FROM project_resources WHERE resource_id = ? ORDER BY resource_name, role, rate_grade"
+      `SELECT DISTINCT
+        project_id,
+        project_slug,
+        project_title,
+        resource_id,
+        resource_name,
+        resource_slug,
+        role_id,
+        role,
+        rate_grade
+      FROM time_entries
+      WHERE project_id IN (${projectIds.map(() => "?").join(",")})
+      ORDER BY resource_name, role, rate_grade`
     )
-    .all(resourceId);
+    .all(projectIds);
+
+  const modfiedResponce: TProjectResourcesProps[] = responce.map((entry) => {
+    return {
+      ...entry,
+      unique_identifier: createProjectResourceUnqiueId(entry),
+    };
+  });
+
+  return modfiedResponce;
+}
+
+export async function getProjectResourcesByResources(
+  resourceIds: number[]
+): Promise<TProjectResourcesProps[]> {
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  // GET ABSENCE DATA
+
+  let responce: Omit<TProjectResourcesProps, "unique_identifier">[] = db
+    .prepare(
+      `SELECT DISTINCT
+        project_id,
+        project_slug,
+        project_title,
+        resource_id,
+        resource_name,
+        resource_slug,
+        role_id,
+        role,
+        rate_grade
+      FROM time_entries
+      WHERE resource_id IN (${resourceIds.map(() => "?").join(",")})
+      ORDER BY resource_name, role, rate_grade`
+    )
+    .all(resourceIds);
+
+  const modfiedResponce: TProjectResourcesProps[] = responce.map((entry) => {
+    return {
+      ...entry,
+      unique_identifier: createProjectResourceUnqiueId(entry),
+    };
+  });
+
+  return modfiedResponce;
 }
 
 export async function getProjectResourcesByResourceSlug(
@@ -52,43 +151,59 @@ export async function getProjectResourcesByResourceSlug(
 ): Promise<TProjectResourcesProps[]> {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  return db
+  // GET ABSENCE DATA
+
+  const responce: Omit<TProjectResourcesProps, "unique_identifier">[] = db
     .prepare(
-      "SELECT * FROM project_resources WHERE resource_slug = ? ORDER BY resource_name, role, rate_grade"
+      `SELECT DISTINCT
+        project_id,
+        project_slug,
+        project_title,
+        resource_id,
+        resource_name,
+        resource_slug,
+        role_id,
+        role,
+        rate_grade
+      FROM time_entries
+      WHERE resource_slug = ? 
+      ORDER BY resource_name, role, rate_grade`
     )
     .all(resourceSlug);
+
+  const modfiedResponce: TProjectResourcesProps[] = responce.map((entry) => {
+    return {
+      ...entry,
+      unique_identifier: createProjectResourceUnqiueId(entry),
+    };
+  });
+
+  return modfiedResponce;
 }
 
-export async function getProjectResourceByUniqueIds(
-  uniqueIds: string[]
-): Promise<TProjectResourcesProps[]> {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-
-  return db
-    .prepare(
-      `SELECT * FROM project_resources WHERE unique_identifier IN (${uniqueIds
-        .map(() => "?")
-        .join(",")})
-        ORDER BY resource_name, role, rate_grade`
-    )
-    .all(uniqueIds);
-}
-
-// Add date range
 export async function getResourcesTimeEntries(
   resourceIds: number[],
   weeks: string[]
 ): Promise<TTimeEntriesProps[]> {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  return db
+  const responce: Omit<TTimeEntriesProps, "unique_identifier">[] = db
     .prepare(
       `
-        SELECT * FROM project_time_entries 
-        WHERE resource_id IN (${resourceIds.map(() => "?").join(",")})
-        AND week_commencing IN (${weeks.map(() => "?").join(",")})`
+      SELECT * FROM time_entries 
+      WHERE resource_id IN (${resourceIds.map(() => "?").join(",")})
+      AND week_commencing IN (${weeks.map(() => "?").join(",")})`
     )
     .all(resourceIds, weeks);
+
+  const modfiedResponce: TTimeEntriesProps[] = responce.map((entry) => {
+    return {
+      ...entry,
+      unique_identifier: createTimeEntryUnqiueId(entry),
+    };
+  });
+
+  return modfiedResponce;
 }
 
 export async function getProjectTimeEntries(
@@ -97,90 +212,55 @@ export async function getProjectTimeEntries(
 ): Promise<TTimeEntriesProps[]> {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  return db
+  const responce: Omit<TTimeEntriesProps, "unique_identifier">[] = db
     .prepare(
       `
-        SELECT * FROM project_time_entries 
-        WHERE project_id = ?
-        AND week_commencing IN (${weeks.map(() => "?").join(",")})`
+      SELECT * FROM time_entries
+      WHERE project_id = ?
+      AND week_commencing IN (${weeks.map(() => "?").join(",")})`
     )
     .all(projectId, weeks);
+
+  const modfiedResponce: TTimeEntriesProps[] = responce.map((entry) => {
+    return {
+      ...entry,
+      unique_identifier: createTimeEntryUnqiueId(entry),
+    };
+  });
+
+  return modfiedResponce;
 }
 
-export async function updateProjectResourcesProjectTitle(
-  projectId: number,
-  projectSlug: string,
-  projectTitle: string
+export async function updateTimeEntriesProjectTitle(
+  project: TProjectDetailsProps
 ) {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   await db
     .prepare(
       `
-    UPDATE project_resources
+    UPDATE time_entries
     SET
       project_slug = ?,
       project_title = ?
     WHERE project_id = ?`
     )
-    .run(projectSlug, projectTitle, projectId);
-
-  await db
-    .prepare(
-      `
-    UPDATE project_time_entries
-    SET
-      project_slug = ?,
-      project_title = ?
-    WHERE project_id = ?`
-    )
-    .run(projectSlug, projectTitle, projectId);
+    .run(project.slug, project.title, project.id);
 }
 
-export async function updateProjectResourcesResourceName(
-  resourceId: number,
-  resourceSlug: string,
-  resourceName: string
-) {
+export async function updateTimeEntriesResourceName(resource: TResourceProps) {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   await db
     .prepare(
       `
-    UPDATE project_resources
+    UPDATE time_entries
     SET
       resource_slug = ?,
       resource_name = ?
     WHERE resource_id = ?`
     )
-    .run(resourceSlug, resourceName, resourceId);
-}
-
-export async function updateProjectResources(
-  projectResources: TProjectResourcesProps[]
-) {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-
-  const projectResourcesUpdate = db.prepare(
-    `
-        UPDATE project_resources
-        SET
-          project_id = @project_id,
-          project_slug = @project_slug,
-          project_title = @project_title,
-          resource_id = @resource_id,
-          resource_name = @resource_name,
-          resource_slug = @resource_slug,
-          role_id = @role_id,
-          role = @role,
-          rate_grade = @rate_grade,
-          unique_identifier = @unique_identifier
-        WHERE id = @id`
-  );
-
-  for (const projectResource of projectResources) {
-    await projectResourcesUpdate.run(projectResource);
-  }
+    .run(resource.slug, resource.name, resource.id);
 }
 
 export async function updateTimeEntries(timeEntries: TTimeEntriesProps[]) {
@@ -188,17 +268,19 @@ export async function updateTimeEntries(timeEntries: TTimeEntriesProps[]) {
 
   const timeEntryUpdate = db.prepare(
     `
-      UPDATE project_time_entries
+      UPDATE time_entries
       SET
         project_id = @project_id,
         project_slug = @project_slug,
         project_title = @project_title,
         resource_id = @resource_id,
+        resource_name = @resource_name,
+        resource_slug = @resource_slug,
         role_id = @role_id,
+        role = @role,
         rate_grade = @rate_grade,
         week_commencing = @week_commencing,
-        work_days = @work_days,
-        unique_identifier = @unique_identifier
+        work_days = @work_days
       WHERE id = @id`
   );
 
@@ -207,13 +289,11 @@ export async function updateTimeEntries(timeEntries: TTimeEntriesProps[]) {
   }
 }
 
-export async function addProjectResources(
-  projectResources: TNewProjectResourcesProps[]
-) {
+export async function addTimeEntries(timeEntries: TNewTimeEntriesProps[]) {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  const projectResourcesInsert = db.prepare(`
-      INSERT INTO project_resources VALUES (
+  const timeEntryInsert = db.prepare(`
+      INSERT INTO time_entries VALUES (
         null,
         @project_id,
         @project_slug,
@@ -224,30 +304,8 @@ export async function addProjectResources(
         @role_id,
         @role,
         @rate_grade,
-        @unique_identifier
-      )
-    `);
-
-  for (const projectResource of projectResources) {
-    await projectResourcesInsert.run(projectResource);
-  }
-}
-
-export async function addTimeEntries(timeEntries: TNewTimeEntriesProps[]) {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-
-  const timeEntryInsert = db.prepare(`
-      INSERT INTO project_time_entries VALUES (
-        null,
-        @project_id,
-        @project_slug,
-        @project_title,
-        @resource_id,
-        @role_id,
-        @rate_grade,
         @week_commencing,
-        @work_days,
-        @unique_identifier
+        @work_days
       )
     `);
 
@@ -256,55 +314,30 @@ export async function addTimeEntries(timeEntries: TNewTimeEntriesProps[]) {
   }
 }
 
-export async function deleteProjectResources(projectResourceIds: number[]) {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-
-  const projectResourcesDelete = db.prepare(
-    "DELETE FROM project_resources WHERE id = ?"
-  );
-
-  for (const id of projectResourceIds) {
-    await projectResourcesDelete.run(id);
-  }
-}
 export async function deleteTimeEnties(timeEntryIds: number[]) {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  const timeEntryDelete = db.prepare(
-    "DELETE FROM project_time_entries WHERE id = ?"
-  );
+  const timeEntryDelete = db.prepare("DELETE FROM time_entries WHERE id = ?");
 
   for (const id of timeEntryIds) {
     await timeEntryDelete.run(id);
   }
 }
 
-export async function deleteProjectResourcesByProjectId(projectId: number) {
+export async function deleteTimeEntiesByProjectId(projectId: number) {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  db.prepare("DELETE FROM project_resources WHERE project_id = ?").run(
-    projectId
-  );
-
-  db.prepare("DELETE FROM project_time_entries WHERE project_id = ?").run(
-    projectId
-  );
+  db.prepare("DELETE FROM time_entries WHERE project_id = ?").run(projectId);
 }
 
-export async function deleteProjectResourcesByResourceId(resourceId: number) {
+export async function deleteTimeEntiesByResourceId(resourceId: number) {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  db.prepare("DELETE FROM project_resources WHERE resource_id = ?").run(
-    resourceId
-  );
-
-  db.prepare("DELETE FROM project_time_entries WHERE resource_id = ?").run(
-    resourceId
-  );
+  db.prepare("DELETE FROM time_entries WHERE resource_id = ?").run(resourceId);
 }
 
 export async function deleteZeroedTimeEntries() {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  db.prepare("DELETE FROM project_time_entries WHERE work_days = 0").run();
+  db.prepare("DELETE FROM time_entries WHERE work_days = 0").run();
 }

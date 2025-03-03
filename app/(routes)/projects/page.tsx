@@ -9,7 +9,6 @@ async function FetchedProjects() {
   try {
     const projects = await getProjectsFromServer();
 
-    // return <Projects projects={projects} />;
     return <ProjectResources projects={projects} context="project" />;
   } catch (error) {
     return (
