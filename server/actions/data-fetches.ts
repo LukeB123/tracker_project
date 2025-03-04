@@ -59,8 +59,10 @@ export type TAbsenceRequestProps = {
   id: number;
   resource_id: number;
   resource_name: string;
+  resource_email: string;
   approver_id: number;
   approver_name: string;
+  approver_email: string;
   absence_type: string;
   absence_duration: "Full Day" | "Half Day";
   start_of_absence: string;
@@ -71,8 +73,10 @@ export type TAbsenceRequestProps = {
 export type TNewAbsenceRequestProps = {
   resource_id: number;
   resource_name: string;
+  resource_email: string;
   approver_id: number;
   approver_name: string;
+  approver_email: string;
   absence_type: string;
   absence_duration: string;
   start_of_absence: string;

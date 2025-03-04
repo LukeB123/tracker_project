@@ -74,6 +74,7 @@ export default function AbsenceForm({ resources }: AbsenceFormProps) {
       <AbsenceFormAction
         key={numberOfEntries.length}
         numberOfEntries={numberOfEntries}
+        resources={resources}
         handleSuccess={handleSuccess}
       />
     </>

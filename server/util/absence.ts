@@ -30,8 +30,10 @@ export async function addAbsenceRequest(
         null,
         @resource_id,
         @resource_name,
+        @resource_email,
         @approver_id,
         @approver_name,
+        @approver_email,
         @absence_type,
         @absence_duration,
         @start_of_absence,
@@ -173,9 +175,10 @@ export async function updateAbsenceResourceName(resource: TResourceProps) {
     UPDATE absence
     SET
       resource_name = ?
+      resource_email = ?
     WHERE resource_id = ?`
     )
-    .run(resource.name, resource.id);
+    .run(resource.name, resource.email, resource.id);
 
   await db
     .prepare(
@@ -183,9 +186,10 @@ export async function updateAbsenceResourceName(resource: TResourceProps) {
       UPDATE absence
       SET
         approver_name = ?
+        approver_email = ?
       WHERE approver_id = ?`
     )
-    .run(resource.name, resource.id);
+    .run(resource.name, resource.email, resource.id);
 
   await db
     .prepare(

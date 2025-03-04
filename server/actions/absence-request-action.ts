@@ -12,10 +12,13 @@ import {
 import {
   TAbsenceRequestProps,
   TNewAbsenceRequestProps,
+  TResourceProps,
 } from "@/server/actions/data-fetches";
 
 interface TFormState {
   numberOfEntries: number[];
+  resources: TResourceProps[];
+  requests: TNewAbsenceRequestProps[];
   notification: TNotificationState | null;
 }
 
@@ -36,12 +39,18 @@ export async function absenceRequestAction(
       const resourceName: string = formData.get(
         "resource_" + entryId
       )! as string;
+      const resourceEmail = prevState.resources.find(
+        (resource) => resource.id === resourceId
+      )!.email;
       const approverID = +(formData.get(
         "approver_" + entryId + "_id"
       )! as string);
       const approverName: string = formData.get(
         "approver_" + entryId
       )! as string;
+      const approverEmail = prevState.resources.find(
+        (resource) => resource.id === approverID
+      )!.email;
       const absenceType: string = formData.get(
         "absence_type_" + entryId
       )! as string;
@@ -72,8 +81,10 @@ export async function absenceRequestAction(
         modelledAbsenceRequests.push({
           resource_id: resourceId,
           resource_name: resourceName,
+          resource_email: resourceEmail,
           approver_id: approverID,
           approver_name: approverName,
+          approver_email: approverEmail,
           absence_type: absenceType,
           absence_duration: absenceDuration,
           start_of_absence: startOfAbsence,
@@ -114,6 +125,7 @@ export async function absenceRequestAction(
 
     return {
       ...prevState,
+      requests: modelledAbsenceRequests,
       notification: {
         status: "success",
         title: "Absence Request",

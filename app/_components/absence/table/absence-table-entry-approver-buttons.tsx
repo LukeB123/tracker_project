@@ -13,6 +13,8 @@ import { useAppDispatch } from "@/app/lib/hooks";
 import { uiActions } from "@/app/lib/features/ui/uiSlice";
 import { formSatusActions } from "@/app/lib/features/formStatus/formStatusSlice";
 
+import sendEmail from "@/app/_hooks/sendEmail";
+
 export default function AbsenceTableEntryApproverButtons({
   request,
 }: {
@@ -40,11 +42,35 @@ export default function AbsenceTableEntryApproverButtons({
   useEffect(() => {
     if (delineFormState.notification) {
       dispatch(uiActions.showNotification(delineFormState.notification));
+
+      if (delineFormState.notification.status === "success") {
+        const requesterEmail = {
+          // to: request.resource_email,
+          to: "luke.barnett@dxc.com",
+          subject: "Absence Request Declined",
+          text: `Your absence request for ${request.start_of_absence} till ${request.end_of_absence} has been declined.`,
+        };
+
+        sendEmail(requesterEmail);
+      }
+
       dispatch(formSatusActions.setFormSatusIsPending(false));
     }
 
     if (approveFormState.notification) {
       dispatch(uiActions.showNotification(approveFormState.notification));
+
+      if (approveFormState.notification.status === "success") {
+        const requesterEmail = {
+          // to: request.resource_email,
+          to: "luke.barnett@dxc.com",
+          subject: "Absence Request Approved",
+          text: `Your absence request for ${request.start_of_absence} till ${request.end_of_absence} has been approved.`,
+        };
+
+        sendEmail(requesterEmail);
+      }
+
       dispatch(formSatusActions.setFormSatusIsPending(false));
     }
   }, [delineFormState, approveFormState]);

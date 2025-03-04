@@ -9,6 +9,7 @@ import AbsenceEntryButton from "@/app/_components/absence/table/absence-entry-bu
 import { useAppDispatch } from "@/app/lib/hooks";
 import { uiActions } from "@/app/lib/features/ui/uiSlice";
 import { formSatusActions } from "@/app/lib/features/formStatus/formStatusSlice";
+import sendEmail from "@/app/_hooks/sendEmail";
 
 export default function AbsenceTableEntryCancelButton({
   request,
@@ -30,6 +31,18 @@ export default function AbsenceTableEntryCancelButton({
   useEffect(() => {
     if (cancelFormState.notification) {
       dispatch(uiActions.showNotification(cancelFormState.notification));
+
+      if (cancelFormState.notification.status === "success") {
+        const requesterEmail = {
+          // to: request.resource_email,
+          to: "luke.barnett@dxc.com",
+          subject: "Absence Request Cancelled",
+          text: `Your absence request for ${request.start_of_absence} till ${request.end_of_absence} has been cancelled.`,
+        };
+
+        sendEmail(requesterEmail);
+      }
+
       dispatch(formSatusActions.setFormSatusIsPending(false));
     }
   }, [cancelFormState]);
