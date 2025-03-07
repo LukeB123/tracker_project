@@ -47,7 +47,7 @@ export default function AbsenceTableEntryApproverButtons({
       if (delineFormState.notification.status === "success") {
         const requesterEmail: EmailRequest = {
           // to: request.resource_email,
-          to: "luke.barnett@dxc.com",
+          to: process.env.EMAIL_TEST as string,
           subject: "Absence Request Declined",
           text: `Your absence request for ${request.start_of_absence} till ${request.end_of_absence} has been declined.`,
         };
@@ -105,7 +105,7 @@ END:VCALENDAR`.trim();
 
         const requesterEmail: EmailRequest = {
           // to: request.resource_email,
-          to: "luke.barnett@dxc.com",
+          to: process.env.EMAIL_TEST as string,
           subject: "Absence Request Approved",
           text: `Your absence request for ${request.start_of_absence} till ${request.end_of_absence} has been approved.`,
           icalEvent: {
