@@ -12,6 +12,7 @@ import { useAppDispatch } from "@/app/lib/hooks";
 import { uiActions } from "@/app/lib/features/ui/uiSlice";
 
 import sendEmail from "@/app/_hooks/sendEmail";
+import { EmailRequest } from "@/app/api/sendEmail/route";
 
 interface AbsenceFormActionProps {
   numberOfEntries: number[];
@@ -40,16 +41,16 @@ export default function AbsenceFormAction({
 
       if (formState.notification.status === "success") {
         formState.requests.forEach((request) => {
-          const requesterEmail = {
+          const requesterEmail: EmailRequest = {
             // to: request.resource_email,
-            to: "luke.barnett@dxc.com",
+            to: process.env.EMAIL_TEST as string,
             subject: "Absence Request Submitted",
             text: `Your absence request for ${request.start_of_absence} till ${request.end_of_absence} has been successfully submitted to ${request.approver_email} for approval.`,
           };
 
-          const approverEmail = {
+          const approverEmail: EmailRequest = {
             // to: request.approver_email,
-            to: "luke.barnett@dxc.com",
+            to: process.env.EMAIL_TEST as string,
             subject: "Absence Request Awaiting Approval",
             text: `A new absence request from ${request.resource_email} for ${request.start_of_absence} till ${request.end_of_absence} is awaiting your approval.`,
           };

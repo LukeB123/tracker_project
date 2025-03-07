@@ -10,6 +10,7 @@ import { useAppDispatch } from "@/app/lib/hooks";
 import { uiActions } from "@/app/lib/features/ui/uiSlice";
 import { formSatusActions } from "@/app/lib/features/formStatus/formStatusSlice";
 import sendEmail from "@/app/_hooks/sendEmail";
+import { EmailRequest } from "@/app/api/sendEmail/route";
 
 export default function AbsenceTableEntryCancelButton({
   request,
@@ -33,7 +34,7 @@ export default function AbsenceTableEntryCancelButton({
       dispatch(uiActions.showNotification(cancelFormState.notification));
 
       if (cancelFormState.notification.status === "success") {
-        const requesterEmail = {
+        const requesterEmail: EmailRequest = {
           // to: request.resource_email,
           to: "luke.barnett@dxc.com",
           subject: "Absence Request Cancelled",

@@ -1,12 +1,6 @@
-interface EmailRequest {
-  to: string;
-  cc?: string;
-  subject: string;
-  text: string;
-}
+import { EmailRequest } from "@/app/api/sendEmail/route";
 
 export default async function sendEmail(emailData: EmailRequest) {
-  console.log("sending email");
   try {
     const responce = await fetch("/api/sendEmail", {
       method: "POST",

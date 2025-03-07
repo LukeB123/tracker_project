@@ -2,15 +2,21 @@ import { NextResponse } from "next/server";
 
 import nodemailer from "nodemailer";
 
-interface EmailRequest {
+export interface EmailRequest {
   to: string;
+  cc?: string;
   subject: string;
   text: string;
+  icalEvent?: {
+    method?: string;
+    filename?: string;
+    content: string;
+  };
 }
 
 export async function POST(req: Request) {
   try {
-    const { to, subject, text }: EmailRequest = await req.json();
+    const emailRequest: EmailRequest = await req.json();
 
     const transporter = nodemailer.createTransport({
       service: "Gmail",
@@ -22,9 +28,7 @@ export async function POST(req: Request) {
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER as string,
-      to,
-      subject,
-      text,
+      ...emailRequest,
     });
     return NextResponse.json(
       { message: "Email sent successfully" },
